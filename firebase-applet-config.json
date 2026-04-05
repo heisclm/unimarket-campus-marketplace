@@ -1,9 +1,10 @@
 {
-  "apiKey": "AIzaSyAemQue_vd2DmTYqrQMbFdNhgRQABISFSY",
-  "authDomain": "uni-market1.firebaseapp.com",
-  "projectId": "uni-market1",
-  "storageBucket": "uni-market1.firebasestorage.app",
-  "messagingSenderId": "1061694164172",
-  "appId": "1:1061694164172:web:5ef8a2ae28725840f18669",
-  "measurementId": "G-Q2XZEB8B9Q"
+  "projectId": "hostelhub-cug",
+  "appId": "1:227554211857:web:8e347469deadacb898d9b0",
+  "apiKey": "AIzaSyCsmOjTXl39Y3GVpsid2oOo7CT9uMxETDE",
+  "authDomain": "hostelhub-cug.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-da568c68-f6eb-4df9-9648-e107e18bbfed",
+  "storageBucket": "hostelhub-cug.firebasestorage.app",
+  "messagingSenderId": "227554211857",
+  "measurementId": ""
 }
