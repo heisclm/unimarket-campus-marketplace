@@ -24,7 +24,7 @@ Unimarket Campus Marketplace is an innovative platform designed to serve the nee
    ```
 2. Install dependencies:
    ```bash
-   npm install
+   npm install --legacy-peer-deps
    ```
 3. Set up environment variables:
    Create a `.env` file in the root directory and add the following variables:
@@ -34,7 +34,7 @@ Unimarket Campus Marketplace is an innovative platform designed to serve the nee
    ```
 4. Run the application:
    ```bash
-   npm start
+   npm run dev
    ```
 
 ## Architecture
