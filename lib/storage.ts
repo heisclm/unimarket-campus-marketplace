@@ -15,8 +15,19 @@ export const uploadImage = async (
     // Set initial progress
     if (onProgress) onProgress(10);
     
+    // Create a timeout promise (15 seconds)
+    // Firebase Storage uploads often hang indefinitely if CORS is not configured on the bucket.
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        reject(new Error("Upload timed out. This is usually caused by missing CORS configuration on your Firebase Storage bucket."));
+      }, 15000);
+    });
+
     // Use uploadBytes for faster, more reliable uploads for small files (< 2MB)
-    const snapshot = await uploadBytes(storageRef, file, metadata);
+    const uploadPromise = uploadBytes(storageRef, file, metadata);
+    
+    // Race the upload against the timeout
+    const snapshot = await Promise.race([uploadPromise, timeoutPromise]) as any;
     
     if (onProgress) onProgress(50);
     
