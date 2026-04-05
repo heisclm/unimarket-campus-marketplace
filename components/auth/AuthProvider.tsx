@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, getDocFromServer } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 
 export type UserRole = 'student' | 'vendor' | 'admin' | null;
@@ -32,6 +32,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [role, setRoleState] = useState<UserRole>(null);
   const [userData, setUserData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Test Firestore connection
+    const testConnection = async () => {
+      try {
+        await getDocFromServer(doc(db, '_connection_test_', 'ping'));
+      } catch (error: any) {
+        if (error?.message?.includes('the client is offline')) {
+          console.error("Firestore connection failed: The client is offline. Please check your Firebase configuration.");
+        }
+      }
+    };
+    testConnection();
+  }, []);
 
   const fetchUserData = async (uid: string) => {
     try {
