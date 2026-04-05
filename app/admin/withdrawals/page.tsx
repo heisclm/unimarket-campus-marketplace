@@ -219,7 +219,7 @@ export default function AdminWithdrawals() {
           <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-xl">
             <h3 className="text-2xl font-bold mb-4">Reject Withdrawal</h3>
             <p className="text-gray-600 mb-4">
-              Please provide a reason for rejecting this withdrawal. The funds will be refunded to the user's wallet.
+              Please provide a reason for rejecting this withdrawal. The funds will be refunded to the user&apos;s wallet.
             </p>
             <textarea
               value={rejectReason}

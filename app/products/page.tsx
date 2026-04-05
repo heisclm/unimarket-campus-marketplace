@@ -16,19 +16,22 @@ function ProductsContent() {
   
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [inputValue, setInputValue] = useState(urlSearch || '');
   const [searchTerm, setSearchTerm] = useState(urlSearch || '');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   const router = useRouter();
 
   useEffect(() => {
+    setInputValue(urlSearch || '');
     setSearchTerm(urlSearch || '');
   }, [urlSearch]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchTerm.trim()) {
-      router.push(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+    setSearchTerm(inputValue.trim());
+    if (inputValue.trim()) {
+      router.push(`/products?search=${encodeURIComponent(inputValue.trim())}`);
     } else {
       router.push('/products');
     }
@@ -98,8 +101,8 @@ function ProductsContent() {
             <input 
               type="text" 
               placeholder="Search products..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
               className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all"
             />
           </form>

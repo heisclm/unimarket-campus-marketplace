@@ -18,7 +18,7 @@ export async function GET(req: Request) {
 
     // 1. Verify with Paystack
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+    const timeoutId = setTimeout(() => controller.abort(new Error('Paystack API request timed out')), 10000); // 10s timeout
 
     let response;
     try {

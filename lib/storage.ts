@@ -1,4 +1,4 @@
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from './firebase';
 
 export const uploadImage = async (
@@ -11,29 +11,20 @@ export const uploadImage = async (
     const metadata = {
       contentType: file.type,
     };
-    const uploadTask = uploadBytesResumable(storageRef, file, metadata);
-
-    return new Promise((resolve, reject) => {
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          if (onProgress) onProgress(progress);
-        },
-        (error) => {
-          console.error('Upload failed:', error);
-          reject(error);
-        },
-        async () => {
-          try {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            resolve(downloadURL);
-          } catch (err) {
-            reject(err);
-          }
-        }
-      );
-    });
+    
+    // Set initial progress
+    if (onProgress) onProgress(10);
+    
+    // Use uploadBytes for faster, more reliable uploads for small files (< 2MB)
+    const snapshot = await uploadBytes(storageRef, file, metadata);
+    
+    if (onProgress) onProgress(50);
+    
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    
+    if (onProgress) onProgress(100);
+    
+    return downloadURL;
   } catch (error) {
     console.error('Error uploading image:', error);
     throw error;

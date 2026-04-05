@@ -29,8 +29,8 @@ service firebase.storage {
       // Only the owner can delete their images
       allow delete: if isOwner(userId);
       
-      // Updates are not allowed (just delete and recreate)
-      allow update: if false;
+      // Allow update for resumable uploads
+      allow update: if isOwner(userId) && isImage() && isValidSize();
     }
   }
 }
