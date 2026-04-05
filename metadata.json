@@ -1,0 +1,5 @@
+{
+  "name": "UniMarket - Campus Marketplace",
+  "description": "A modern, secure campus marketplace for students and vendors to buy, sell, and auction products with a vibrant community board.",
+  "requestFramePermissions": ["camera"]
+}

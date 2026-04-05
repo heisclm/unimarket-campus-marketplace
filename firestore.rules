@@ -1,0 +1,281 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: userId (auth.uid)
+    // Fields:
+    //   - uid: string (required) - User's unique ID
+    //   - email: string (required) - User's email
+    //   - displayName: string (required) - User's full name
+    //   - photoURL: string (optional) - User's profile picture URL
+    //   - role: string (required) - 'student', 'vendor', or 'admin'
+    //   - walletBalance: number (required) - User's current balance
+    //   - isVerified: boolean (required) - Whether the user is ID verified
+    //   - createdAt: timestamp (required) - Account creation time
+    //
+    // Collection: products
+    // Document ID: productId
+    // Fields:
+    //   - sellerId: string (required) - UID of the seller
+    //   - title: string (required) - Product name
+    //   - description: string (required) - Product details
+    //   - price: number (required) - Product price or starting bid
+    //   - category: string (required) - Product category
+    //   - type: string (required) - 'fixed' or 'auction'
+    //   - status: string (required) - 'active', 'sold', or 'archived'
+    //   - images: list (required) - Array of image URLs
+    //   - createdAt: timestamp (required) - Listing creation time
+    //
+    // Collection: bids
+    // Document ID: bidId
+    // Fields:
+    //   - auctionId: string (required) - ID of the product
+    //   - bidderId: string (required) - UID of the bidder
+    //   - amount: number (required) - Bid amount
+    //   - createdAt: timestamp (required) - Bid time
+    //
+    // Collection: notifications
+    // Document ID: notificationId
+    // Fields:
+    //   - userId: string (required) - UID of the recipient
+    //   - title: string (required) - Notification title
+    //   - message: string (required) - Notification message
+    //   - type: string (required) - 'order', 'bid', 'system', etc.
+    //   - read: boolean (required) - Whether the notification is read
+    //   - link: string (optional) - Link to relevant page
+    //   - createdAt: timestamp (required) - Notification time
+    //
+    // Collection: posts
+    // Document ID: postId
+    // Fields:
+    //   - authorId: string (required) - UID of the author
+    //   - authorName: string (required) - Name of the author
+    //   - authorPhoto: string (optional) - Photo of the author
+    //   - content: string (required) - Post content
+    //   - likes: number (required) - Number of likes
+    //   - createdAt: timestamp (required) - Post time
+    //
+    // Collection: reports
+    // Document ID: reportId
+    // Fields:
+    //   - reporterId: string (required) - UID of the reporter
+    //   - targetId: string (required) - ID of the reported content
+    //   - targetType: string (required) - 'product', 'user', or 'post'
+    //   - reason: string (required) - Reason for reporting
+    //   - status: string (required) - 'pending', 'resolved', or 'dismissed'
+    //   - createdAt: timestamp (required) - Report time
+    //
+    // Collection: payment_locks
+    // Document ID: paystackReference
+    // Fields:
+    //   - processedAt: timestamp (required)
+    //   - metadataType: string (required)
+    //   - amount: number (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         request.auth.token.email == "feraclem@gmail.com");
+    }
+
+    function isVerified() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isVerified == true;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    // Payment Locks Collection
+    match /payment_locks/{lockId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && 
+                      hasRequiredFields(['uid', 'email', 'displayName', 'role', 'walletBalance', 'isVerified', 'createdAt']) &&
+                      request.resource.data.role in ['student', 'vendor'] &&
+                      request.resource.data.walletBalance == 0 &&
+                      request.resource.data.isVerified == false;
+      
+      allow update: if isAdmin() || (isOwner(userId) && 
+                      // CRITICAL: Prevent sensitive field manipulation
+                      !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'uid', 'email', 'walletBalance', 'isVerified', 'createdAt']) &&
+                      // Validate allowed fields
+                      (request.resource.data.displayName is string && request.resource.data.displayName.size() > 0) &&
+                      (request.resource.data.photoURL == null || request.resource.data.photoURL is string)
+                    );
+    }
+
+    // Products Collection
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && 
+                      request.resource.data.sellerId == request.auth.uid &&
+                      request.resource.data.status == 'active' &&
+                      hasRequiredFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt']);
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        (request.auth.uid == resource.data.sellerId && 
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['sellerId', 'createdAt']))
+      );
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.sellerId || isAdmin());
+    }
+
+    // Bids Collection
+    match /bids/{bidId} {
+      allow read: if true;
+      allow create: if isAdmin(); // Only admin/system can create bids (via API)
+      allow update, delete: if isAdmin();
+    }
+
+    // Notifications Collection
+    match /notifications/{notificationId} {
+      allow read: if isOwner(resource.data.userId);
+      allow create: if isAuthenticated(); // System or other users can create notifications
+      allow update: if isOwner(resource.data.userId) && hasOnlyAllowedFields(['read']);
+      allow delete: if isOwner(resource.data.userId);
+    }
+
+    // Posts Collection
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && 
+                      request.resource.data.authorId == request.auth.uid &&
+                      hasRequiredFields(['authorId', 'authorName', 'content', 'likes', 'createdAt']);
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.authorId || hasOnlyAllowedFields(['likes']) || isAdmin());
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.authorId || isAdmin());
+    }
+
+    // Reports Collection
+    match /reports/{reportId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.reporterId == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.reporterId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Orders Collection
+    match /orders/{orderId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.buyerId || request.auth.uid == resource.data.sellerId || isAdmin());
+      allow create: if isAuthenticated() && 
+                      request.resource.data.buyerId == request.auth.uid &&
+                      request.resource.data.status == 'pending';
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        (
+          // Prevent modification of core order details
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['buyerId', 'sellerId', 'productId', 'amount', 'createdAt']) &&
+          (
+            // Seller can only mark as delivered
+            (request.auth.uid == resource.data.sellerId && 
+             request.resource.data.status == 'delivered' && 
+             resource.data.status == 'escrow_held') ||
+            // Buyer can confirm receipt or dispute
+            (request.auth.uid == resource.data.buyerId && 
+             (request.resource.data.status == 'completed' || request.resource.data.status == 'disputed') &&
+             (resource.data.status == 'delivered' || resource.data.status == 'escrow_held'))
+          )
+        )
+      );
+    }
+
+    // Transactions Collection
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin());
+      // Most transactions are now created via backend APIs.
+      // Only 'deposit' and 'withdrawal' requests can be initiated by users (though we moved to backend, keeping for compatibility if needed, but ideally restricted to admin).
+      allow create: if isAdmin() || (isAuthenticated() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.type in ['deposit', 'withdrawal'] &&
+                      request.resource.data.status == 'pending');
+      allow update, delete: if isAdmin();
+    }
+
+    // Wallet Ledger Collection
+    match /wallet_ledger/{ledgerId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Withdrawals Collection
+    match /withdrawals/{withdrawalId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // Students Master Collection
+    match /students_master/{studentId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Verification Requests Collection
+    match /verification_requests/{requestId} {
+      allow read: if isAdmin() || (isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid));
+      allow create: if isAuthenticated() && 
+                      request.resource.data.userId == request.auth.uid &&
+                      request.resource.data.status == 'pending' &&
+                      (
+                        (request.resource.data.role == 'student' && hasRequiredFields(['userId', 'fullName', 'studentId', 'status', 'autoMatch', 'createdAt'])) ||
+                        (request.resource.data.role == 'vendor' && hasRequiredFields(['userId', 'fullName', 'idType', 'idNumber', 'idCardImage', 'status', 'autoMatch', 'createdAt']))
+                      );
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Audit Logs Collection
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Chats Collection
+    match /chats/{chatId} {
+      allow read: if isAuthenticated() && (request.auth.uid in resource.data.participants || isAdmin());
+      allow create: if isAuthenticated() && (request.auth.uid == request.resource.data.buyerId || request.auth.uid == request.resource.data.sellerId);
+      allow update: if isAuthenticated() && (request.auth.uid in resource.data.participants || isAdmin());
+      
+      // Messages Subcollection
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() && (request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants || isAdmin());
+        allow create: if isAuthenticated() && 
+                        request.auth.uid == request.resource.data.senderId &&
+                        request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+        allow update: if isAuthenticated() && (request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants || isAdmin());
+      }
+    }
+  }
+}

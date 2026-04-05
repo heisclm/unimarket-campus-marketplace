@@ -1,0 +1,284 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the marketplace (student, vendor, or admin)",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["student", "vendor", "admin"] },
+        "walletBalance": { "type": "number", "description": "Virtual wallet balance for escrow" },
+        "isVerified": { "type": "boolean", "description": "Whether the user's ID is verified" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "An item listed for sale or auction",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "sellerId": { "type": "string" },
+        "category": { "type": "string" },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string", "enum": ["active", "sold", "ended"] },
+        "type": { "type": "string", "enum": ["fixed", "auction"] },
+        "isFeatured": { "type": "boolean", "description": "Whether the product is featured on the homepage" },
+        "isPopular": { "type": "boolean", "description": "Whether the product is popular" },
+        "auctionEndTime": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "price", "sellerId", "status", "type", "createdAt"]
+    },
+    "Service": {
+      "title": "Service",
+      "description": "A service offered by a student or vendor",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "image_url": { "type": "string" },
+        "category": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "category", "createdAt"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A completed purchase or won auction with escrow tracking",
+      "type": "object",
+      "properties": {
+        "buyerId": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "productId": { "type": "string" },
+        "productTitle": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "escrow_held", "delivered", "completed", "disputed", "cancelled", "refunded"] },
+        "deliveryMethod": { "type": "string", "enum": ["pickup", "delivery"] },
+        "disputeReason": { "type": "string" },
+        "adminNote": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["buyerId", "sellerId", "productId", "amount", "status", "createdAt"]
+    },
+    "Bid": {
+      "title": "Bid",
+      "description": "A bid placed on an auction product",
+      "type": "object",
+      "properties": {
+        "auctionId": { "type": "string" },
+        "bidderId": { "type": "string" },
+        "amount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["auctionId", "bidderId", "amount", "createdAt"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Wallet transaction for escrow and balance tracking",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "senderId": { "type": "string", "description": "ID of the user sending funds" },
+        "receiverId": { "type": "string", "description": "ID of the user receiving funds" },
+        "orderId": { "type": "string", "description": "Linked order ID if applicable" },
+        "amount": { "type": "number" },
+        "type": { "type": "string", "enum": ["deposit", "withdrawal", "escrow_hold", "escrow_release", "escrow_refund"] },
+        "status": { "type": "string", "enum": ["pending", "completed", "failed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "amount", "type", "status", "createdAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "A user notification",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string", "enum": ["order", "bid", "system"] },
+        "read": { "type": "boolean" },
+        "link": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "message", "type", "read", "createdAt"]
+    },
+    "Post": {
+      "title": "Community Post",
+      "description": "A post on the community board",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "content": { "type": "string" },
+        "likes": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["authorId", "authorName", "content", "likes", "createdAt"]
+    },
+    "Report": {
+      "title": "Report",
+      "description": "A report for fraud or inappropriate content",
+      "type": "object",
+      "properties": {
+        "reporterId": { "type": "string" },
+        "targetId": { "type": "string" },
+        "targetType": { "type": "string", "enum": ["product", "user", "post"] },
+        "reason": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "reviewed", "resolved"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["reporterId", "targetId", "targetType", "reason", "status", "createdAt"]
+    },
+    "StudentMaster": {
+      "title": "Student Master Record",
+      "description": "The official university record for a student used for verification",
+      "type": "object",
+      "properties": {
+        "studentId": { "type": "string" },
+        "fullName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "department": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentId", "fullName", "createdAt"]
+    },
+    "VerificationRequest": {
+      "title": "Verification Request",
+      "description": "A student's request to be verified on the platform",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "fullName": { "type": "string", "description": "Name as it appears in master records" },
+        "idCardImage": { "type": "string" },
+        "selfieImage": { "type": "string" },
+        "faceMatchScore": { "type": "number" },
+        "autoMatch": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "adminNote": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "studentId", "idCardImage", "selfieImage", "status", "createdAt"]
+    },
+    "Chat": {
+      "title": "Chat",
+      "description": "A private conversation between a buyer and a seller",
+      "type": "object",
+      "properties": {
+        "participants": { "type": "array", "items": { "type": "string" }, "description": "UIDs of the buyer and seller" },
+        "buyerId": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "orderId": { "type": "string", "description": "The order that triggered this chat" },
+        "lastMessage": { "type": "string" },
+        "lastMessageAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["participants", "buyerId", "sellerId", "orderId", "createdAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A single message within a chat",
+      "type": "object",
+      "properties": {
+        "chatId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "text": { "type": "string" },
+        "status": { "type": "string", "enum": ["sent", "delivered", "read"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["chatId", "senderId", "text", "status", "createdAt"]
+    },
+    "WalletLedger": {
+      "title": "Wallet Ledger",
+      "description": "A record of every change to a user's wallet balance for auditing and integrity.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The ID of the user whose wallet is being updated" },
+        "amount": { "type": "number", "description": "The amount added (positive) or removed (negative)" },
+        "type": { 
+          "type": "string", 
+          "enum": ["deposit", "withdrawal", "escrow_hold", "escrow_release", "escrow_refund", "payment_received"],
+          "description": "The type of transaction" 
+        },
+        "orderId": { "type": "string", "description": "Optional reference to an order" },
+        "previousBalance": { "type": "number", "description": "Balance before this transaction" },
+        "newBalance": { "type": "number", "description": "Balance after this transaction" },
+        "description": { "type": "string", "description": "Human-readable description of the transaction" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the transaction occurred" }
+      },
+      "required": ["userId", "amount", "type", "previousBalance", "newBalance", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user profiles and roles"
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Stores all products and auctions"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Stores all orders and purchases"
+    },
+    "/bids/{bidId}": {
+      "schema": { "$ref": "#/entities/Bid" },
+      "description": "Stores all bids for auctions"
+    },
+    "/transactions/{transactionId}": {
+      "schema": { "$ref": "#/entities/Transaction" },
+      "description": "Stores wallet transactions"
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "Stores user notifications"
+    },
+    "/posts/{postId}": {
+      "schema": { "$ref": "#/entities/Post" },
+      "description": "Stores community posts"
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "#/entities/Report" },
+      "description": "Stores fraud and content reports"
+    },
+    "/students_master/{studentId}": {
+      "schema": { "$ref": "#/entities/StudentMaster" },
+      "description": "Stores official student records for verification"
+    },
+    "/verification_requests/{requestId}": {
+      "schema": { "$ref": "#/entities/VerificationRequest" },
+      "description": "Stores user verification requests"
+    },
+    "/services/{serviceId}": {
+      "schema": { "$ref": "#/entities/Service" },
+      "description": "Stores all services"
+    },
+    "/chats/{chatId}": {
+      "schema": { "$ref": "#/entities/Chat" },
+      "description": "Stores all private chats"
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/Message" },
+      "description": "Stores messages for a specific chat"
+    },
+    "/wallet_ledger/{ledgerId}": {
+      "schema": { "$ref": "#/entities/WalletLedger" },
+      "description": "Stores private wallet audit logs"
+    },
+    "/payment_locks/{lockId}": {
+      "schema": { "type": "object" },
+      "description": "Idempotency locks for payments"
+    }
+  }
+}
