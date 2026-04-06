@@ -16,23 +16,14 @@ import {
 import { Gavel } from "lucide-react";
 
 export default function Home() {
-  const [featuredProduct, setFeaturedProduct] = useState<Product | null>(null);
-  const [popularProducts, setPopularProducts] = useState<Product[]>([]);
-  const [newProducts, setNewProducts] = useState<Product[]>([]);
-  const [moreProducts, setMoreProducts] = useState<Product[]>([]);
-  const [activeAuctions, setActiveAuctions] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>(['Tech', 'Books', 'Furniture', 'Clothing', 'Sports']);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubFeatured = subscribeToFeaturedProduct(setFeaturedProduct);
-    const unsubPopular = subscribeToPopularProducts(setPopularProducts, 1); // We use one for the bottom right highlight
-    const unsubNew = subscribeToNewProducts(setNewProducts, 4);
-    const unsubMore = subscribeToMoreProducts(setMoreProducts, 3);
-    const unsubAuctions = subscribeToActiveAuctions(setActiveAuctions, 4);
-    
-    const unsubAll = subscribeToAllActiveProducts((products) => {
-      const cats = Array.from(new Set(products.map(p => p.category)));
+    const unsubAll = subscribeToAllActiveProducts((fetchedProducts) => {
+      setProducts(fetchedProducts);
+      const cats = Array.from(new Set(fetchedProducts.map(p => p.category))).filter(Boolean);
       if (cats.length > 0) {
         setCategories(cats);
       }
@@ -40,21 +31,40 @@ export default function Home() {
     });
 
     return () => {
-      unsubFeatured();
-      unsubPopular();
-      unsubNew();
-      unsubMore();
-      unsubAuctions();
       unsubAll();
     };
   }, []);
 
-  // Use the first popular product for the bottom right highlight
-  const highlightProduct = popularProducts[0] || null;
-  // Use the first new product for the middle small card
-  const newGenProduct = newProducts[0] || null;
-  // Use the second new product for the tall card
-  const tallCardProduct = newProducts[1] || null;
+  // Helper to get time
+  const getTime = (p: Product) => p.createdAt?.toMillis ? p.createdAt.toMillis() : 0;
+
+  // Sort products by newest first
+  const sortedProducts = [...products].sort((a, b) => getTime(b) - getTime(a));
+
+  // 1. Featured product (isFeatured or latest)
+  const featuredProduct = sortedProducts.find(p => p.isFeatured) || sortedProducts[0] || null;
+  
+  // Remove featured from remaining pool to avoid duplicates
+  let remainingProducts = sortedProducts.filter(p => p.id !== featuredProduct?.id);
+
+  // 2. Popular product (for highlight card)
+  const highlightProduct = remainingProducts.find(p => p.isPopular) || remainingProducts[0] || null;
+  remainingProducts = remainingProducts.filter(p => p.id !== highlightProduct?.id);
+
+  // 3. Tall Card Product (New Product 1)
+  const tallCardProduct = remainingProducts[0] || null;
+  remainingProducts = remainingProducts.filter(p => p.id !== tallCardProduct?.id);
+
+  // 4. Small Product Card (New Product 2)
+  const newGenProduct = remainingProducts[0] || null;
+  remainingProducts = remainingProducts.filter(p => p.id !== newGenProduct?.id);
+
+  // 5. More Products (Mini gallery)
+  const moreProducts = remainingProducts.slice(0, 3);
+  remainingProducts = remainingProducts.filter(p => !moreProducts.find(mp => mp.id === p.id));
+
+  // 6. Active Auctions
+  const activeAuctions = sortedProducts.filter(p => p.type === 'auction').slice(0, 4);
 
   return (
     <div className="space-y-24 pb-20">
@@ -62,20 +72,20 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-auto">
         
         {/* Hero Section (Spans 2 columns, 2 rows on large screens) */}
-        <div className="col-span-1 md:col-span-2 lg:col-span-2 lg:row-span-2 bg-white rounded-[2rem] p-8 md:p-12 relative overflow-hidden shadow-sm flex flex-col justify-between min-h-[400px]">
-          <div className="z-10 max-w-md">
+        <div className="col-span-1 md:col-span-2 lg:col-span-2 lg:row-span-2 bg-white rounded-[2rem] p-8 md:p-12 shadow-sm flex flex-col md:flex-row items-center justify-between min-h-[400px] gap-8">
+          <div className="z-10 flex-1 w-full max-w-md">
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-sm font-medium text-gray-600 mb-6">
               <span className="w-2 h-2 rounded-full bg-gray-400"></span>
               {featuredProduct?.category || 'Featured'}
             </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-6 line-clamp-3">
               {featuredProduct?.title || 'Premium Campus Deals.'}
             </h1>
             <div className="flex items-start gap-4 mb-8">
               <span className="text-4xl font-light text-gray-300">01</span>
               <div>
                 <h3 className="font-semibold text-lg">Featured Item</h3>
-                <p className="text-gray-500 text-sm mt-1">
+                <p className="text-gray-500 text-sm mt-1 line-clamp-3">
                   {featuredProduct?.description || 'Find the best items listed by your fellow students.'}
                 </p>
               </div>
@@ -89,7 +99,7 @@ export default function Home() {
           </div>
           
           {/* Hero Image */}
-          <div className="absolute right-[-10%] bottom-[-10%] w-[60%] h-[80%] z-0">
+          <div className="relative w-full md:w-1/2 h-[300px] md:h-[400px] flex-shrink-0">
             <Image 
               src={featuredProduct?.previewImage || featuredProduct?.images?.[0] || "https://picsum.photos/seed/headphones/800/800"} 
               alt={featuredProduct?.title || "Featured Product"} 
@@ -116,7 +126,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Tall Image Card (New Product 2) */}
+        {/* Tall Image Card (New Product 1) */}
         <Link 
           href={tallCardProduct ? `/products/${tallCardProduct.id}` : "/products"}
           className="col-span-1 lg:row-span-2 bg-white rounded-[2rem] p-6 shadow-sm relative overflow-hidden min-h-[300px] flex flex-col justify-end group cursor-pointer"
@@ -134,12 +144,12 @@ export default function Home() {
             <ArrowUpRight className="w-5 h-5" />
           </div>
           <div className="relative z-10 bg-white/90 backdrop-blur-sm p-4 rounded-2xl">
-            <h3 className="font-semibold text-lg leading-tight">{tallCardProduct?.title || 'Next Gen Tech'}</h3>
-            <p className="text-sm text-gray-500 mt-1">{tallCardProduct?.description?.slice(0, 40) || 'Immersive learning'}...</p>
+            <h3 className="font-semibold text-lg leading-tight line-clamp-2">{tallCardProduct?.title || 'Next Gen Tech'}</h3>
+            <p className="text-sm text-gray-500 mt-1 line-clamp-1">{tallCardProduct?.description || 'Immersive learning'}</p>
           </div>
         </Link>
 
-        {/* Small Product Card (New Product 1) */}
+        {/* Small Product Card (New Product 2) */}
         <Link 
           href={newGenProduct ? `/products/${newGenProduct.id}` : "/products"}
           className="col-span-1 bg-white rounded-[2rem] p-6 shadow-sm relative overflow-hidden group cursor-pointer"
@@ -147,9 +157,8 @@ export default function Home() {
           <div className="absolute top-4 right-4 z-10 bg-white p-2 rounded-full shadow-sm">
             <ArrowUpRight className="w-4 h-4" />
           </div>
-          <h3 className="font-semibold text-lg relative z-10">
-            {newGenProduct?.title?.split(' ').slice(0, 2).join(' ') || 'New Gen'}<br/>
-            {newGenProduct?.title?.split(' ').slice(2, 4).join(' ') || 'Arrivals'}
+          <h3 className="font-semibold text-lg relative z-10 line-clamp-2 pr-8">
+            {newGenProduct?.title || 'New Arrivals'}
           </h3>
           <div className="absolute right-[-20%] bottom-[-20%] w-[80%] h-[80%] z-0">
             <Image 
@@ -210,9 +219,9 @@ export default function Home() {
         >
           <div className="max-w-[50%]">
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-500 rounded-md text-xs font-medium mb-3">
-              <Heart className="w-3 h-3 fill-current" /> Popular
+              <Heart className="w-3 h-3 fill-current" /> {highlightProduct?.category || 'Popular'}
             </span>
-            <h3 className="font-semibold text-xl leading-tight mb-4">
+            <h3 className="font-semibold text-xl leading-tight mb-4 line-clamp-2">
               {highlightProduct?.title || 'Textbooks & Notes Exchange Released'}
             </h3>
             <div className="flex -space-x-2">

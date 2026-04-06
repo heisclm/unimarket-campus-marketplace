@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, query, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -37,7 +37,25 @@ function ProductsContent() {
     }
   };
 
-  const categories = ['All', 'Electronics', 'Books', 'Clothing', 'Services', 'Other'];
+  const [categories, setCategories] = useState<string[]>(['All']);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const q = query(collection(db, 'products'), where('status', '==', 'active'));
+        const querySnapshot = await getDocs(q);
+        const cats = new Set<string>();
+        querySnapshot.forEach(doc => {
+          const cat = doc.data().category;
+          if (cat) cats.add(cat);
+        });
+        setCategories(['All', ...Array.from(cats)]);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
