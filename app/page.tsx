@@ -76,7 +76,7 @@ export default function Home() {
           <div className="z-10 flex-1 w-full max-w-md">
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-sm font-medium text-gray-600 mb-6">
               <span className="w-2 h-2 rounded-full bg-gray-400"></span>
-              {featuredProduct?.category || 'Featured'}
+              {featuredProduct?.category === 'Electronics' ? 'Featured Item' : (featuredProduct?.category || 'Featured Item')}
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-6 line-clamp-3">
               {featuredProduct?.title || 'Premium Campus Deals.'}
@@ -111,18 +111,26 @@ export default function Home() {
         </div>
 
         {/* Popular Categories */}
-        <div className="col-span-1 bg-white rounded-[2rem] p-6 shadow-sm flex flex-col">
-          <h3 className="font-semibold text-lg mb-4">Popular Categories</h3>
-          <div className="flex flex-wrap gap-2 mt-auto">
-            {categories.slice(0, 8).map((cat) => (
-              <Link 
-                key={cat} 
-                href={`/products?category=${cat.toLowerCase()}`}
-                className="px-3 py-1.5 bg-gray-50 hover:bg-[#d9ff00] rounded-full text-xs font-bold transition-colors"
-              >
-                {cat}
-              </Link>
-            ))}
+        <div className="col-span-1 bg-gradient-to-br from-gray-900 to-black text-white rounded-[2rem] p-8 shadow-lg flex flex-col relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-[#d9ff00] rounded-full blur-[80px] opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+          <div className="relative z-10 flex flex-col h-full">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2.5 bg-white/10 rounded-xl backdrop-blur-md border border-white/5">
+                <Zap className="w-5 h-5 text-[#d9ff00]" />
+              </div>
+              <h3 className="font-bold text-xl tracking-tight">Trending</h3>
+            </div>
+            <div className="flex flex-wrap gap-2.5 mt-auto">
+              {categories.slice(0, 8).map((cat) => (
+                <Link 
+                  key={cat} 
+                  href={`/products?category=${cat.toLowerCase()}`}
+                  className="px-4 py-2 bg-white/5 hover:bg-[#d9ff00] hover:text-black border border-white/10 hover:border-[#d9ff00] rounded-xl text-sm font-medium transition-all duration-300 backdrop-blur-sm"
+                >
+                  {cat}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
 
