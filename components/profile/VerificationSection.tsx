@@ -154,7 +154,7 @@ export default function VerificationSection() {
   // If already verified or has a pending request
   if (request) {
     return (
-      <div className="bg-white rounded-[2rem] p-12 shadow-sm border border-gray-50 text-center max-w-2xl mx-auto">
+      <div className="bg-white rounded-[2rem] p-6 md:p-12 shadow-sm border border-gray-50 text-center max-w-2xl mx-auto">
         <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${request.status === 'approved' ? 'bg-green-100 text-green-600' : request.status === 'rejected' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'}`}>
           {request.status === 'approved' ? <CheckCircle2 className="w-10 h-10" /> : request.status === 'rejected' ? <AlertCircle className="w-10 h-10" /> : <RefreshCw className="w-10 h-10 animate-spin-slow" />}
         </div>
@@ -199,7 +199,7 @@ export default function VerificationSection() {
   }
 
   return (
-    <div className="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-gray-50 max-w-3xl mx-auto">
+    <div className="bg-white rounded-[2rem] p-6 md:p-12 shadow-sm border border-gray-50 max-w-3xl mx-auto">
       <div className="flex items-center gap-4 mb-8">
         <div className="w-12 h-12 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center">
           <ShieldCheck className="w-6 h-6" />

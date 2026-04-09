@@ -169,7 +169,7 @@ export default function ProfilePage() {
   // Not logged in
   if (!user) {
     return (
-      <div className="max-w-md mx-auto bg-white rounded-[2rem] p-8 shadow-sm min-h-[60vh] flex flex-col items-center justify-center">
+      <div className="max-w-md mx-auto bg-white rounded-[2rem] p-6 md:p-8 shadow-sm min-h-[60vh] flex flex-col items-center justify-center">
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
           <UserIcon className="w-8 h-8 text-gray-400" />
         </div>
@@ -283,7 +283,7 @@ export default function ProfilePage() {
   // Logged in, but no role selected (First time user)
   if (!role) {
     return (
-      <div className="bg-white rounded-[2rem] p-8 shadow-sm min-h-[60vh] flex flex-col items-center justify-center text-center">
+      <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm min-h-[60vh] flex flex-col items-center justify-center text-center">
         <h1 className="text-3xl font-bold mb-2">Complete Your Profile</h1>
         <p className="text-gray-500 mb-8 max-w-md">
           Are you joining as a student looking to buy/sell, or a vendor setting up a shop?
@@ -322,7 +322,7 @@ export default function ProfilePage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Profile Header */}
-      <div className="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm relative overflow-hidden">
+      <div className="bg-white rounded-[2rem] p-6 md:p-12 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-gray-100 to-gray-50 z-0"></div>
         
         <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 mt-12">
@@ -342,7 +342,7 @@ export default function ProfilePage() {
               {role} Account
             </div>
             <h1 className="text-3xl font-bold mb-1">{user.displayName || 'Anonymous User'}</h1>
-            <p className="text-gray-500 mb-6">{user.email}</p>
+            <p className="text-gray-500 mb-6 break-all">{user.email}</p>
             
             <div className="flex flex-wrap justify-center md:justify-start gap-3">
               <button 
@@ -358,32 +358,32 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile Tabs */}
-      <div className="flex gap-2 bg-gray-100 p-1.5 rounded-2xl w-fit mx-auto md:mx-0">
+      <div className="flex gap-2 bg-gray-100 p-1.5 rounded-2xl w-full md:w-fit mx-auto md:mx-0 overflow-x-auto no-scrollbar">
         <button 
           onClick={() => setActiveTab('profile')}
-          className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'profile' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          className={`whitespace-nowrap px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'profile' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
         >
-          <UserIcon className="w-4 h-4" /> Profile
+          <UserIcon className="w-4 h-4 shrink-0" /> Profile
         </button>
         {role !== 'admin' && (
           <>
             <button 
               onClick={() => setActiveTab('orders')}
-              className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'orders' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`whitespace-nowrap px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'orders' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
             >
-              <Package className="w-4 h-4" /> Orders
+              <Package className="w-4 h-4 shrink-0" /> Orders
             </button>
             <button 
               onClick={() => setActiveTab('wallet')}
-              className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'wallet' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`whitespace-nowrap px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'wallet' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
             >
-              <Wallet className="w-4 h-4" /> Wallet
+              <Wallet className="w-4 h-4 shrink-0" /> Wallet
             </button>
             <button 
               onClick={() => setActiveTab('verification')}
-              className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'verification' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`whitespace-nowrap px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'verification' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
             >
-              <ShieldCheck className="w-4 h-4" /> Verification
+              <ShieldCheck className="w-4 h-4 shrink-0" /> Verification
             </button>
           </>
         )}
@@ -393,7 +393,7 @@ export default function ProfilePage() {
       <div className="min-h-[400px]">
         {activeTab === 'profile' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50">
+            <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-50">
               <h3 className="font-bold text-lg mb-6">Account Settings</h3>
               <div className="space-y-4">
                 <div>
@@ -414,7 +414,7 @@ export default function ProfilePage() {
             </div>
             
             {role !== 'admin' && (
-              <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50">
+              <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-50">
                 <h3 className="font-bold text-lg mb-6">Marketplace Activity</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 bg-gray-50 rounded-2xl text-center">
