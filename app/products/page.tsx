@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { collection, query, getDocs, orderBy, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import Image from 'next/image';
+import PremiumImage from '@/components/ui/PremiumImage';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Search, Filter, Clock, Tag, ShieldCheck } from 'lucide-react';
@@ -173,17 +173,14 @@ function ProductsContent() {
           {filteredProducts.map(product => (
             <Link href={`/products/${product.id}`} key={product.id} className="bg-white rounded-2xl p-4 shadow-sm group hover:shadow-md transition-all flex flex-col">
               <div className="relative w-full h-48 bg-gray-100 rounded-xl mb-4 overflow-hidden">
-                {product.previewImage || (product.images && product.images.length > 0) ? (
-                  <Image 
-                    src={product.previewImage || product.images[0]} 
-                    alt={product.title} 
-                    fill 
-                    className="object-cover group-hover:scale-105 transition-transform duration-500" 
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
-                )}
+                <PremiumImage 
+                  src={product.previewImage || product.images?.[0] || ""} 
+                  alt={product.title} 
+                  fill 
+                  className="object-cover group-hover:scale-105 transition-transform duration-500" 
+                  referrerPolicy="no-referrer"
+                  containerClassName="absolute inset-0"
+                />
                 
                 {/* Badges */}
                 <div className="absolute top-2 left-2 flex flex-col gap-2">

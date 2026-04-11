@@ -1,7 +1,8 @@
-import type {Metadata} from 'next';
+import type {Metadata, Viewport} from 'next';
 import './globals.css'; // Global styles
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import BottomNav from '@/components/layout/BottomNav';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { CartProvider } from '@/components/cart/CartProvider';
 import Chatbot from '@/components/chat/Chatbot';
@@ -11,6 +12,20 @@ import { Toaster } from 'react-hot-toast';
 export const metadata: Metadata = {
   title: 'UniMarket - Campus Marketplace',
   description: 'A modern, secure campus marketplace for students and vendors to buy, sell, and auction products with a vibrant community board.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'UniMarket',
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#000000',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
@@ -22,10 +37,13 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
             <ErrorBoundary>
               <div className="flex flex-col min-h-screen">
                 <Navbar />
-                <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+                <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
                   {children}
                 </main>
-                <Footer />
+                <div className="hidden md:block">
+                  <Footer />
+                </div>
+                <BottomNav />
               </div>
               <Chatbot />
               <Toaster 

@@ -149,7 +149,7 @@ export default function NewProductPage() {
         category,
         images: [], // Will update after upload
         previewImage: '', // Will update after upload
-        status: 'active',
+        status: 'pending',
         type,
         createdAt: serverTimestamp(),
         ...(type === 'auction' && auctionEndTime ? { auctionEndTime } : {})
@@ -190,8 +190,8 @@ export default function NewProductPage() {
       });
       console.log("Document updated successfully.");
 
-      toast.success('Listing published successfully!');
-      router.push(`/products/${docRef.id}`);
+      toast.success('Listing submitted for approval!');
+      router.push('/dashboard');
     } catch (err: any) {
       console.error("Error adding document: ", err);
       setError(err.message || "Failed to create product");

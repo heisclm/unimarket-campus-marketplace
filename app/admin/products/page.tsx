@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, doc, deleteDoc, limit } from 'firebase/firestore';
-import { Package, Search, Trash2, ExternalLink, Tag, Clock, AlertTriangle } from 'lucide-react';
+import { Package, Search, Trash2, ExternalLink, Tag, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -107,13 +107,32 @@ export default function AdminProducts() {
                   </td>
                   <td className="px-8 py-5">
                     <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg ${
-                      p.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                      p.status === 'active' ? 'bg-green-100 text-green-700' : 
+                      p.status === 'pending' ? 'bg-orange-100 text-orange-700' :
+                      'bg-gray-100 text-gray-700'
                     }`}>
                       {p.status}
                     </span>
                   </td>
                   <td className="px-8 py-5 text-right">
                     <div className="flex items-center justify-end gap-2">
+                      {p.status === 'pending' && (
+                        <button 
+                          onClick={async () => {
+                            try {
+                              const { updateDoc, doc } = await import('firebase/firestore');
+                              await updateDoc(doc(db, 'products', p.id), { status: 'active' });
+                              toast.success('Product approved!');
+                            } catch (e) {
+                              toast.error('Approval failed');
+                            }
+                          }}
+                          className="p-2 text-green-500 hover:bg-green-50 rounded-xl transition-all"
+                          title="Approve Product"
+                        >
+                          <CheckCircle className="w-5 h-5" />
+                        </button>
+                      )}
                       <Link 
                         href={`/products/${p.id}`}
                         target="_blank"

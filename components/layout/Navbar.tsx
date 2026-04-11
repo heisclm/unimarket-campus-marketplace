@@ -16,7 +16,6 @@ export default function Navbar() {
   const { items } = useCart();
   const router = useRouter();
   const [unreadCount, setUnreadCount] = useState(0);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
@@ -63,12 +62,6 @@ export default function Navbar() {
             
             {/* Logo & Mobile Menu Toggle */}
             <div className="flex items-center gap-3">
-              <button 
-                className="lg:hidden p-2 -ml-2 text-gray-700 hover:bg-gray-200 rounded-full transition-colors"
-                onClick={() => setMobileMenuOpen(true)}
-              >
-                <Menu className="w-6 h-6" />
-              </button>
               <Link href="/" className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-black text-white flex items-center justify-center rounded-lg font-bold text-xl">
                   U
@@ -96,6 +89,14 @@ export default function Navbar() {
                 <Search className="w-4 h-4" />
               </button>
             </form>
+
+            {/* Mobile Search Trigger */}
+            <div className="flex-1 md:hidden">
+              <Link href="/products" className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 text-gray-400 text-sm">
+                <Search className="w-4 h-4" />
+                <span>Search...</span>
+              </Link>
+            </div>
 
             {/* Desktop Center Links */}
             <div className="hidden lg:flex items-center gap-6">
@@ -183,68 +184,6 @@ export default function Navbar() {
           </div>
         </div>
       </nav>
-
-      {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <div className="fixed inset-0 z-[100] lg:hidden">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMobileMenuOpen(false)}
-              className="absolute inset-0 bg-black/50"
-            />
-            <motion.div 
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-              className="absolute inset-y-0 left-0 w-64 bg-white shadow-2xl flex flex-col"
-            >
-              <div className="p-4 flex items-center justify-between border-b border-gray-100">
-                <span className="font-bold text-xl tracking-tight">UniMarket.</span>
-                <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-                {role !== 'admin' && (
-                  <>
-                    <Link href="/products" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-gray-700 hover:bg-gray-50 font-medium">
-                      <Search className="w-5 h-5 text-gray-400" /> Marketplace
-                    </Link>
-                    <Link href="/community" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-gray-700 hover:bg-gray-50 font-medium">
-                      <Users className="w-5 h-5 text-gray-400" /> Community
-                    </Link>
-                  </>
-                )}
-                {role === 'admin' ? (
-                  <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-white bg-red-600 font-bold shadow-sm">
-                    <ShieldAlert className="w-5 h-5" /> Admin Panel
-                  </Link>
-                ) : (
-                  role === 'vendor' && (
-                    <Link href="/vendor" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-orange-600 hover:bg-orange-50 font-bold">
-                      <Store className="w-5 h-5" /> Vendor Dashboard
-                    </Link>
-                  )
-                )}
-                {user && role === 'student' && (
-                  <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-gray-700 hover:bg-gray-50 font-medium">
-                    <LayoutDashboard className="w-5 h-5 text-gray-400" /> My Dashboard
-                  </Link>
-                )}
-                {role !== 'admin' && role !== 'vendor' && (
-                  <Link href="/wishlist" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-3 rounded-xl text-gray-700 hover:bg-gray-50 font-medium">
-                    <Heart className="w-5 h-5 text-gray-400" /> Wishlist
-                  </Link>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </>
   );
 }

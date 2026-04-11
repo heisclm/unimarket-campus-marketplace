@@ -22,7 +22,8 @@ export default function AdminOverview() {
     totalOrders: 0,
     totalRevenue: 0,
     pendingReports: 0,
-    pendingVerifications: 0
+    pendingVerifications: 0,
+    pendingProducts: 0
   });
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,14 +43,16 @@ export default function AdminOverview() {
           totalProductsSnap,
           totalOrdersSnap,
           totalRevenueSnap,
-          pendingReportsSnap
+          pendingReportsSnap,
+          pendingProductsSnap
         ] = await Promise.all([
           getCountFromServer(usersColl),
           getCountFromServer(query(usersColl, where('isVerified', '==', false))),
           getCountFromServer(productsColl),
           getCountFromServer(ordersColl),
           getAggregateFromServer(ordersColl, { totalRevenue: sum('amount') }),
-          getCountFromServer(query(reportsColl, where('status', '==', 'pending')))
+          getCountFromServer(query(reportsColl, where('status', '==', 'pending'))),
+          getCountFromServer(query(productsColl, where('status', '==', 'pending')))
         ]);
 
         setStats({
@@ -58,7 +61,8 @@ export default function AdminOverview() {
           totalProducts: totalProductsSnap.data().count,
           totalOrders: totalOrdersSnap.data().count,
           totalRevenue: totalRevenueSnap.data().totalRevenue || 0,
-          pendingReports: pendingReportsSnap.data().count
+          pendingReports: pendingReportsSnap.data().count,
+          pendingProducts: pendingProductsSnap.data().count
         });
 
         // Fetch recent activity
@@ -182,6 +186,13 @@ export default function AdminOverview() {
                     <span className="text-sm font-bold">Pending IDs</span>
                   </div>
                   <span className="bg-[#d9ff00] text-black text-xs font-bold px-2 py-0.5 rounded-full">{stats.pendingVerifications}</span>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-white/10 rounded-2xl backdrop-blur-sm border border-white/5">
+                  <div className="flex items-center gap-3">
+                    <Package className="w-5 h-5 text-orange-400" />
+                    <span className="text-sm font-bold">Pending Products</span>
+                  </div>
+                  <span className="bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{stats.pendingProducts}</span>
                 </div>
                 <div className="flex items-center justify-between p-4 bg-white/10 rounded-2xl backdrop-blur-sm border border-white/5">
                   <div className="flex items-center gap-3">

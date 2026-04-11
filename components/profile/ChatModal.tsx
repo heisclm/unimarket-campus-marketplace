@@ -21,7 +21,10 @@ export default function ChatModal({ order, onClose }: ChatModalProps) {
   const [loading, setLoading] = useState(true);
   const [chatId, setChatId] = useState<string | null>(null);
   const [otherUser, setOtherUser] = useState<any>(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const [otherUserTyping, setOtherUserTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!user || !order) return;
@@ -58,8 +61,21 @@ export default function ChatModal({ order, onClose }: ChatModalProps) {
     findChat();
   }, [user, order, onClose]);
 
+  // Listen to chat document for typing status
   useEffect(() => {
-    if (!chatId) return;
+    if (!chatId || !user) return;
+    const unsubscribe = onSnapshot(doc(db, 'chats', chatId), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const otherUserId = order.buyerId === user.uid ? order.sellerId : order.buyerId;
+        setOtherUserTyping(!!data.typing?.[otherUserId]);
+      }
+    });
+    return () => unsubscribe();
+  }, [chatId, user, order]);
+
+  useEffect(() => {
+    if (!chatId || !user) return;
 
     const q = query(
       collection(db, 'chats', chatId, 'messages'),
@@ -75,10 +91,48 @@ export default function ChatModal({ order, onClose }: ChatModalProps) {
       setTimeout(() => {
         scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
+
+      // Mark unread messages from other user as read
+      msgs.forEach(async (msg) => {
+        if (msg.senderId !== user.uid && !msg.readAt) {
+          try {
+            await updateDoc(doc(db, 'chats', chatId, 'messages', msg.id), {
+              readAt: serverTimestamp(),
+              status: 'read'
+            });
+          } catch (err) {
+            console.error("Error marking message as read", err);
+          }
+        }
+      });
     });
 
     return () => unsubscribe();
-  }, [chatId]);
+  }, [chatId, user]);
+
+  const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+    
+    if (!chatId || !user) return;
+
+    if (!isTyping) {
+      setIsTyping(true);
+      await updateDoc(doc(db, 'chats', chatId), {
+        [`typing.${user.uid}`]: true
+      });
+    }
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(async () => {
+      setIsTyping(false);
+      await updateDoc(doc(db, 'chats', chatId), {
+        [`typing.${user.uid}`]: false
+      });
+    }, 1500);
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,6 +140,13 @@ export default function ChatModal({ order, onClose }: ChatModalProps) {
 
     const messageText = newMessage.trim();
     setNewMessage('');
+    
+    // Clear typing status immediately
+    setIsTyping(false);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    await updateDoc(doc(db, 'chats', chatId), {
+      [`typing.${user.uid}`]: false
+    });
 
     try {
       await addDoc(collection(db, 'chats', chatId, 'messages'), {
@@ -93,7 +154,8 @@ export default function ChatModal({ order, onClose }: ChatModalProps) {
         senderId: user.uid,
         text: messageText,
         status: 'sent',
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
+        readAt: null
       });
 
       // Update last message in chat doc
@@ -127,9 +189,16 @@ export default function ChatModal({ order, onClose }: ChatModalProps) {
             </div>
             <div>
               <h3 className="font-bold text-gray-900 leading-tight">{otherUser?.displayName || 'Loading...'}</h3>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
-                Order: {order.productTitle}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                  Order: {order.productTitle}
+                </p>
+                {otherUserTyping && (
+                  <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mt-0.5 animate-pulse">
+                    • Typing...
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <button 
@@ -177,7 +246,11 @@ export default function ChatModal({ order, onClose }: ChatModalProps) {
                         {msg.createdAt?.toDate?.().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                       {isMe && (
-                        <CheckCheck className="w-3 h-3 text-blue-500" />
+                        msg.readAt ? (
+                          <CheckCheck className="w-3 h-3 text-blue-500" />
+                        ) : (
+                          <Check className="w-3 h-3 text-gray-400" />
+                        )
                       )}
                     </div>
                   </div>
@@ -194,7 +267,7 @@ export default function ChatModal({ order, onClose }: ChatModalProps) {
             <input 
               type="text" 
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={handleTyping}
               placeholder="Type your message..."
               className="flex-1 px-5 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-black transition-all"
             />

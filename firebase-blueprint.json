@@ -27,7 +27,7 @@
         "sellerId": { "type": "string" },
         "category": { "type": "string" },
         "images": { "type": "array", "items": { "type": "string" } },
-        "status": { "type": "string", "enum": ["active", "sold", "ended"] },
+        "status": { "type": "string", "enum": ["pending", "active", "sold", "ended", "rejected"] },
         "type": { "type": "string", "enum": ["fixed", "auction"] },
         "isFeatured": { "type": "boolean", "description": "Whether the product is featured on the homepage" },
         "isPopular": { "type": "boolean", "description": "Whether the product is popular" },
@@ -217,12 +217,31 @@
         "createdAt": { "type": "string", "format": "date-time", "description": "When the transaction occurred" }
       },
       "required": ["userId", "amount", "type", "previousBalance", "newBalance", "createdAt"]
+    },
+    "AuditLog": {
+      "title": "Audit Log",
+      "description": "A record of admin actions for security and accountability",
+      "type": "object",
+      "properties": {
+        "adminId": { "type": "string" },
+        "adminName": { "type": "string" },
+        "action": { "type": "string" },
+        "targetId": { "type": "string" },
+        "targetType": { "type": "string" },
+        "details": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["adminId", "action", "createdAt"]
     }
   },
   "firestore": {
     "/users/{userId}": {
       "schema": { "$ref": "#/entities/User" },
       "description": "Stores user profiles and roles"
+    },
+    "/audit_logs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Stores admin audit logs"
     },
     "/products/{productId}": {
       "schema": { "$ref": "#/entities/Product" },

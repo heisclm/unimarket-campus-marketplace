@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import PremiumImage from "@/components/ui/PremiumImage";
 import { ArrowUpRight, Star, Heart, Shield, Zap, Users, ShoppingBag, ArrowRight } from "lucide-react";
 import { 
   subscribeToFeaturedProduct, 
@@ -79,15 +79,26 @@ export default function Home() {
               {featuredProduct?.category === 'Electronics' ? 'Featured Item' : (featuredProduct?.category || 'Featured Item')}
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-6 line-clamp-3">
-              {featuredProduct?.title || 'Premium Campus Deals.'}
+              {loading ? (
+                <div className="h-16 bg-gray-100 rounded-xl animate-pulse w-full" />
+              ) : (
+                featuredProduct?.title || 'Premium Campus Deals.'
+              )}
             </h1>
             <div className="flex items-start gap-4 mb-8">
               <span className="text-4xl font-light text-gray-300">01</span>
-              <div>
+              <div className="flex-1">
                 <h3 className="font-semibold text-lg">Featured Item</h3>
-                <p className="text-gray-500 text-sm mt-1 line-clamp-3">
-                  {featuredProduct?.description || 'Find the best items listed by your fellow students.'}
-                </p>
+                {loading ? (
+                  <div className="space-y-2 mt-2">
+                    <div className="h-4 bg-gray-100 rounded animate-pulse w-full" />
+                    <div className="h-4 bg-gray-100 rounded animate-pulse w-3/4" />
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-sm mt-1 line-clamp-3">
+                    {featuredProduct?.description || 'Find the best items listed by your fellow students.'}
+                  </p>
+                )}
               </div>
             </div>
             <Link href={featuredProduct ? `/products/${featuredProduct.id}` : "/products"} className="inline-flex items-center gap-3 bg-[#d9ff00] text-black font-semibold px-6 py-3 rounded-full hover:bg-[#c4e600] transition-colors">
@@ -100,12 +111,14 @@ export default function Home() {
           
           {/* Hero Image */}
           <div className="relative w-full md:w-1/2 h-[300px] md:h-[400px] flex-shrink-0">
-            <Image 
-              src={featuredProduct?.previewImage || featuredProduct?.images?.[0] || "https://picsum.photos/seed/headphones/800/800"} 
+            <PremiumImage 
+              src={featuredProduct?.previewImage || featuredProduct?.images?.[0] || ""} 
+              fallbackSrc="https://picsum.photos/seed/headphones/800/800"
               alt={featuredProduct?.title || "Featured Product"} 
               fill 
               className="object-contain drop-shadow-2xl"
               referrerPolicy="no-referrer"
+              containerClassName="absolute inset-0"
             />
           </div>
         </div>
@@ -140,12 +153,14 @@ export default function Home() {
           className="col-span-1 lg:row-span-2 bg-white rounded-[2rem] p-6 shadow-sm relative overflow-hidden min-h-[300px] flex flex-col justify-end group cursor-pointer"
         >
           <div className="absolute inset-0 z-0">
-            <Image 
-              src={tallCardProduct?.previewImage || tallCardProduct?.images?.[0] || "https://picsum.photos/seed/vr/600/800"} 
+            <PremiumImage 
+              src={tallCardProduct?.previewImage || tallCardProduct?.images?.[0] || ""} 
+              fallbackSrc="https://picsum.photos/seed/vr/600/800"
               alt={tallCardProduct?.title || "New Product"} 
               fill 
               className="object-cover group-hover:scale-105 transition-transform duration-500"
               referrerPolicy="no-referrer"
+              containerClassName="absolute inset-0"
             />
           </div>
           <div className="absolute top-4 right-4 z-10 bg-white p-2 rounded-full shadow-sm">
@@ -169,12 +184,14 @@ export default function Home() {
             {newGenProduct?.title || 'New Arrivals'}
           </h3>
           <div className="absolute right-[-20%] bottom-[-20%] w-[80%] h-[80%] z-0">
-            <Image 
-              src={newGenProduct?.previewImage || newGenProduct?.images?.[0] || "https://picsum.photos/seed/earbuds/400/400"} 
+            <PremiumImage 
+              src={newGenProduct?.previewImage || newGenProduct?.images?.[0] || ""} 
+              fallbackSrc="https://picsum.photos/seed/earbuds/400/400"
               alt={newGenProduct?.title || "New Arrival"} 
               fill 
               className="object-contain group-hover:scale-110 transition-transform duration-500"
               referrerPolicy="no-referrer"
+              containerClassName="absolute inset-0"
             />
           </div>
         </Link>
@@ -193,11 +210,11 @@ export default function Home() {
           <div className="flex gap-3">
             {moreProducts.length > 0 ? moreProducts.map((p, i) => (
               <Link key={p.id} href={`/products/${p.id}`} className="w-16 h-16 rounded-xl bg-gray-100 relative overflow-hidden">
-                 <Image src={p.previewImage || p.images?.[0] || `https://picsum.photos/seed/item${i}/100/100`} alt={p.title} fill className="object-cover" referrerPolicy="no-referrer" />
+                 <PremiumImage src={p.previewImage || p.images?.[0] || ""} fallbackSrc={`https://picsum.photos/seed/item${i}/100/100`} alt={p.title} fill className="object-cover" referrerPolicy="no-referrer" containerClassName="absolute inset-0" />
               </Link>
             )) : [1, 2, 3].map(i => (
               <div key={i} className="w-16 h-16 rounded-xl bg-gray-100 relative overflow-hidden">
-                 <Image src={`https://picsum.photos/seed/item${i}/100/100`} alt="Item" fill className="object-cover" referrerPolicy="no-referrer" />
+                 <PremiumImage src="" fallbackSrc={`https://picsum.photos/seed/item${i}/100/100`} alt="Item" fill className="object-cover" referrerPolicy="no-referrer" containerClassName="absolute inset-0" />
               </div>
             ))}
           </div>
@@ -206,9 +223,9 @@ export default function Home() {
         {/* Stats / Reviews Card */}
         <div className="col-span-1 bg-[#f4f4f0] rounded-[2rem] p-6 flex flex-col items-center justify-center text-center">
           <div className="flex -space-x-3 mb-4">
-            <div className="w-10 h-10 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative"><Image src="https://picsum.photos/seed/user1/100/100" alt="User" fill className="object-cover" referrerPolicy="no-referrer" /></div>
-            <div className="w-10 h-10 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative"><Image src="https://picsum.photos/seed/user2/100/100" alt="User" fill className="object-cover" referrerPolicy="no-referrer" /></div>
-            <div className="w-10 h-10 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative"><Image src="https://picsum.photos/seed/user3/100/100" alt="User" fill className="object-cover" referrerPolicy="no-referrer" /></div>
+            <div className="w-10 h-10 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative"><PremiumImage src="" showSkeleton={false} fallbackSrc="https://picsum.photos/seed/user1/100/100" alt="User" fill className="object-cover" referrerPolicy="no-referrer" containerClassName="absolute inset-0" /></div>
+            <div className="w-10 h-10 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative"><PremiumImage src="" showSkeleton={false} fallbackSrc="https://picsum.photos/seed/user2/100/100" alt="User" fill className="object-cover" referrerPolicy="no-referrer" containerClassName="absolute inset-0" /></div>
+            <div className="w-10 h-10 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative"><PremiumImage src="" showSkeleton={false} fallbackSrc="https://picsum.photos/seed/user3/100/100" alt="User" fill className="object-cover" referrerPolicy="no-referrer" containerClassName="absolute inset-0" /></div>
           </div>
           <div className="w-24 h-24 bg-blue-500 rounded-full flex flex-col items-center justify-center text-white shadow-lg mb-4">
             <span className="text-2xl font-bold">5k+</span>
@@ -233,17 +250,19 @@ export default function Home() {
               {highlightProduct?.title || 'Textbooks & Notes Exchange Released'}
             </h3>
             <div className="flex -space-x-2">
-               <div className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative"><Image src="https://picsum.photos/seed/book1/100/100" alt="Book" fill className="object-cover" referrerPolicy="no-referrer" /></div>
-               <div className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative"><Image src="https://picsum.photos/seed/book2/100/100" alt="Book" fill className="object-cover" referrerPolicy="no-referrer" /></div>
+               <div className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative"><PremiumImage src="" showSkeleton={false} fallbackSrc="https://picsum.photos/seed/book1/100/100" alt="Book" fill className="object-cover" referrerPolicy="no-referrer" containerClassName="absolute inset-0" /></div>
+               <div className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative"><PremiumImage src="" showSkeleton={false} fallbackSrc="https://picsum.photos/seed/book2/100/100" alt="Book" fill className="object-cover" referrerPolicy="no-referrer" containerClassName="absolute inset-0" /></div>
             </div>
           </div>
           <div className="relative w-32 h-32 md:w-40 md:h-40">
-            <Image 
-              src={highlightProduct?.previewImage || highlightProduct?.images?.[0] || "https://picsum.photos/seed/hands/400/400"} 
+            <PremiumImage 
+              src={highlightProduct?.previewImage || highlightProduct?.images?.[0] || ""} 
+              fallbackSrc="https://picsum.photos/seed/hands/400/400"
               alt={highlightProduct?.title || "Popular Item"} 
               fill 
               className="object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500"
               referrerPolicy="no-referrer"
+              containerClassName="absolute inset-0"
             />
             <div className="absolute top-2 right-2 bg-white p-1.5 rounded-full shadow-sm">
               <ArrowUpRight className="w-4 h-4" />
@@ -276,12 +295,14 @@ export default function Home() {
                 className="bg-white rounded-3xl p-4 shadow-sm border border-gray-50 hover:shadow-md transition-all group"
               >
                 <div className="relative aspect-square rounded-2xl overflow-hidden mb-4">
-                  <Image 
-                    src={auction.previewImage || auction.images?.[0] || "https://picsum.photos/seed/auction/400/400"} 
+                  <PremiumImage 
+                    src={auction.previewImage || auction.images?.[0] || ""} 
+                    fallbackSrc="https://picsum.photos/seed/auction/400/400"
                     alt={auction.title} 
                     fill 
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                     referrerPolicy="no-referrer"
+                    containerClassName="absolute inset-0"
                   />
                   <div className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
                     <Gavel className="w-3 h-3" /> AUCTION
@@ -362,12 +383,14 @@ export default function Home() {
             </Link>
           </div>
           <div className="relative h-[400px] lg:h-[500px] rounded-[2rem] overflow-hidden">
-            <Image 
-              src="https://picsum.photos/seed/campus/800/1000" 
+            <PremiumImage 
+              src="" 
+              fallbackSrc="https://picsum.photos/seed/campus/800/1000"
               alt="Campus life" 
               fill 
               className="object-cover opacity-80"
               referrerPolicy="no-referrer"
+              containerClassName="absolute inset-0"
             />
           </div>
         </div>

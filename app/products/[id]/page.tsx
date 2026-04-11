@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
+import PremiumImage from '@/components/ui/PremiumImage';
 import Link from 'next/link';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useCart } from '@/components/cart/CartProvider';
@@ -110,25 +110,14 @@ export default function ProductDetailPage() {
         {/* Left: Image Gallery */}
         <div className="space-y-4">
           <div className="relative w-full aspect-square bg-gray-100 rounded-3xl overflow-hidden">
-            {product.images && product.images.length > 0 ? (
-              <Image 
-                src={product.images[activeImageIndex] || product.previewImage || product.images[0]} 
-                alt={product.title} 
-                fill 
-                className="object-cover"
-                referrerPolicy="no-referrer"
-              />
-            ) : product.previewImage ? (
-              <Image 
-                src={product.previewImage} 
-                alt={product.title} 
-                fill 
-                className="object-cover"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">No Image Available</div>
-            )}
+            <PremiumImage 
+              src={product.images?.[activeImageIndex] || product.previewImage || product.images?.[0] || ""} 
+              alt={product.title} 
+              fill 
+              className="object-cover"
+              referrerPolicy="no-referrer"
+              containerClassName="absolute inset-0"
+            />
             
             {/* Badges */}
             <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -149,7 +138,7 @@ export default function ProductDetailPage() {
                   onClick={() => setActiveImageIndex(idx)}
                   className={`relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${activeImageIndex === idx ? 'border-black' : 'border-transparent hover:border-gray-300'}`}
                 >
-                  <Image src={img} alt={`Thumbnail ${idx}`} fill className="object-cover" referrerPolicy="no-referrer" />
+                  <PremiumImage src={img} alt={`Thumbnail ${idx}`} fill className="object-cover" referrerPolicy="no-referrer" containerClassName="absolute inset-0" />
                 </button>
               ))}
             </div>
@@ -180,7 +169,7 @@ export default function ProductDetailPage() {
           <div className="bg-gray-50 rounded-2xl p-4 mb-8 flex items-center gap-4 border border-gray-100">
             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden relative shadow-sm">
               {seller?.photoURL ? (
-                <Image src={seller.photoURL} alt={seller.displayName || 'Seller'} fill className="object-cover" referrerPolicy="no-referrer" />
+                <PremiumImage src={seller.photoURL} alt={seller.displayName || 'Seller'} fill className="object-cover" referrerPolicy="no-referrer" containerClassName="absolute inset-0" />
               ) : (
                 <UserIcon className="w-6 h-6 text-gray-400" />
               )}
