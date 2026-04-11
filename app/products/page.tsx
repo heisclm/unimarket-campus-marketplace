@@ -8,6 +8,8 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Search, Filter, Clock, Tag, ShieldCheck } from 'lucide-react';
 
+import { motion } from 'motion/react';
+
 import { Suspense } from 'react';
 
 function ProductsContent() {
@@ -171,50 +173,57 @@ function ProductsContent() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map(product => (
-            <Link href={`/products/${product.id}`} key={product.id} className="bg-white rounded-2xl p-4 shadow-sm group hover:shadow-md transition-all flex flex-col">
-              <div className="relative w-full h-48 bg-gray-100 rounded-xl mb-4 overflow-hidden">
-                <PremiumImage 
-                  src={product.previewImage || product.images?.[0] || ""} 
-                  alt={product.title} 
-                  fill 
-                  className="object-cover group-hover:scale-105 transition-transform duration-500" 
-                  referrerPolicy="no-referrer"
-                  containerClassName="absolute inset-0"
-                />
-                
-                {/* Badges */}
-                <div className="absolute top-2 left-2 flex flex-col gap-2">
-                  {product.type === 'auction' && (
-                    <span className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
-                      <Clock className="w-3 h-3" /> Auction
+            <motion.div
+              key={product.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              <Link href={`/products/${product.id}`} className="bg-white rounded-2xl p-4 shadow-sm group hover:shadow-md transition-all flex flex-col h-full">
+                <div className="relative w-full h-48 bg-gray-100 rounded-xl mb-4 overflow-hidden">
+                  <PremiumImage 
+                    src={product.previewImage || product.images?.[0] || ""} 
+                    alt={product.title} 
+                    fill 
+                    className="object-cover group-hover:scale-105 transition-transform duration-500" 
+                    referrerPolicy="no-referrer"
+                    containerClassName="absolute inset-0"
+                  />
+                  
+                  {/* Badges */}
+                  <div className="absolute top-2 left-2 flex flex-col gap-2">
+                    {product.type === 'auction' && (
+                      <span className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
+                        <Clock className="w-3 h-3" /> Auction
+                      </span>
+                    )}
+                    {product.sellerIsVerified && (
+                      <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
+                        <ShieldCheck className="w-3 h-3" /> Verified Seller
+                      </span>
+                    )}
+                    <span className="bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium px-2 py-1 rounded-md shadow-sm">
+                      {product.category}
                     </span>
-                  )}
-                  {product.sellerIsVerified && (
-                    <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
-                      <ShieldCheck className="w-3 h-3" /> Verified Seller
-                    </span>
-                  )}
-                  <span className="bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium px-2 py-1 rounded-md shadow-sm">
-                    {product.category}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="flex-1 flex flex-col">
-                <h3 className="font-semibold text-lg line-clamp-1 mb-1 group-hover:text-blue-600 transition-colors">{product.title}</h3>
-                <p className="text-gray-500 text-sm line-clamp-2 mb-4 flex-1">{product.description}</p>
-                
-                <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
-                  <div className="flex items-center gap-1 text-lg font-bold">
-                    <Tag className="w-4 h-4 text-gray-400" />
-                    GH₵{Number(product.price).toFixed(2)}
                   </div>
-                  <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md capitalize">
-                    {product.status}
-                  </span>
                 </div>
-              </div>
-            </Link>
+                
+                <div className="flex-1 flex flex-col">
+                  <h3 className="font-semibold text-lg line-clamp-1 mb-1 group-hover:text-blue-600 transition-colors">{product.title}</h3>
+                  <p className="text-gray-500 text-sm line-clamp-2 mb-4 flex-1">{product.description}</p>
+                  
+                  <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-1 text-lg font-bold">
+                      <Tag className="w-4 h-4 text-gray-400" />
+                      GH₵{Number(product.price).toFixed(2)}
+                    </div>
+                    <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md capitalize">
+                      {product.status}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
           ))}
         </div>
       )}
