@@ -118,6 +118,18 @@ When recommending a product, include its link (e.g., /products/123). Keep your r
     return NextResponse.json({ text: response.text });
   } catch (error: any) {
     console.error('Chat API error:', error);
+    
+    const errorMessage = error.message || '';
+    if (errorMessage.includes('suspended') || errorMessage.includes('PERMISSION_DENIED')) {
+      return NextResponse.json(
+        { 
+          error: 'The AI service is currently unavailable due to an API key issue. Please check your Gemini API key configuration in the settings.',
+          code: 'API_KEY_SUSPENDED'
+        },
+        { status: 403 }
+      );
+    }
+
     return NextResponse.json(
       { error: error.message || 'Failed to generate response' },
       { status: 500 }

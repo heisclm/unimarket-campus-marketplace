@@ -46,8 +46,15 @@ export default function Chatbot() {
       });
 
       const data = await response.json();
-
+      
       if (!response.ok) {
+        if (data.code === 'API_KEY_SUSPENDED') {
+          setMessages(prev => [...prev, { 
+            role: 'model', 
+            text: "⚠️ **API Key Issue**: It looks like the Gemini API key is suspended or invalid. \n\nTo fix this, please go to the **Settings** menu in AI Studio and provide a valid Gemini API key. Once updated, I'll be back to help you!" 
+          }]);
+          return;
+        }
         throw new Error(data.error || 'Failed to get response');
       }
 
