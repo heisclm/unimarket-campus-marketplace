@@ -41,7 +41,7 @@ Use the searchProducts tool to find relevant products when the user asks for rec
 When recommending a product, include its link (e.g., /products/123). Keep your responses concise, friendly, and format them using Markdown.`;
 
     let response = await ai.models.generateContent({
-      model: 'gemini-3.1-flash-preview',
+      model: 'gemini-2.5-flash',
       contents: messages,
       config: {
         systemInstruction,
@@ -104,7 +104,7 @@ When recommending a product, include its link (e.g., /products/123). Keep your r
         ];
 
         response = await ai.models.generateContent({
-          model: 'gemini-3.1-flash-preview',
+          model: 'gemini-2.5-flash',
           contents: newContents,
           config: {
             systemInstruction,
