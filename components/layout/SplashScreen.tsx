@@ -39,8 +39,12 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
             }}
             className="flex flex-col items-center gap-6"
           >
-            <div className="w-24 h-24 bg-[#d9ff00] text-black flex items-center justify-center rounded-[2rem] font-bold text-5xl shadow-2xl shadow-[#d9ff00]/20">
-              U
+            <div className="w-24 h-24 bg-[#d9ff00] text-black flex items-center justify-center rounded-[2rem] shadow-2xl shadow-[#d9ff00]/20 overflow-hidden p-5">
+              <svg width="100%" height="100%" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M160 170.667C160 147.103 179.103 128 202.667 128H309.333C332.897 128 352 147.103 352 170.667V213.333H160V170.667Z" stroke="black" stroke-width="32" stroke-linejoin="round"/>
+                <rect x="128" y="213.333" width="256" height="170.667" rx="16" stroke="black" stroke-width="32" stroke-linejoin="round"/>
+                <path d="M213.333 277.333C213.333 300.897 232.436 320 256 320C279.564 320 298.667 300.897 298.667 277.333" stroke="black" stroke-width="32" stroke-linecap="round"/>
+              </svg>
             </div>
             <div className="text-center">
               <motion.h1 

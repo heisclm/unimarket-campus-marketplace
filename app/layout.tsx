@@ -20,11 +20,11 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
     title: 'UniMarket',
     startupImage: [
-      'https://picsum.photos/seed/unimarket-app/512/512',
+      '/icon.svg',
     ],
   },
   icons: {
-    apple: 'https://picsum.photos/seed/unimarket-app/192/192',
+    apple: '/icon.svg',
   },
 };
 
