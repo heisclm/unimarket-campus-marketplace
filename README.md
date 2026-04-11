@@ -80,7 +80,7 @@ The application is built using the Next.js App Router, prioritizing performance 
    ```
 
 3. **Configuration**:
-   - Create a `firebase-applet-config.json` in the root directory with your Firebase project credentials:
+   - Create a `firebase-config.json` in the root directory with your Firebase project credentials:
      ```json
      {
        "apiKey": "YOUR_API_KEY",

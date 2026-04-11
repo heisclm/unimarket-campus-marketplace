@@ -12,10 +12,10 @@ import {
 } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
-import firebaseConfig from '../firebase-applet-config.json';
+import firebaseConfig from '../firebase-config.json';
 
 if (!firebaseConfig || !firebaseConfig.apiKey) {
-  throw new Error("Firebase configuration is missing or invalid. Please check firebase-applet-config.json.");
+  throw new Error("Firebase configuration is missing or invalid. Please check firebase-config.json.");
 }
 
 let app: FirebaseApp;
