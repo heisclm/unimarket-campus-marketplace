@@ -162,9 +162,9 @@ export default function Navbar() {
               
               {!loading && (
                 user ? (
-                  <Link href="/profile" className="flex items-center gap-2 bg-white rounded-full p-1.5 sm:pl-4 sm:pr-1.5 shadow-sm hover:shadow transition-shadow ml-1">
+                  <Link href="/profile" className="flex items-center justify-center gap-2 bg-white rounded-full p-1.5 sm:pl-4 sm:pr-1.5 shadow-sm hover:shadow transition-shadow ml-1 min-w-[44px] min-h-[44px]">
                     <span className="text-sm font-medium text-gray-700 capitalize hidden sm:block">{firstName}</span>
-                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden relative">
+                    <div className="w-8 h-8 sm:w-8 sm:h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden relative">
                       {user.photoURL ? (
                         <Image src={user.photoURL} alt="Profile" fill className="object-cover" referrerPolicy="no-referrer" />
                       ) : (
@@ -173,9 +173,9 @@ export default function Navbar() {
                     </div>
                   </Link>
                 ) : (
-                  <Link href="/profile" className="flex items-center gap-2 bg-black text-white rounded-full px-3 py-2 sm:px-4 shadow-sm hover:bg-gray-800 transition-colors ml-1">
+                  <Link href="/profile" className="flex items-center justify-center gap-2 bg-black text-white rounded-full px-3 py-2 sm:px-4 shadow-sm hover:bg-gray-800 transition-colors ml-1 min-w-[44px] min-h-[44px]">
                     <span className="text-sm font-medium hidden sm:block">Log In</span>
-                    <LogIn className="w-4 h-4 sm:hidden" />
+                    <LogIn className="w-5 h-5 sm:hidden" />
                   </Link>
                 )
               )}

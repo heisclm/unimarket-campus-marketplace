@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ShoppingBag, MessageSquare, User, Heart, PlusCircle } from 'lucide-react';
+import { Home, ShoppingBag, MessageSquare, Users, Heart, PlusCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 
 const navItems = [
@@ -10,7 +10,7 @@ const navItems = [
   { name: 'Market', href: '/products', icon: ShoppingBag },
   { name: 'Sell', href: '/products/new', icon: PlusCircle, primary: true },
   { name: 'Chat', href: '/dashboard/messages', icon: MessageSquare },
-  { name: 'Profile', href: '/profile', icon: User },
+  { name: 'Community', href: '/community', icon: Users },
 ];
 
 export default function BottomNav() {
