@@ -8,6 +8,7 @@ import { uploadImage } from '@/lib/storage';
 import { useRouter } from 'next/navigation';
 import { Package, DollarSign, Image as ImageIcon, AlignLeft, Tag, ShieldCheck, X, UploadCloud } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 export default function NewProductPage() {
   const { user, role, userData } = useAuth();
@@ -375,7 +376,7 @@ export default function NewProductPage() {
                 className={`relative aspect-square rounded-xl overflow-hidden border-2 group cursor-pointer transition-all ${previewImageIndex === index ? 'border-orange-500 ring-2 ring-orange-200' : 'border-gray-200 hover:border-gray-300'}`}
                 onClick={() => setPreviewImageIndex(index)}
               >
-                <img src={preview} alt={`Preview ${index}`} className="w-full h-full object-cover" />
+                <Image src={preview} alt={`Preview ${index}`} fill unoptimized className="object-cover" referrerPolicy="no-referrer" />
                 
                 {/* Preview Badge */}
                 {previewImageIndex === index && (

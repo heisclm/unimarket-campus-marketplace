@@ -8,6 +8,7 @@ import { uploadImage } from '@/lib/storage';
 import { useRouter, useParams } from 'next/navigation';
 import { Package, Tag, ShieldCheck, X, UploadCloud, AlignLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 export default function EditProductPage() {
   const { id } = useParams();
@@ -300,7 +301,7 @@ export default function EditProductPage() {
                 className={`relative aspect-square rounded-xl overflow-hidden border-2 group cursor-pointer transition-all ${previewImageIndex === index ? 'border-orange-500 ring-2 ring-orange-200' : 'border-gray-200 hover:border-gray-300'}`}
                 onClick={() => setPreviewImageIndex(index)}
               >
-                <img src={url} alt={`Existing ${index}`} className="w-full h-full object-cover" />
+                <Image src={url} alt={`Existing ${index}`} fill unoptimized className="object-cover" referrerPolicy="no-referrer" />
                 
                 {previewImageIndex === index && (
                   <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">
@@ -336,7 +337,7 @@ export default function EditProductPage() {
                   className={`relative aspect-square rounded-xl overflow-hidden border-2 group cursor-pointer transition-all ${previewImageIndex === combinedIndex ? 'border-orange-500 ring-2 ring-orange-200' : 'border-gray-200 hover:border-gray-300'}`}
                   onClick={() => setPreviewImageIndex(combinedIndex)}
                 >
-                  <img src={preview} alt={`New ${index}`} className="w-full h-full object-cover" />
+                  <Image src={preview} alt={`New ${index}`} fill unoptimized className="object-cover" referrerPolicy="no-referrer" />
                   
                   {previewImageIndex === combinedIndex && (
                     <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">

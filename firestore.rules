@@ -155,11 +155,14 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAuthenticated() && 
                       request.resource.data.sellerId == request.auth.uid &&
-                      request.resource.data.status == 'pending' &&
+                      request.resource.data.status in ['active', 'pending'] &&
+                      hasOnlyAllowedFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt', 'sellerIsVerified', 'offersDelivery', 'deliveryFee', 'auctionEndTime']) &&
                       hasRequiredFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt']);
       allow update: if isAuthenticated() && (
         isAdmin() || 
         (request.auth.uid == resource.data.sellerId && 
+         // CRITICAL: lock schema
+         hasOnlyAllowedFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt', 'sellerIsVerified', 'offersDelivery', 'deliveryFee', 'auctionEndTime']) &&
          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['sellerId', 'createdAt', 'status']) &&
          // Seller can only update to 'sold' or 'ended' if it was 'active'
          (request.resource.data.status in ['sold', 'ended'] || request.resource.data.status == resource.data.status))

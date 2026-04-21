@@ -3,8 +3,8 @@
 import { useCart } from '@/components/cart/CartProvider';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { db } from '@/lib/firebase';
-import { writeBatch, doc, collection, serverTimestamp, increment } from 'firebase/firestore';
-import { useState } from 'react';
+import { writeBatch, doc, collection, serverTimestamp, increment, getDoc } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Trash2, ShieldCheck, ShoppingBag, ArrowRight, CheckCircle2, Wallet } from 'lucide-react';
 import Link from 'next/link';
@@ -19,7 +19,37 @@ export default function CartPage() {
   const [success, setSuccess] = useState(false);
   const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
   const [paymentMethod, setPaymentMethod] = useState<'wallet' | 'paystack'>('paystack');
+  const [unavailableItems, setUnavailableItems] = useState<string[]>([]);
+  const [isValidatingCart, setIsValidatingCart] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    const validateCart = async () => {
+      if (items.length === 0) {
+        setIsValidatingCart(false);
+        return;
+      }
+      
+      try {
+        const itemChecks = await Promise.all(items.map(async (item) => {
+          const productRef = doc(db, 'products', item.id);
+          const productSnap = await getDoc(productRef);
+          if (!productSnap.exists() || productSnap.data().status !== 'active') {
+            return item.id;
+          }
+          return null;
+        }));
+        
+        const unavailable = itemChecks.filter(id => id !== null) as string[];
+        setUnavailableItems(unavailable);
+      } catch (e) {
+        console.error("Cart validation failed", e);
+      } finally {
+        setIsValidatingCart(false);
+      }
+    };
+    validateCart();
+  }, [items]);
 
   const handleRemove = (id: string) => {
     removeFromCart(id);
@@ -35,6 +65,11 @@ export default function CartPage() {
     if (!userData?.isVerified) {
       toast.error('Please verify your account in your profile before checking out.');
       router.push('/profile?tab=verification');
+      return;
+    }
+
+    if (unavailableItems.length > 0) {
+      toast.error('Some items in your cart are no longer available. Please remove them.');
       return;
     }
 
@@ -161,31 +196,39 @@ export default function CartPage() {
           <button onClick={() => { clearCart(); toast.success('Cart cleared'); }} className="text-sm text-gray-400 hover:text-red-500 font-medium transition-colors">Clear Cart</button>
         </div>
         
-        {items.map((item) => (
-          <div key={item.id} className="bg-white rounded-[2rem] p-4 shadow-sm flex items-center gap-4 border border-gray-50 hover:border-gray-100 transition-colors group">
-            <div className="w-24 h-24 bg-gray-50 rounded-2xl relative overflow-hidden flex-shrink-0 border border-gray-100">
-              {item.image ? (
-                <Image src={item.image} alt={item.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">No Image</div>
+        {items.map((item) => {
+          const isUnavailable = unavailableItems.includes(item.id);
+          return (
+            <div key={item.id} className={`bg-white rounded-[2rem] p-4 shadow-sm flex items-center gap-4 border ${isUnavailable ? 'border-red-200 bg-red-50/30' : 'border-gray-50 hover:border-gray-100'} transition-colors group relative`}>
+              {isUnavailable && (
+                <div className="absolute top-2 right-2 bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-bold shadow-sm z-10">
+                  Sold Out / Unavailable
+                </div>
               )}
+              <div className={`w-24 h-24 bg-gray-50 rounded-2xl relative overflow-hidden flex-shrink-0 border border-gray-100 ${isUnavailable ? 'opacity-50 grayscale' : ''}`}>
+                {item.image ? (
+                  <Image src={item.image} alt={item.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">No Image</div>
+                )}
+              </div>
+              
+              <div className={`flex-1 ${isUnavailable ? 'opacity-50' : ''}`}>
+                <h3 className="font-bold text-lg line-clamp-1 text-gray-900">{item.title}</h3>
+                <p className="text-gray-400 text-xs mb-2 font-medium uppercase tracking-wider">Seller: {item.sellerId.slice(0, 8)}...</p>
+                <div className="font-bold text-xl text-black">GH₵{item.price.toFixed(2)}</div>
+              </div>
+              
+              <button 
+                onClick={() => handleRemove(item.id)}
+                className="p-3 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all active:scale-90"
+                title="Remove from cart"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
             </div>
-            
-            <div className="flex-1">
-              <h3 className="font-bold text-lg line-clamp-1 text-gray-900">{item.title}</h3>
-              <p className="text-gray-400 text-xs mb-2 font-medium uppercase tracking-wider">Seller: {item.sellerId.slice(0, 8)}...</p>
-              <div className="font-bold text-xl text-black">GH₵{item.price.toFixed(2)}</div>
-            </div>
-            
-            <button 
-              onClick={() => handleRemove(item.id)}
-              className="p-3 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all active:scale-90"
-              title="Remove from cart"
-            >
-              <Trash2 className="w-5 h-5" />
-            </button>
-          </div>
-        ))}
+          );
+        })}
 
         {/* Delivery Method Selection */}
         <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50 mt-8">
@@ -280,10 +323,10 @@ export default function CartPage() {
 
           <button 
             onClick={handleCheckout}
-            disabled={isCheckingOut}
-            className="w-full bg-black text-white py-4 rounded-2xl font-bold text-lg hover:bg-gray-800 transition-all hover:scale-[1.02] active:scale-95 shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+            disabled={isCheckingOut || isValidatingCart || unavailableItems.length > 0}
+            className="w-full bg-black text-white py-4 rounded-2xl font-bold text-lg hover:bg-gray-800 transition-all hover:scale-[1.02] active:scale-95 shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isCheckingOut ? 'Processing...' : 'Checkout Securely'} <ArrowRight className="w-5 h-5" />
+            {isCheckingOut ? 'Processing...' : isValidatingCart ? 'Checking Cart...' : 'Checkout Securely'} <ArrowRight className="w-5 h-5" />
           </button>
           
           <p className="text-center text-xs text-gray-400 mt-6 font-medium">Secure checkout powered by UniMart Escrow</p>
