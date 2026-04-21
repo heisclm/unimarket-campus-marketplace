@@ -354,7 +354,7 @@ export default function Home() {
       <div className="bg-black text-white rounded-[3rem] p-12 md:p-20 overflow-hidden relative">
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8">How UniMarket Works</h2>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8">How UniMart Works</h2>
             <div className="space-y-8">
               <div className="flex gap-6">
                 <div className="w-12 h-12 rounded-full bg-[#d9ff00] text-black flex items-center justify-center font-bold shrink-0">1</div>

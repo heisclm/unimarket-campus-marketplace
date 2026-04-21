@@ -202,7 +202,7 @@ export default function ProductDetailPage() {
                 <ShieldCheck className="w-5 h-5 text-orange-500 mt-0.5" />
                 <div>
                   <p className="text-sm font-bold text-orange-800">Verification Required</p>
-                  <p className="text-xs text-orange-700 mt-0.5">Please verify your account in the dashboard to trade on UniMarket.</p>
+                  <p className="text-xs text-orange-700 mt-0.5">Please verify your account in the dashboard to trade on UniMart.</p>
                   <Link href="/profile?tab=verification" className="text-xs font-bold text-orange-800 underline mt-2 block">Go to Profile Verification</Link>
                 </div>
               </div>
@@ -248,13 +248,24 @@ export default function ProductDetailPage() {
                 This item is no longer available.
               </div>
             ) : (
+            <div className="flex gap-3 mb-4">
               <button 
                 onClick={handleAddToCart}
-                disabled={items.some(i => i.id === product.id) || (!userData?.isVerified && !!user) || userData?.role === 'vendor'}
-                className="w-full bg-[#d9ff00] text-black py-4 rounded-xl font-bold text-lg hover:bg-[#c4e600] transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 mb-4"
+                disabled={items.some(i => i.id === product.id) || userData?.role === 'vendor'}
+                className="flex-1 bg-[#d9ff00] text-black py-4 rounded-xl font-bold text-lg hover:bg-[#c4e600] transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <ShoppingBag className="w-5 h-5" /> {items.some(i => i.id === product.id) ? 'In Cart' : 'Add to Cart'}
+                <ShoppingBag className="w-5 h-5 flex-shrink-0" /> {items.some(i => i.id === product.id) ? 'In Cart' : 'Add to Cart'}
               </button>
+              
+              {user && (
+                <Link
+                  href={`/dashboard/messages?sellerId=${product.sellerId}&productId=${product.id}`}
+                  className="bg-black text-white px-6 rounded-xl font-bold hover:bg-gray-800 transition-colors shadow-sm flex items-center justify-center gap-2"
+                >
+                  Message
+                </Link>
+              )}
+            </div>
             )}
 
             {!isOwner && user && (

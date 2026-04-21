@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, setDoc, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { Search, Send, User, ArrowLeft, Clock, ShoppingBag, MessageSquare } from 'lucide-react';
+import { Search, Send, User, ArrowLeft, Clock, ShoppingBag, MessageSquare, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface Chat {
@@ -26,16 +27,87 @@ interface Message {
   senderId: string;
   text: string;
   createdAt: any;
+  isSystem?: boolean;
 }
 
-export default function MessagesPage() {
-  const { user } = useAuth();
+function MessagesContent() {
+  const { user, userData } = useAuth();
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const initializingRef = useRef(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Handle URL Params for new chat initiation
+  useEffect(() => {
+    if (!user || !userData) return;
+    const sellerId = searchParams.get('sellerId');
+    const productId = searchParams.get('productId');
+    
+    if (sellerId && productId && !initializingRef.current) {
+      initializingRef.current = true;
+      const initializeChat = async () => {
+        try {
+          // Generate a deterministic Chat ID based on buyer, seller, and product.
+          // This makes the operation strictly IDEMPOTENT. Even if React fires this 10 times simultaneously,
+          // Firestore will just safely overwrite the same document instead of creating duplicates.
+          const deterministicChatId = `${user.uid}_${sellerId}_${productId}`;
+          const chatRef = doc(db, 'chats', deterministicChatId);
+          
+          const chatSnap = await getDoc(chatRef);
+
+          if (chatSnap.exists()) {
+            // Chat already exists, just switch to it
+            setActiveChatId(deterministicChatId);
+          } else {
+            // Fetch product and seller info to build chat context
+            const productSnap = await getDoc(doc(db, 'products', productId));
+            const sellerSnap = await getDoc(doc(db, 'users', sellerId));
+            
+            if (productSnap.exists() && sellerSnap.exists()) {
+              await setDoc(chatRef, {
+                participants: [user.uid, sellerId],
+                buyerId: user.uid,
+                sellerId: sellerId,
+                productId: productId,
+                productTitle: productSnap.data().title,
+                participantDetails: {
+                  [user.uid]: { name: userData.displayName || 'Buyer', photoURL: userData.photoURL || '', role: userData.role },
+                  [sellerId]: { name: sellerSnap.data().displayName || 'Seller', photoURL: sellerSnap.data().photoURL || '', role: sellerSnap.data().role }
+                },
+                createdAt: serverTimestamp(),
+                lastMessage: 'Chat initiated',
+                lastMessageAt: serverTimestamp()
+              });
+              setActiveChatId(deterministicChatId);
+              
+              // Add initial system message with product card. Using deterministic ID for the message too.
+              await setDoc(doc(db, `chats/${deterministicChatId}/messages`, 'system_init_msg'), {
+                chatId: deterministicChatId,
+                senderId: 'system',
+                text: `Product Inquiry: ${productSnap.data().title} - GH₵${productSnap.data().price}\nPlease keep payments inside UniMart for your safety.`,
+                isSystem: true,
+                productId,
+                status: 'sent',
+                createdAt: serverTimestamp()
+              });
+            }
+          }
+        } finally {
+          // Remove params from URL and release lock
+          setTimeout(() => {
+            router.replace('/dashboard/messages');
+            initializingRef.current = false;
+          }, 500);
+        }
+      };
+      initializeChat();
+    }
+  }, [user, userData, searchParams, router]);
 
   // Fetch Chats
   useEffect(() => {
@@ -250,14 +322,21 @@ export default function MessagesPage() {
                             </span>
                           </div>
                         )}
-                        <div className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[75%] sm:max-w-[60%] p-4 ${
-                            isMe 
-                              ? 'bg-black text-white rounded-[2rem] rounded-br-md' 
-                              : 'bg-white border border-gray-100 text-gray-900 rounded-[2rem] rounded-bl-md shadow-sm'
-                          }`}>
-                            <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-                          </div>
+                        <div className={`flex ${msg.isSystem ? 'justify-center' : isMe ? 'justify-end' : 'justify-start'}`}>
+                          {msg.isSystem ? (
+                            <div className="max-w-[85%] bg-blue-50 text-blue-800 border border-blue-100 rounded-2xl p-4 text-center mx-auto my-4 shadow-sm flex flex-col items-center gap-2">
+                              <AlertTriangle className="w-5 h-5 text-blue-500" />
+                              <p className="text-xs font-medium whitespace-pre-wrap">{msg.text}</p>
+                            </div>
+                          ) : (
+                            <div className={`max-w-[75%] sm:max-w-[60%] p-4 ${
+                              isMe 
+                                ? 'bg-black text-white rounded-[2rem] rounded-br-md' 
+                                : 'bg-white border border-gray-100 text-gray-900 rounded-[2rem] rounded-bl-md shadow-sm'
+                            }`}>
+                              <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -299,5 +378,13 @@ export default function MessagesPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-gray-500">Loading messages...</div>}>
+      <MessagesContent />
+    </Suspense>
   );
 }

@@ -12,13 +12,13 @@ import { Toaster } from 'react-hot-toast';
 import AppWrapper from '@/components/layout/AppWrapper';
 
 export const metadata: Metadata = {
-  title: 'UniMarket - Campus Marketplace',
+  title: 'UniMart - Campus Marketplace',
   description: 'A modern, secure campus marketplace for students and vendors to buy, sell, and auction products with a vibrant community board.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'UniMarket',
+    title: 'UniMart',
     startupImage: [
       '/icon.svg',
     ],

@@ -1,6 +1,6 @@
 {
-  "name": "UniMarket",
-  "short_name": "UniMarket",
+  "name": "UniMart",
+  "short_name": "UniMart",
   "description": "Premium Campus Marketplace",
   "start_url": "/",
   "display": "standalone",

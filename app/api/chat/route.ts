@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
     const ai = new GoogleGenAI({ apiKey });
 
-    const systemInstruction = `You are a helpful AI shopping assistant for UniMarket, a university e-commerce platform. 
+    const systemInstruction = `You are a helpful AI shopping assistant for UniMart, a university e-commerce platform. 
 Help students find products, answer questions about the marketplace, and provide recommendations.
 Use the searchProducts tool to find relevant products when the user asks for recommendations or specific items.
 When recommending a product, include its link (e.g., /products/123). Keep your responses concise, friendly, and format them using Markdown.`;

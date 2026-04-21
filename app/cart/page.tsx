@@ -43,9 +43,9 @@ export default function CartPage() {
       return;
     }
 
-    const deliveryFee = deliveryMethod === 'delivery' ? 2 : 0;
-    const platformFee = total * 0.02;
-    const finalTotal = total + platformFee + deliveryFee;
+    const uniqueSellers = new Set(items.map(item => item.sellerId)).size;
+    const deliveryFee = deliveryMethod === 'delivery' ? (uniqueSellers * 2.00) : 0;
+    const finalTotal = total + deliveryFee;
 
     if (paymentMethod === 'wallet') {
       if ((userData?.walletBalance || 0) < finalTotal) {
@@ -244,19 +244,22 @@ export default function CartPage() {
               <span>Subtotal</span>
               <span className="text-gray-900">GH₵{total.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-gray-500 font-medium">
-              <span>Platform Fee (2%)</span>
-              <span className="text-gray-900">GH₵{(total * 0.02).toFixed(2)}</span>
-            </div>
             {deliveryMethod === 'delivery' && (
               <div className="flex justify-between text-gray-500 font-medium">
-                <span>Delivery Fee</span>
-                <span className="text-gray-900">GH₵2.00</span>
+                <span className="flex flex-col">
+                  <span>Delivery Fee</span>
+                  <span className="text-[10px] text-gray-400">GH₵2.00 per seller ({new Set(items.map(i => i.sellerId)).size} distinct)</span>
+                </span>
+                <span className="text-gray-900">GH₵{(new Set(items.map(i => i.sellerId)).size * 2).toFixed(2)}</span>
               </div>
             )}
+            <div className="flex justify-between text-gray-400 font-medium text-xs">
+              <span>Platform Fee</span>
+              <span>Paid by seller</span>
+            </div>
             <div className="pt-6 border-t border-gray-100 flex justify-between font-bold text-2xl text-black">
               <span>Total</span>
-              <span>GH₵{(total * 1.02 + (deliveryMethod === 'delivery' ? 2 : 0)).toFixed(2)}</span>
+              <span>GH₵{(total + (deliveryMethod === 'delivery' ? new Set(items.map(i => i.sellerId)).size * 2 : 0)).toFixed(2)}</span>
             </div>
           </div>
 
@@ -265,7 +268,7 @@ export default function CartPage() {
               <Wallet className="w-4 h-4 text-gray-400" />
               <span className="text-sm font-medium text-gray-600">Wallet Balance</span>
             </div>
-            <span className={`font-bold ${(userData?.walletBalance || 0) < (total * 1.02 + (deliveryMethod === 'delivery' ? 2 : 0)) ? 'text-red-500' : 'text-green-600'}`}>
+            <span className={`font-bold ${(userData?.walletBalance || 0) < (total + (deliveryMethod === 'delivery' ? new Set(items.map(i => i.sellerId)).size * 2 : 0)) ? 'text-red-500' : 'text-green-600'}`}>
               GH₵{(userData?.walletBalance || 0).toFixed(2)}
             </span>
           </div>
@@ -283,7 +286,7 @@ export default function CartPage() {
             {isCheckingOut ? 'Processing...' : 'Checkout Securely'} <ArrowRight className="w-5 h-5" />
           </button>
           
-          <p className="text-center text-xs text-gray-400 mt-6 font-medium">Secure checkout powered by UniMarket Escrow</p>
+          <p className="text-center text-xs text-gray-400 mt-6 font-medium">Secure checkout powered by UniMart Escrow</p>
         </div>
       </div>
     </div>

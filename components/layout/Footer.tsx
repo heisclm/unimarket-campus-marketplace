@@ -16,7 +16,7 @@ export default function Footer() {
               <div className="w-10 h-10 bg-[#d9ff00] rounded-xl flex items-center justify-center shadow-sm group-hover:rotate-6 transition-transform">
                 <ShoppingBag className="w-6 h-6 text-black" />
               </div>
-              <span className="text-xl font-black tracking-tighter text-gray-900">UNIMARKET</span>
+              <span className="text-xl font-black tracking-tighter text-gray-900">UNIMART</span>
             </Link>
             <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
               The premier marketplace for students and campus vendors. Buy, sell, and auction anything with ease and security.
@@ -76,7 +76,7 @@ export default function Footer() {
 
         <div className="mt-16 pt-8 border-t border-gray-50 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-gray-400 text-xs">
-            © {currentYear} UniMarket. All rights reserved.
+            © {currentYear} UniMart. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link href="/privacy" className="text-gray-400 hover:text-gray-600 text-xs transition-colors">Privacy Policy</Link>

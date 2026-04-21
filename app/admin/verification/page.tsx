@@ -65,7 +65,7 @@ export default function AdminVerificationPage() {
         userId,
         title: status === 'approved' ? 'Account Verified!' : 'Verification Rejected',
         message: status === 'approved' 
-          ? `Congratulations! Your ${userRole} identity has been verified. You now have full access to UniMarket.` 
+          ? `Congratulations! Your ${userRole} identity has been verified. You now have full access to UniMart.` 
           : `Your verification request was rejected. ${adminNote ? 'Reason: ' + adminNote : 'Please check your details and try again.'}`,
         type: 'system',
         read: false,

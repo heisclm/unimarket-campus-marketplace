@@ -147,7 +147,7 @@ export default function WalletSection() {
               <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
                 <Wallet className="w-6 h-6 text-[#d9ff00]" />
               </div>
-              <div className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">UniMarket Wallet</div>
+              <div className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">UniMart Wallet</div>
             </div>
             
             <div className="space-y-1">

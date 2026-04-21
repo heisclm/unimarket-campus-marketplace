@@ -173,7 +173,7 @@ export default function ProfilePage() {
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
           <UserIcon className="w-8 h-8 text-gray-400" />
         </div>
-        <h1 className="text-2xl font-bold mb-2 text-center">Welcome to UniMarket</h1>
+        <h1 className="text-2xl font-bold mb-2 text-center">Welcome to UniMart</h1>
         <p className="text-gray-500 mb-8 text-center text-sm">
           Join the university marketplace to buy, sell, and auction products.
         </p>

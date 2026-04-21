@@ -42,21 +42,23 @@ const nextConfig: NextConfig = {
       };
     }
 
-    // Resolve face-api.js issues with Node.js modules
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      encoding: false,
-      'node-fetch': false,
-      net: false,
-      tls: false,
-    };
-    
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      encoding: false,
-      'node-fetch': false,
-    };
+    if (!isServer) {
+      // Resolve top-level issues with Node.js modules for client bundle
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        encoding: false,
+        'node-fetch': false,
+        net: false,
+        tls: false,
+      };
+      
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        encoding: false,
+        'node-fetch': false,
+      };
+    }
 
     return config;
   },

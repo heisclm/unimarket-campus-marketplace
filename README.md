@@ -1,6 +1,6 @@
-# UniMarket - Campus Marketplace 🎓🛒
+# UniMart - Campus Marketplace 🎓🛒
 
-UniMarket is a modern, secure, and feature-rich campus marketplace designed specifically for university students and vendors. It facilitates buying, selling, and auctioning products within a trusted community, complemented by a vibrant community board for campus discussions.
+UniMart is a modern, secure, and feature-rich campus marketplace designed specifically for university students and vendors. It facilitates buying, selling, and auctioning products within a trusted community, complemented by a vibrant community board for campus discussions.
 
 ## 🚀 Key Features
 
@@ -71,7 +71,7 @@ The application is built using the Next.js App Router, prioritizing performance 
 1. **Clone the repository**:
    ```bash
    git clone <repository-url>
-   cd unimarket
+   cd unimart
    ```
 
 2. **Install dependencies**:

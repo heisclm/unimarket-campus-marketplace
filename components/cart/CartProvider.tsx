@@ -33,7 +33,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('unimarket_cart');
+    const saved = localStorage.getItem('unimart_cart');
     let initialItems = [];
     if (saved) {
       try {
@@ -50,7 +50,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isLoaded) {
-      localStorage.setItem('unimarket_cart', JSON.stringify(items));
+      localStorage.setItem('unimart_cart', JSON.stringify(items));
     }
   }, [items, isLoaded]);
 

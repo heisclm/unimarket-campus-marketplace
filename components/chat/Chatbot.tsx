@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from 'motion/react';
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{role: 'user'|'model', text: string}[]>([
-    { role: 'model', text: "Hi there! 👋 I'm your UniMarket AI Assistant. How can I help you find what you're looking for today?" }
+    { role: 'model', text: "Hi there! 👋 I'm your UniMart AI Assistant. How can I help you find what you're looking for today?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -103,7 +103,7 @@ export default function Chatbot() {
                   <Bot className="w-5 h-5 text-black" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 leading-tight">UniMarket AI</h3>
+                  <h3 className="font-bold text-gray-900 leading-tight">UniMart AI</h3>
                   <p className="text-xs text-green-500 font-medium flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Online
                   </p>

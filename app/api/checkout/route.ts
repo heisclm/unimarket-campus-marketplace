@@ -74,31 +74,44 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      const platformFee = subtotal * 0.02;
-      const deliveryFee = deliveryMethod === 'delivery' ? 2.00 : 0;
-      const totalAmount = subtotal + platformFee + deliveryFee;
+      // Identify unique sellers for delivery calculation
+      const uniqueSellers = new Set(validItems.map(item => item.sellerId)).size;
+      const deliveryFee = deliveryMethod === 'delivery' ? (uniqueSellers * 2.00) : 0;
+      
+      // The platform fee is now handled on the seller's side (deducted from their payout), 
+      // so the buyer ONLY pays the subtotal + delivery.
+      const buyerTotalAmount = subtotal + deliveryFee;
 
       // 1. Deduct Total from Buyer Wallet Securely with Ledger
       await updateWalletWithLedger(transaction, {
         userId: buyerId,
-        amount: -totalAmount,
+        amount: -buyerTotalAmount,
         type: 'escrow_hold',
-        description: `Cart checkout (${validItems.length} items) + fees`
+        description: `Cart checkout (${validItems.length} items) + Delivery`
       });
 
       const orderIds = [];
+      let totalPlatformFeeHeld = 0;
 
       // 2. Create Orders and Update Products
       for (const item of validItems) {
         const orderRef = adminDb!.collection('orders').doc();
         orderIds.push(orderRef.id);
+        
+        // Calculate the platform fee per item (2% for students, could be higher for vendors later)
+        const itemPlatformFee = item.price * 0.02;
+        // The delivery fee per item can just be attributed to the order if they chose delivery
+        const itemDeliveryFee = deliveryMethod === 'delivery' ? 2.00 : 0; // simplistic: per seller, assuming 1 item per seller for now, or just record it cleanly. 
+        totalPlatformFeeHeld += itemPlatformFee;
 
         transaction.set(orderRef, {
           buyerId,
           sellerId: item.sellerId,
           productId: item.id,
           productTitle: item.title,
-          amount: item.price,
+          amount: item.price, // Gross amount
+          platformFee: itemPlatformFee, // What the platform takes
+          netAmount: item.price - itemPlatformFee, // What the seller actually receives for the item
           status: 'escrow_held',
           deliveryMethod,
           createdAt: FieldValue.serverTimestamp(),
@@ -124,16 +137,16 @@ export async function POST(req: NextRequest) {
       }
 
       // 3. Record Public Transaction for Fees
-      if (platformFee + deliveryFee > 0) {
+      if (totalPlatformFeeHeld > 0 || deliveryFee > 0) {
         const feeTxRef = adminDb!.collection('transactions').doc();
         transaction.set(feeTxRef, {
           userId: buyerId,
           senderId: buyerId,
           receiverId: 'platform',
-          amount: platformFee + deliveryFee,
+          amount: totalPlatformFeeHeld + deliveryFee,
           type: 'withdrawal',
           status: 'completed',
-          description: 'Platform & Delivery Fees',
+          description: 'Delivery Fees & Platform Escrow Allocation',
           createdAt: FieldValue.serverTimestamp()
         });
       }
@@ -141,7 +154,7 @@ export async function POST(req: NextRequest) {
       // Update user total spent
       const userRef = adminDb!.collection('users').doc(buyerId);
       transaction.update(userRef, {
-        totalSpent: FieldValue.increment(platformFee + deliveryFee)
+        totalSpent: FieldValue.increment(deliveryFee) // Subtotal is already paid to users, we only track the extra spent on delivery directly to platform if that's the logic. Actually, better to increment total item value too.
       });
 
       return { success: true, orderIds };

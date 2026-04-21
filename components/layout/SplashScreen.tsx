@@ -53,7 +53,7 @@ export default function SplashScreen({ onComplete }: { onComplete: () => void })
                 transition={{ delay: 0.3 }}
                 className="text-white text-3xl font-bold tracking-tighter"
               >
-                UniMarket<span className="text-[#d9ff00]">.</span>
+                UniMart<span className="text-[#d9ff00]">.</span>
               </motion.h1>
               <motion.p 
                 initial={{ y: 10, opacity: 0 }}

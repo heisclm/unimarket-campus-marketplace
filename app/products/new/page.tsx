@@ -18,6 +18,8 @@ export default function NewProductPage() {
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('Electronics');
   const [type, setType] = useState('fixed');
+  const [offersDelivery, setOffersDelivery] = useState(false);
+  const [deliveryFee, setDeliveryFee] = useState('');
   const [auctionDuration, setAuctionDuration] = useState('24'); // hours
   const [customAuctionDate, setCustomAuctionDate] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -147,6 +149,8 @@ export default function NewProductPage() {
         sellerId: user.uid,
         sellerIsVerified: true,
         category,
+        offersDelivery,
+        deliveryFee: offersDelivery ? parseFloat(deliveryFee) || 0 : 0,
         images: [], // Will update after upload
         previewImage: '', // Will update after upload
         status: 'pending',
@@ -205,7 +209,7 @@ export default function NewProductPage() {
     <div className="max-w-2xl mx-auto bg-white rounded-[2rem] p-8 md:p-12 shadow-sm">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">List a New Item</h1>
-        <p className="text-gray-500">Fill out the details below to list your product on UniMarket.</p>
+        <p className="text-gray-500">Fill out the details below to list your product on UniMart.</p>
       </div>
 
       {error && <div className="w-full p-4 mb-6 text-sm text-red-600 bg-red-50 rounded-xl">{error}</div>}
@@ -227,8 +231,8 @@ export default function NewProductPage() {
           </div>
         </div>
 
-        {/* Price & Category */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Price, Category & Delivery */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Price (GH₵)</label>
             <div className="relative">
@@ -260,6 +264,39 @@ export default function NewProductPage() {
               </select>
             </div>
           </div>
+        </div>
+
+        {/* Delivery Options */}
+        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input 
+              type="checkbox"
+              checked={offersDelivery}
+              onChange={(e) => setOffersDelivery(e.target.checked)}
+              className="w-5 h-5 accent-black rounded border-gray-300 text-black focus:ring-black"
+            />
+            <span className="font-bold text-gray-900">Offer Campus/Dorm Delivery</span>
+          </label>
+          
+          {offersDelivery && (
+            <div className="mt-4 animate-in fade-in slide-in-from-top-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Delivery Fee (GH₵)</label>
+              <div className="relative">
+                <DollarSign className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                <input 
+                  type="number" 
+                  step="0.01"
+                  min="0"
+                  value={deliveryFee}
+                  onChange={(e) => setDeliveryFee(e.target.value)}
+                  placeholder="e.g., 5.00"
+                  required={offersDelivery}
+                  className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-2">Set how much you charge to deliver this item directly to a buyer&apos;s dorm.</p>
+            </div>
+          )}
         </div>
 
         {/* Listing Type */}
