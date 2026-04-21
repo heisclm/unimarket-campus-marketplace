@@ -77,6 +77,30 @@ export async function POST(req: NextRequest) {
           updatedAt: FieldValue.serverTimestamp()
         });
 
+        // Notify Buyer
+        const buyerNotifRef = adminDb.collection('notifications').doc();
+        transaction.set(buyerNotifRef, {
+          userId: buyerId,
+          title: 'Auto-Refund Issued',
+          message: `Your order for ${orderData.productTitle} hit the 3-strike rejection limit. GH₵${totalRefund.toFixed(2)} has been refunded to your wallet.`,
+          type: 'wallet',
+          link: '/profile',
+          read: false,
+          createdAt: FieldValue.serverTimestamp()
+        });
+
+        // Notify Seller
+        const sellerNotifRef = adminDb.collection('notifications').doc();
+        transaction.set(sellerNotifRef, {
+          userId: orderData.sellerId,
+          title: 'Order Cancelled (3 Strikes) ⚠️',
+          message: `The order for ${orderData.productTitle} was rejected 3 times and has been automatically cancelled. Funds were refunded to the buyer.`,
+          type: 'alert',
+          link: '/vendor',
+          read: false,
+          createdAt: FieldValue.serverTimestamp()
+        });
+
         return { success: true, autoCancelled: true };
       } else {
         // Less than 3 rejections, enter pending seller decision
@@ -84,6 +108,18 @@ export async function POST(req: NextRequest) {
           status: 'rejected_pending_seller',
           rejectionCount: rejectionCount,
           updatedAt: FieldValue.serverTimestamp()
+        });
+
+        // Notify the Seller about the Rejection
+        const notifRef = adminDb.collection('notifications').doc();
+        transaction.set(notifRef, {
+          userId: orderData.sellerId,
+          title: 'Order Rejected 🛑',
+          message: `The buyer rejected the delivery of ${orderData.productTitle}. Action is required in your dashboard immediately.`,
+          type: 'alert',
+          link: '/vendor',
+          read: false,
+          createdAt: FieldValue.serverTimestamp()
         });
 
         return { success: true, autoCancelled: false, rejectionCount };

@@ -15,29 +15,53 @@ export default function Navbar() {
   const { user, loading, role } = useAuth();
   const { items } = useCart();
   const router = useRouter();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0); // For general notifications
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0); // For chat messages
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    let unsubscribe: () => void;
+    let unsubscribeNotifs: () => void;
+    let unsubscribeChats: () => void;
 
     if (!user) {
-      setTimeout(() => setUnreadCount(0), 0);
+      setTimeout(() => {
+        setUnreadCount(0);
+        setUnreadMessageCount(0);
+      }, 0);
       return;
     }
 
-    const q = query(
+    // 1. Listen for General Notifications
+    const qNotifs = query(
       collection(db, 'notifications'),
       where('userId', '==', user.uid),
       where('read', '==', false)
     );
 
-    unsubscribe = onSnapshot(q, (snapshot) => {
+    unsubscribeNotifs = onSnapshot(qNotifs, (snapshot) => {
       setUnreadCount(snapshot.docs.length);
     });
 
+    // 2. Listen for Unread Messages in Chats
+    const qChats = query(
+      collection(db, 'chats'),
+      where('participants', 'array-contains', user.uid)
+    );
+
+    unsubscribeChats = onSnapshot(qChats, (snapshot) => {
+      let totalUnreadMessages = 0;
+      snapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        if (data.unreadCount && typeof data.unreadCount[user.uid] === 'number') {
+          totalUnreadMessages += data.unreadCount[user.uid];
+        }
+      });
+      setUnreadMessageCount(totalUnreadMessages);
+    });
+
     return () => {
-      if (unsubscribe) unsubscribe();
+      if (unsubscribeNotifs) unsubscribeNotifs();
+      if (unsubscribeChats) unsubscribeChats();
     };
   }, [user]);
 
@@ -136,6 +160,11 @@ export default function Navbar() {
                     <>
                       <Link href="/dashboard/messages" className="hidden md:flex relative w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm hover:shadow transition-shadow text-gray-700">
                         <MessageSquare className="w-5 h-5" />
+                        {unreadMessageCount > 0 && (
+                          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
+                            {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+                          </span>
+                        )}
                       </Link>
                       <Link href="/notifications" className="relative w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow transition-shadow text-gray-700">
                         <Bell className="w-5 h-5" />

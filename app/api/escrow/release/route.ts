@@ -69,6 +69,18 @@ export async function POST(req: NextRequest) {
         updatedAt: FieldValue.serverTimestamp()
       });
 
+      // Notify the Seller that their funds cleared
+      const notifRef = adminDb.collection('notifications').doc();
+      transaction.set(notifRef, {
+        userId: sellerId,
+        title: 'Escrow Released! 💰',
+        message: `The buyer accepted ${orderData.productTitle}. GH₵${netAmount.toFixed(2)} has been added to your wallet!`,
+        type: 'wallet',
+        link: '/profile',
+        read: false,
+        createdAt: FieldValue.serverTimestamp()
+      });
+
       // 3. Record Public Transaction (for history)
       const txRef = adminDb.collection('transactions').doc();
       transaction.set(txRef, {
@@ -76,10 +88,16 @@ export async function POST(req: NextRequest) {
         senderId: 'escrow',
         receiverId: sellerId,
         orderId: orderId,
-        amount: amount,
+        amount: netAmount,
         type: 'escrow_release',
         status: 'completed',
         createdAt: FieldValue.serverTimestamp()
+      });
+
+      // 4. Update the seller's totalEarned
+      const sellerRef = adminDb.collection('users').doc(sellerId);
+      transaction.update(sellerRef, {
+        totalEarned: FieldValue.increment(netAmount)
       });
 
       return { success: true };

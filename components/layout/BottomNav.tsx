@@ -4,17 +4,51 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, ShoppingBag, MessageSquare, Users, Heart, PlusCircle } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useAuth } from '@/components/auth/AuthProvider';
+import { db } from '@/lib/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
 
 const navItems = [
   { name: 'Home', href: '/', icon: Home },
   { name: 'Market', href: '/products', icon: ShoppingBag },
   { name: 'Sell', href: '/products/new', icon: PlusCircle, primary: true },
-  { name: 'Chat', href: '/dashboard/messages', icon: MessageSquare },
+  { name: 'Chat', href: '/dashboard/messages', icon: MessageSquare, badge: true },
   { name: 'Community', href: '/community', icon: Users },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+
+  useEffect(() => {
+    let unsubscribeChats: () => void;
+    if (!user) {
+      setTimeout(() => setUnreadMessageCount(0), 0);
+      return;
+    }
+
+    const qChats = query(
+      collection(db, 'chats'),
+      where('participants', 'array-contains', user.uid)
+    );
+
+    unsubscribeChats = onSnapshot(qChats, (snapshot) => {
+      let totalUnreadMessages = 0;
+      snapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        if (data.unreadCount && typeof data.unreadCount[user.uid] === 'number') {
+          totalUnreadMessages += data.unreadCount[user.uid];
+        }
+      });
+      setUnreadMessageCount(totalUnreadMessages);
+    });
+
+    return () => {
+      if (unsubscribeChats) unsubscribeChats();
+    };
+  }, [user]);
 
   // Hide on admin routes
   if (pathname.startsWith('/admin')) return null;
@@ -42,6 +76,11 @@ export default function BottomNav() {
           >
             <div className="relative">
               <item.icon className={`w-6 h-6 ${isActive ? 'scale-110' : ''} transition-transform`} />
+              {item.badge && unreadMessageCount > 0 && (
+                <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white z-10 scale-90">
+                  {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+                </span>
+              )}
               {isActive && (
                 <motion.div 
                   layoutId="bottomNavDot"

@@ -120,8 +120,17 @@ export default function AdminProducts() {
                         <button 
                           onClick={async () => {
                             try {
-                              const { updateDoc, doc } = await import('firebase/firestore');
+                              const { updateDoc, doc, collection, addDoc, serverTimestamp } = await import('firebase/firestore');
                               await updateDoc(doc(db, 'products', p.id), { status: 'active' });
+                              await addDoc(collection(db, 'notifications'), {
+                                userId: p.sellerId,
+                                title: 'Product Live! 🚀',
+                                message: `Your product "${p.title}" has been approved by our team and is now live on the marketplace.`,
+                                type: 'system',
+                                link: `/products/${p.id}`,
+                                read: false,
+                                createdAt: serverTimestamp()
+                              });
                               toast.success('Product approved!');
                             } catch (e) {
                               toast.error('Approval failed');

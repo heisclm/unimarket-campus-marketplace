@@ -153,7 +153,7 @@ export default function NewProductPage() {
         deliveryFee: offersDelivery ? parseFloat(deliveryFee) || 0 : 0,
         images: [], // Will update after upload
         previewImage: '', // Will update after upload
-        status: 'pending',
+        status: 'active', // Bypassing Admin Approval since user is already KYC verified
         type,
         createdAt: serverTimestamp(),
         ...(type === 'auction' && auctionEndTime ? { auctionEndTime } : {})
@@ -194,7 +194,7 @@ export default function NewProductPage() {
       });
       console.log("Document updated successfully.");
 
-      toast.success('Listing submitted for approval!');
+      toast.success('Your listing is live on the marketplace!');
       router.push('/dashboard');
     } catch (err: any) {
       console.error("Error adding document: ", err);

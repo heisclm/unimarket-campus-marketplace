@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
-import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, setDoc, limit, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, setDoc, limit, getDocs, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { confirmOrderReceipt, rejectOrderReceipt, respondToRejection } from '@/lib/escrow';
 import { Search, Send, User, ArrowLeft, Clock, ShoppingBag, MessageSquare, AlertTriangle, ShieldCheck, CheckCircle, XCircle } from 'lucide-react';
@@ -20,6 +20,7 @@ interface Chat {
   orderId?: string;
   productId?: string;
   productTitle?: string;
+  unreadCount?: Record<string, number>;
 }
 
 interface Message {
@@ -84,7 +85,11 @@ function MessagesContent() {
                 },
                 createdAt: serverTimestamp(),
                 lastMessage: 'Chat initiated',
-                lastMessageAt: serverTimestamp()
+                lastMessageAt: serverTimestamp(),
+                unreadCount: {
+                  [user.uid]: 0,
+                  [sellerId]: 1
+                }
               });
               setActiveChatId(deterministicChatId);
               
@@ -159,6 +164,17 @@ function MessagesContent() {
     return () => unsubscribe();
   }, [activeChatId]);
 
+  // Mark active chat as read
+  useEffect(() => {
+    if (!activeChatId || !user) return;
+    const activeChat = chats.find(c => c.id === activeChatId);
+    if (activeChat && activeChat.unreadCount && activeChat.unreadCount[user.uid] > 0) {
+      updateDoc(doc(db, 'chats', activeChatId), {
+        [`unreadCount.${user.uid}`]: 0
+      }).catch(console.error);
+    }
+  }, [activeChatId, chats, user]);
+
   // Fetch Order for Active Chat
   useEffect(() => {
     const activeChat = chats.find(c => c.id === activeChatId);
@@ -195,11 +211,15 @@ function MessagesContent() {
         createdAt: serverTimestamp()
       });
 
-      // Update chat last message
-      await updateDoc(doc(db, 'chats', activeChatId), {
-        lastMessage: messageText,
-        lastMessageAt: serverTimestamp()
-      });
+      // Update chat last message and increment unread for receiver
+      const otherId = activeChat?.participants.find(id => id !== user.uid);
+      if (otherId) {
+        await updateDoc(doc(db, 'chats', activeChatId), {
+          lastMessage: messageText,
+          lastMessageAt: serverTimestamp(),
+          [`unreadCount.${otherId}`]: increment(1)
+        });
+      }
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -280,9 +300,16 @@ function MessagesContent() {
                         <div className="flex justify-between items-baseline mb-1">
                           <h3 className="font-bold text-gray-900 truncate pr-2">{otherUser?.name || 'Unknown User'}</h3>
                           {chat.lastMessageAt && (
-                            <span className="text-xs text-gray-400 flex-shrink-0">
-                              {new Date(chat.lastMessageAt?.toDate()).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                            </span>
+                            <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                              <span className="text-[10px] text-gray-400">
+                                {new Date(chat.lastMessageAt?.toDate()).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                              {chat.unreadCount?.[user.uid] > 0 && (
+                                <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                                  {chat.unreadCount[user.uid]}
+                                </span>
+                              )}
+                            </div>
                           )}
                         </div>
                         {chat.productTitle && (

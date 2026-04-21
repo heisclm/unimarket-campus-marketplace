@@ -151,27 +151,37 @@ export async function POST(req: NextRequest) {
           status: 'sent',
           createdAt: FieldValue.serverTimestamp()
         });
-      }
 
-      // 3. Record Public Transaction for Fees
-      if (totalPlatformFeeHeld > 0 || deliveryFee > 0) {
-        const feeTxRef = adminDb!.collection('transactions').doc();
-        transaction.set(feeTxRef, {
-          userId: buyerId,
-          senderId: buyerId,
-          receiverId: 'platform',
-          amount: totalPlatformFeeHeld + deliveryFee,
-          type: 'withdrawal',
-          status: 'completed',
-          description: 'Delivery Fees & Platform Escrow Allocation',
+        // Notify the Seller that they sold an item!
+        const notifRef = adminDb!.collection('notifications').doc();
+        transaction.set(notifRef, {
+          userId: item.sellerId,
+          title: 'New Order Received! 🎉',
+          message: `Cha-ching! Someone just bought ${item.title}. The funds are safe in Escrow. Please prepare for shipment or pickup!`,
+          type: 'order',
+          link: '/vendor',
+          read: false,
           createdAt: FieldValue.serverTimestamp()
         });
       }
 
-      // Update user total spent
+      // 3. Record Public Transaction for Fees & Escrow Hold
+      const txRef = adminDb!.collection('transactions').doc();
+      transaction.set(txRef, {
+        userId: buyerId,
+        senderId: buyerId,
+        receiverId: 'escrow',
+        amount: buyerTotalAmount,
+        type: 'escrow_hold',
+        status: 'completed',
+        description: `Order Payment (${validItems.length} item${validItems.length > 1 ? 's' : ''})`,
+        createdAt: FieldValue.serverTimestamp()
+      });
+
+      // Update user total spent (including subtotal, not just delivery fee)
       const userRef = adminDb!.collection('users').doc(buyerId);
       transaction.update(userRef, {
-        totalSpent: FieldValue.increment(deliveryFee) // Subtotal is already paid to users, we only track the extra spent on delivery directly to platform if that's the logic. Actually, better to increment total item value too.
+        totalSpent: FieldValue.increment(buyerTotalAmount)
       });
 
       return { success: true, orderIds };
