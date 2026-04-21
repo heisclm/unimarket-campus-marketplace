@@ -158,7 +158,7 @@ export default function Navbar() {
                   )}
                   {role !== 'admin' && (
                     <>
-                      <Link href="/dashboard/messages" className="hidden md:flex relative w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm hover:shadow transition-shadow text-gray-700">
+                      <Link href="/dashboard/messages" className="hidden lg:flex relative w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm hover:shadow transition-shadow text-gray-700">
                         <MessageSquare className="w-5 h-5" />
                         {unreadMessageCount > 0 && (
                           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
@@ -188,7 +188,7 @@ export default function Navbar() {
                     )}
                   </Link>
                   
-                  <Link href="/wishlist" className="hidden sm:flex w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm hover:shadow transition-shadow text-red-500">
+                  <Link href="/wishlist" className="hidden lg:flex w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm hover:shadow transition-shadow text-red-500">
                     <Heart className="w-5 h-5" />
                   </Link>
                 </>

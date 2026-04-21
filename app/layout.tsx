@@ -3,6 +3,7 @@ import './globals.css'; // Global styles
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import BottomNav from '@/components/layout/BottomNav';
+import SideNav from '@/components/layout/SideNav';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { CartProvider } from '@/components/cart/CartProvider';
 import Chatbot from '@/components/chat/Chatbot';
@@ -47,10 +48,11 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
               <AppWrapper>
                 <div className="flex flex-col min-h-screen">
                   <Navbar />
-                  <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
+                  <SideNav />
+                  <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8 md:pl-32 lg:pl-8">
                     {children}
                   </main>
-                  <div className="hidden md:block">
+                  <div className="hidden lg:block">
                     <Footer />
                   </div>
                   <BottomNav />

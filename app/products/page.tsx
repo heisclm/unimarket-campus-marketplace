@@ -153,10 +153,10 @@ function ProductsContent() {
 
       {/* Product Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="bg-white rounded-2xl p-4 shadow-sm animate-pulse">
-              <div className="w-full h-48 bg-gray-200 rounded-xl mb-4"></div>
+            <div key={i} className="bg-white rounded-2xl p-3 sm:p-4 shadow-sm animate-pulse">
+              <div className="w-full aspect-square bg-gray-200 rounded-xl mb-3 sm:mb-4"></div>
               <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
               <div className="h-4 bg-gray-200 rounded w-1/2"></div>
             </div>
@@ -171,7 +171,7 @@ function ProductsContent() {
           <p className="text-gray-500">Try adjusting your search or category filter.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
           {filteredProducts.map(product => (
             <motion.div
               key={product.id}
@@ -179,8 +179,8 @@ function ProductsContent() {
               whileTap={{ scale: 0.98 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
-              <Link href={`/products/${product.id}`} className="bg-white rounded-2xl p-4 shadow-sm group hover:shadow-md transition-all flex flex-col h-full">
-                <div className="relative w-full h-48 bg-gray-100 rounded-xl mb-4 overflow-hidden">
+              <Link href={`/products/${product.id}`} className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-4 shadow-sm group hover:shadow-md transition-all flex flex-col h-full">
+                <div className="relative w-full aspect-square bg-gray-100 rounded-lg sm:rounded-xl mb-3 sm:mb-4 overflow-hidden">
                   <PremiumImage 
                     src={product.previewImage || product.images?.[0] || ""} 
                     alt={product.title} 
@@ -191,35 +191,37 @@ function ProductsContent() {
                   />
                   
                   {/* Badges */}
-                  <div className="absolute top-2 left-2 flex flex-col gap-2">
+                  <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-col gap-1 sm:gap-2">
                     {product.type === 'auction' && (
-                      <span className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
-                        <Clock className="w-3 h-3" /> Auction
+                      <span className="bg-orange-500 text-white text-[9px] sm:text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded sm:rounded-md flex items-center gap-1 shadow-sm">
+                        <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Auction
                       </span>
                     )}
                     {product.sellerIsVerified && (
-                      <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
-                        <ShieldCheck className="w-3 h-3" /> Verified Seller
+                      <span className="bg-green-500 text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded sm:rounded-md flex items-center gap-1 shadow-sm">
+                        <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> <span className="hidden sm:inline">Verified Seller</span><span className="sm:hidden">Verified</span>
                       </span>
                     )}
-                    <span className="bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium px-2 py-1 rounded-md shadow-sm">
+                    <span className="bg-white/90 backdrop-blur-sm text-gray-700 text-[9px] sm:text-xs font-medium px-1.5 py-0.5 sm:px-2 sm:py-1 rounded sm:rounded-md shadow-sm line-clamp-1 max-w-[80px]">
                       {product.category}
                     </span>
                   </div>
                 </div>
                 
-                <div className="flex-1 flex flex-col">
-                  <h3 className="font-semibold text-lg line-clamp-1 mb-1 group-hover:text-blue-600 transition-colors">{product.title}</h3>
-                  <p className="text-gray-500 text-sm line-clamp-2 mb-4 flex-1">{product.description}</p>
+                <div className="flex-1 flex flex-col px-1 sm:px-0">
+                  <h3 className="font-bold text-sm sm:text-lg line-clamp-1 sm:line-clamp-2 mb-0.5 sm:mb-1 group-hover:text-blue-600 transition-colors leading-tight">{product.title}</h3>
+                  <p className="hidden sm:block text-gray-500 text-sm line-clamp-2 mb-4 flex-1">{product.description}</p>
                   
-                  <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-1 text-lg font-bold">
-                      <Tag className="w-4 h-4 text-gray-400" />
+                  <div className="flex items-center justify-between mt-auto pt-2 sm:pt-4 sm:border-t border-gray-100">
+                    <div className="flex items-center gap-0.5 sm:gap-1 text-sm sm:text-lg font-black tracking-tight text-gray-900">
+                      <Tag className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
                       GH₵{Number(product.price).toFixed(2)}
                     </div>
-                    <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md capitalize">
-                      {product.status}
-                    </span>
+                    {product.status !== 'active' && (
+                      <span className="hidden sm:block text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md capitalize">
+                        {product.status}
+                      </span>
+                    )}
                   </div>
                 </div>
               </Link>
