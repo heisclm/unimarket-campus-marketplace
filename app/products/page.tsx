@@ -209,8 +209,7 @@ function ProductsContent() {
                 </div>
                 
                 <div className="flex-1 flex flex-col px-1 sm:px-0">
-                  <h3 className="font-bold text-sm sm:text-lg line-clamp-1 sm:line-clamp-2 mb-0.5 sm:mb-1 group-hover:text-blue-600 transition-colors leading-tight">{product.title}</h3>
-                  <p className="hidden sm:block text-gray-500 text-sm line-clamp-2 mb-4 flex-1">{product.description}</p>
+                  <h3 className="font-bold text-sm sm:text-lg line-clamp-1 sm:line-clamp-2 mb-0.5 sm:mb-2 group-hover:text-blue-600 transition-colors leading-tight">{product.title}</h3>
                   
                   <div className="flex items-center justify-between mt-auto pt-2 sm:pt-4 sm:border-t border-gray-100">
                     <div className="flex items-center gap-0.5 sm:gap-1 text-sm sm:text-lg font-black tracking-tight text-gray-900">
