@@ -5,12 +5,13 @@ import Image from 'next/image';
 import { useAuth, UserRole } from '@/components/auth/AuthProvider';
 import { loginWithGoogle, logout, signInWithEmail, signUpWithEmail, resetPassword, db } from '@/lib/firebase';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { LogIn, LogOut, User as UserIcon, Store, GraduationCap, Mail, Lock, Eye, EyeOff, Wallet, ShieldCheck, History, Package } from 'lucide-react';
+import { LogIn, LogOut, User as UserIcon, Store, GraduationCap, Mail, Lock, Eye, EyeOff, Wallet, ShieldCheck, History, Package, LayoutDashboard } from 'lucide-react';
 import dynamic from 'next/dynamic';
 const VerificationSection = dynamic(() => import('@/components/profile/VerificationSection'), { ssr: false });
 import WalletSection from '@/components/profile/WalletSection';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function ProfilePage() {
   const { user, role, userData, loading, setRole } = useAuth();
@@ -345,6 +346,33 @@ export default function ProfilePage() {
             <p className="text-gray-500 mb-6 break-all">{user.email}</p>
             
             <div className="flex flex-wrap justify-center md:justify-start gap-3">
+              {role === 'student' && (
+                <Link 
+                  href="/dashboard"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-black text-white rounded-full text-sm font-semibold hover:bg-gray-800 transition-colors"
+                >
+                  <LayoutDashboard className="w-4 h-4" />
+                  My Dashboard
+                </Link>
+              )}
+              {role === 'vendor' && (
+                <Link 
+                  href="/vendor"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-orange-600 text-white rounded-full text-sm font-semibold hover:bg-orange-700 transition-colors"
+                >
+                  <Store className="w-4 h-4" />
+                  Vendor Dashboard
+                </Link>
+              )}
+              {role === 'admin' && (
+                <Link 
+                  href="/admin"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-red-600 text-white rounded-full text-sm font-semibold hover:bg-red-700 transition-colors shadow-sm shadow-red-200"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  Admin Panel
+                </Link>
+              )}
               <button 
                 onClick={handleLogout}
                 className="inline-flex items-center gap-2 px-6 py-2.5 border-2 border-gray-200 rounded-full text-sm font-semibold hover:border-red-500 hover:text-red-500 transition-colors"

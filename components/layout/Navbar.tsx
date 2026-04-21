@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, ShoppingBag, Heart, User, LogIn, Bell, Users, Menu, X, LayoutDashboard, ShieldAlert, Store } from 'lucide-react';
+import { Search, ShoppingBag, Heart, User, LogIn, Bell, Users, Menu, X, LayoutDashboard, ShieldAlert, Store, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useCart } from '@/components/cart/CartProvider';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -133,12 +133,17 @@ export default function Navbar() {
                     </Link>
                   )}
                   {role !== 'admin' && (
-                    <Link href="/notifications" className="relative w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow transition-shadow text-gray-700">
-                      <Bell className="w-5 h-5" />
-                      {unreadCount > 0 && (
-                        <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                      )}
-                    </Link>
+                    <>
+                      <Link href="/dashboard/messages" className="hidden md:flex relative w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm hover:shadow transition-shadow text-gray-700">
+                        <MessageSquare className="w-5 h-5" />
+                      </Link>
+                      <Link href="/notifications" className="relative w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow transition-shadow text-gray-700">
+                        <Bell className="w-5 h-5" />
+                        {unreadCount > 0 && (
+                          <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                        )}
+                      </Link>
+                    </>
                   )}
                 </>
               )}
