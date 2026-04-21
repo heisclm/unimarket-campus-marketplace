@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, setDoc, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { Search, Send, User, ArrowLeft, Clock, ShoppingBag, MessageSquare, AlertTriangle } from 'lucide-react';
+import { confirmOrderReceipt, rejectOrderReceipt, respondToRejection } from '@/lib/escrow';
+import { Search, Send, User, ArrowLeft, Clock, ShoppingBag, MessageSquare, AlertTriangle, ShieldCheck, CheckCircle, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -35,6 +36,8 @@ function MessagesContent() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [activeOrder, setActiveOrder] = useState<any>(null);
+  const [isProcessingAction, setIsProcessingAction] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -156,6 +159,25 @@ function MessagesContent() {
     return () => unsubscribe();
   }, [activeChatId]);
 
+  // Fetch Order for Active Chat
+  useEffect(() => {
+    const activeChat = chats.find(c => c.id === activeChatId);
+    if (!activeChatId || !activeChat?.orderId) {
+      setActiveOrder(null);
+      return;
+    }
+
+    const unsubscribe = onSnapshot(doc(db, 'orders', activeChat.orderId), (snapshot) => {
+      if (snapshot.exists()) {
+        setActiveOrder({ id: snapshot.id, ...snapshot.data() });
+      } else {
+        setActiveOrder(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [activeChatId, chats]);
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !activeChatId || !newMessage.trim()) return;
@@ -186,6 +208,17 @@ function MessagesContent() {
   const activeChat = chats.find(c => c.id === activeChatId);
   const otherParticipantId = activeChat?.participants.find(id => id !== user?.uid);
   const otherParticipant = otherParticipantId ? activeChat?.participantDetails?.[otherParticipantId] : null;
+
+  const handleEscrowAction = async (action: () => Promise<any>) => {
+    try {
+      setIsProcessingAction(true);
+      await action();
+    } catch (error: any) {
+      alert(error.message || 'Failed to process action');
+    } finally {
+      setIsProcessingAction(false);
+    }
+  };
 
   const filteredChats = chats.filter(chat => {
     const otherId = chat.participants.find(id => id !== user?.uid);
@@ -298,6 +331,67 @@ function MessagesContent() {
                   </Link>
                 )}
               </div>
+
+              {/* Escrow Action Banner */}
+              {activeOrder && (
+                <div className="bg-white border-b border-gray-200 p-4 shadow-sm z-10 flex-shrink-0">
+                  <div className="flex items-center gap-3 mb-2">
+                    <ShieldCheck className="w-5 h-5 text-indigo-500" />
+                    <h3 className="font-bold text-gray-900">Escrow Protected Order</h3>
+                    <span className="text-xs font-medium px-2 py-1 rounded bg-gray-100 text-gray-600 ml-auto uppercase tracking-wider">
+                      {activeOrder.status.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                  
+                  {user.uid === activeOrder.buyerId && activeOrder.status === 'escrow_held' && (
+                    <div className="flex flex-col sm:flex-row gap-2 mt-3">
+                      <button 
+                        onClick={() => handleEscrowAction(() => confirmOrderReceipt(activeOrder.id, user.uid))}
+                        disabled={isProcessingAction}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 disabled:opacity-50"
+                      >
+                        <CheckCircle className="w-4 h-4" /> Accept Item
+                      </button>
+                      <button 
+                        onClick={() => handleEscrowAction(() => rejectOrderReceipt(activeOrder.id))}
+                        disabled={isProcessingAction}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl text-sm font-bold hover:bg-red-100 disabled:opacity-50"
+                      >
+                        <XCircle className="w-4 h-4" /> Reject & Return
+                      </button>
+                    </div>
+                  )}
+
+                  {user.uid === activeOrder.sellerId && activeOrder.status === 'rejected_pending_seller' && (
+                    <div className="flex flex-col sm:flex-row gap-2 mt-3">
+                      <button 
+                        onClick={() => handleEscrowAction(() => respondToRejection(activeOrder.id, 'resend'))}
+                        disabled={isProcessingAction}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 disabled:opacity-50"
+                      >
+                        <CheckCircle className="w-4 h-4" /> Resend Correct Item
+                      </button>
+                      <button 
+                        onClick={() => handleEscrowAction(() => respondToRejection(activeOrder.id, 'cancel'))}
+                        disabled={isProcessingAction}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl text-sm font-bold hover:bg-red-100 disabled:opacity-50"
+                      >
+                        <XCircle className="w-4 h-4" /> Cancel & Refund Buyer
+                      </button>
+                    </div>
+                  )}
+
+                  {activeOrder.status === 'completed' && (
+                   <p className="text-sm text-green-600 font-medium">This transaction has been successfully completed. Funds are released.</p>
+                  )}
+                  {activeOrder.status === 'cancelled_refunded' && (
+                   <p className="text-sm text-red-600 font-medium">This transaction was cancelled. The buyer has been refunded.</p>
+                  )}
+                  {activeOrder.rejectionCount > 0 && activeOrder.status !== 'cancelled_refunded' && (
+                    <p className="text-xs text-orange-500 font-bold mt-2">Rejection Strike: {activeOrder.rejectionCount}/3 (Auto-refund on 3rd rejection)</p>
+                  )}
+                </div>
+              )}
 
               {/* Messages Area */}
               <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">

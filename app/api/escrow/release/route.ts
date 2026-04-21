@@ -52,11 +52,12 @@ export async function POST(req: NextRequest) {
 
       const sellerId = orderData.sellerId;
       const amount = orderData.amount;
+      const netAmount = orderData.netAmount || amount;
 
       // 1. Update Seller Wallet Securely with Ledger
       await updateWalletWithLedger(transaction, {
         userId: sellerId,
-        amount: amount,
+        amount: netAmount,
         type: 'escrow_release',
         orderId: orderId,
         description: `Escrow release for order ${orderId}: ${orderData.productTitle}`

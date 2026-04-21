@@ -96,6 +96,60 @@ export async function confirmOrderReceipt(orderId: string, buyerId: string) {
 }
 
 /**
+ * Step 3B: Buyer rejects the item (Triggers Strike System)
+ */
+export async function rejectOrderReceipt(orderId: string) {
+  const auth = getAuth();
+  const user = auth.currentUser;
+  if (!user) throw new Error("Authentication required");
+
+  const idToken = await user.getIdToken();
+
+  const response = await fetch('/api/escrow/reject', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`
+    },
+    body: JSON.stringify({ orderId })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to reject item');
+  }
+
+  return data;
+}
+
+/**
+ * Step 3C: Seller responds to rejection
+ */
+export async function respondToRejection(orderId: string, action: 'cancel' | 'resend') {
+  const auth = getAuth();
+  const user = auth.currentUser;
+  if (!user) throw new Error("Authentication required");
+
+  const idToken = await user.getIdToken();
+
+  const response = await fetch('/api/escrow/seller-response', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`
+    },
+    body: JSON.stringify({ orderId, action })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to process seller response');
+  }
+
+  return data;
+}
+
+/**
  * Step 4: Buyer raises dispute
  */
 export async function raiseOrderDispute(orderId: string, buyerId: string, reason: string) {

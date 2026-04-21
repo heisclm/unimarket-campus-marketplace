@@ -123,16 +123,33 @@ export async function POST(req: NextRequest) {
           updatedAt: FieldValue.serverTimestamp()
         });
 
-        // Create Chat
-        const chatRef = adminDb!.collection('chats').doc();
+        // Create or update Chat using Idempotent / Deterministic IDs
+        const deterministicChatId = `${buyerId}_${item.sellerId}_${item.id}`;
+        const chatRef = adminDb!.collection('chats').doc(deterministicChatId);
+        
+        // Use set with merge so it works whether the chat already exists (e.g. they discussed the product first) or not.
         transaction.set(chatRef, {
           participants: [buyerId, item.sellerId],
           buyerId,
           sellerId: item.sellerId,
           orderId: orderRef.id,
+          productId: item.id,
+          productTitle: item.title,
           createdAt: FieldValue.serverTimestamp(),
-          lastMessage: 'Order placed. Start chatting with the seller!',
+          lastMessage: 'Order placed. Securely check delivery methods.',
           lastMessageAt: FieldValue.serverTimestamp()
+        }, { merge: true });
+        
+        // Add a system message indicating the start of Escrow
+        const msgRef = adminDb!.collection(`chats/${deterministicChatId}/messages`).doc();
+        transaction.set(msgRef, {
+          chatId: deterministicChatId,
+          senderId: 'system',
+          text: `Checkout Alert: Escrow has received funds securely. \nDelivery Method Chosen: ${deliveryMethod === 'delivery' ? 'Dorm Delivery' : 'Campus Pickup'}`,
+          isSystem: true,
+          productId: item.id,
+          status: 'sent',
+          createdAt: FieldValue.serverTimestamp()
         });
       }
 
