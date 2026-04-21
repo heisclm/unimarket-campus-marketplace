@@ -50,10 +50,10 @@ export default function Footer() {
           <div>
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 mb-6">Support</h3>
             <ul className="space-y-4">
-              <li><Link href="/help" className="text-gray-500 hover:text-black transition-colors text-sm flex items-center gap-2"><HelpCircle className="w-4 h-4" /> Help Center</Link></li>
-              <li><Link href="/safety" className="text-gray-500 hover:text-black transition-colors text-sm flex items-center gap-2"><Shield className="w-4 h-4" /> Safety Tips</Link></li>
-              <li><Link href="/tos" className="text-gray-500 hover:text-black transition-colors text-sm flex items-center gap-2"><FileText className="w-4 h-4" /> Terms of Service</Link></li>
-              <li><Link href="/contact" className="text-gray-500 hover:text-black transition-colors text-sm flex items-center gap-2"><Mail className="w-4 h-4" /> Contact Us</Link></li>
+              <li><Link href="/help" prefetch={false} className="text-gray-500 hover:text-black transition-colors text-sm flex items-center gap-2"><HelpCircle className="w-4 h-4" /> Help Center</Link></li>
+              <li><Link href="/safety" prefetch={false} className="text-gray-500 hover:text-black transition-colors text-sm flex items-center gap-2"><Shield className="w-4 h-4" /> Safety Tips</Link></li>
+              <li><Link href="/tos" prefetch={false} className="text-gray-500 hover:text-black transition-colors text-sm flex items-center gap-2"><FileText className="w-4 h-4" /> Terms of Service</Link></li>
+              <li><Link href="/contact" prefetch={false} className="text-gray-500 hover:text-black transition-colors text-sm flex items-center gap-2"><Mail className="w-4 h-4" /> Contact Us</Link></li>
             </ul>
           </div>
 
@@ -79,9 +79,9 @@ export default function Footer() {
             © {currentYear} UniMart. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <Link href="/privacy" className="text-gray-400 hover:text-gray-600 text-xs transition-colors">Privacy Policy</Link>
-            <Link href="/cookies" className="text-gray-400 hover:text-gray-600 text-xs transition-colors">Cookies</Link>
-            <Link href="/sitemap" className="text-gray-400 hover:text-gray-600 text-xs transition-colors">Sitemap</Link>
+            <Link href="/privacy" prefetch={false} className="text-gray-400 hover:text-gray-600 text-xs transition-colors">Privacy Policy</Link>
+            <Link href="/cookies" prefetch={false} className="text-gray-400 hover:text-gray-600 text-xs transition-colors">Cookies</Link>
+            <Link href="/sitemap" prefetch={false} className="text-gray-400 hover:text-gray-600 text-xs transition-colors">Sitemap</Link>
           </div>
         </div>
       </div>

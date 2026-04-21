@@ -42,7 +42,7 @@ export default function ProfilePage() {
       
       const userDoc = await getDoc(doc(db, 'users', loggedInUser.uid));
       if (userDoc.exists() && userDoc.data().role) {
-        router.push('/');
+        window.location.assign('/');
       }
     } catch (error: any) {
       setAuthError(error.message || "Google login failed");
@@ -68,7 +68,7 @@ export default function ProfilePage() {
         
         const userDoc = await getDoc(doc(db, 'users', loggedInUser.uid));
         if (userDoc.exists() && userDoc.data().role) {
-          router.push('/');
+          window.location.assign('/');
         }
       }
     } catch (error: any) {
@@ -115,7 +115,7 @@ export default function ProfilePage() {
     try {
       await setRole(selectedRole);
       toast.success(`Profile set as ${selectedRole}!`);
-      router.push('/');
+      window.location.assign('/');
     } catch (error) {
       console.error("Failed to set role", error);
       toast.error('Failed to set profile type');
