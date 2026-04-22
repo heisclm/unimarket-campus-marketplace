@@ -82,6 +82,23 @@ export async function POST(req: NextRequest) {
       // so the buyer ONLY pays the subtotal + delivery.
       const buyerTotalAmount = subtotal + deliveryFee;
 
+      // FETCH USERS FOR CHAT BEFORE WRITES (Transactions require reads before writes)
+      const uniqueSellerIds = Array.from(new Set(validItems.map(item => item.sellerId)));
+      const userRefs = [
+        adminDb!.collection('users').doc(buyerId),
+        ...uniqueSellerIds.map(id => adminDb!.collection('users').doc(id))
+      ];
+      const userSnaps = await transaction.getAll(...userRefs);
+      const buyerData = userSnaps[0].data() || {};
+      
+      const sellerDataMap: Record<string, any> = {};
+      for (let i = 1; i < userSnaps.length; i++) {
+        const snap = userSnaps[i];
+        if (snap.exists) {
+          sellerDataMap[snap.id] = snap.data() || {};
+        }
+      }
+
       // 1. Deduct Total from Buyer Wallet Securely with Ledger
       await updateWalletWithLedger(transaction, {
         userId: buyerId,
@@ -127,6 +144,8 @@ export async function POST(req: NextRequest) {
         const deterministicChatId = `${buyerId}_${item.sellerId}_${item.id}`;
         const chatRef = adminDb!.collection('chats').doc(deterministicChatId);
         
+        const sellerData = sellerDataMap[item.sellerId] || {};
+
         // Use set with merge so it works whether the chat already exists (e.g. they discussed the product first) or not.
         transaction.set(chatRef, {
           participants: [buyerId, item.sellerId],
@@ -135,9 +154,14 @@ export async function POST(req: NextRequest) {
           orderId: orderRef.id,
           productId: item.id,
           productTitle: item.title,
+          participantDetails: {
+            [buyerId]: { name: buyerData.displayName || 'Buyer', photoURL: buyerData.photoURL || '', role: buyerData.role || 'student' },
+            [item.sellerId]: { name: sellerData.displayName || 'Seller', photoURL: sellerData.photoURL || '', role: sellerData.role || 'vendor' }
+          },
           createdAt: FieldValue.serverTimestamp(),
           lastMessage: 'Order placed. Securely check delivery methods.',
-          lastMessageAt: FieldValue.serverTimestamp()
+          lastMessageAt: FieldValue.serverTimestamp(),
+          [`unreadCount.${item.sellerId}`]: FieldValue.increment(1)
         }, { merge: true });
         
         // Add a system message indicating the start of Escrow

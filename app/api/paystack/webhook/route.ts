@@ -53,6 +53,23 @@ export async function POST(req: Request) {
         if (metadata.type === 'cart_checkout') {
           const { buyerId, items, deliveryMethod } = metadata;
           const totalAmount = items.reduce((sum: number, item: any) => sum + item.price, 0);
+
+          // FETCH USERS FOR CHAT BEFORE WRITES (Transactions require reads before writes)
+          const uniqueSellerIds = Array.from(new Set(items.map((item: any) => item.sellerId)));
+          const userRefs = [
+            adminDb.collection('users').doc(buyerId),
+            ...uniqueSellerIds.map(id => adminDb.collection('users').doc(id as string))
+          ];
+          const userSnaps = await transaction.getAll(...userRefs);
+          const buyerData = userSnaps[0].data() || {};
+          
+          const sellerDataMap: Record<string, any> = {};
+          for (let i = 1; i < userSnaps.length; i++) {
+            const snap = userSnaps[i];
+            if (snap.exists) {
+              sellerDataMap[snap.id] = snap.data() || {};
+            }
+          }
           
           // Update buyer total spent
           const buyerRef = adminDb.collection('users').doc(buyerId);
@@ -94,15 +111,50 @@ export async function POST(req: Request) {
             transaction.update(productRef, { status: 'sold' });
 
             // Create Chat
-            const chatRef = adminDb.collection('chats').doc();
+            const deterministicChatId = `${buyerId}_${item.sellerId}_${item.id}`;
+            const chatRef = adminDb.collection('chats').doc(deterministicChatId);
+            
+            const sellerData = sellerDataMap[item.sellerId] || {};
+
             transaction.set(chatRef, {
               participants: [buyerId, item.sellerId],
               buyerId,
               sellerId: item.sellerId,
               orderId: orderRef.id,
+              productId: item.id,
+              productTitle: item.title,
+              participantDetails: {
+                [buyerId]: { name: buyerData.displayName || 'Buyer', photoURL: buyerData.photoURL || '', role: buyerData.role || 'student' },
+                [item.sellerId]: { name: sellerData.displayName || 'Seller', photoURL: sellerData.photoURL || '', role: sellerData.role || 'vendor' }
+              },
               createdAt: FieldValue.serverTimestamp(),
               lastMessage: 'Order placed. Start chatting with the seller!',
               lastMessageAt: FieldValue.serverTimestamp(),
+              [`unreadCount.${item.sellerId}`]: FieldValue.increment(1)
+            }, { merge: true });
+            
+            // Add a system message indicating the start of Escrow
+            const msgRef = adminDb.collection(`chats/${deterministicChatId}/messages`).doc();
+            transaction.set(msgRef, {
+              chatId: deterministicChatId,
+              senderId: 'system',
+              text: `Checkout Alert: Escrow has received funds securely via Paystack. \nDelivery Method Chosen: ${deliveryMethod === 'delivery' ? 'Dorm Delivery' : 'Campus Pickup'}`,
+              isSystem: true,
+              productId: item.id,
+              status: 'sent',
+              createdAt: FieldValue.serverTimestamp()
+            });
+
+            // Notify the Seller
+            const notifRef = adminDb.collection('notifications').doc();
+            transaction.set(notifRef, {
+              userId: item.sellerId,
+              title: 'New Order Received! 🎉',
+              message: `Cha-ching! Someone just bought ${item.title}. The funds are safe in Escrow. Please prepare for shipment or pickup!`,
+              type: 'order',
+              link: '/vendor',
+              read: false,
+              createdAt: FieldValue.serverTimestamp()
             });
           }
 
