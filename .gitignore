@@ -1,7 +1,17 @@
+# Firebase & Applet Configs
+firebase-applet-config.json
+firebase-config.json
+firebase-blueprint.json
+DRAFT_firestore.rules
+
+# OS files
+.DS_Store
+.idea/
+.vscode/
+
 node_modules/
 .next/
 coverage/
-.DS_Store
 *.log
 .env*
 !.env.example
