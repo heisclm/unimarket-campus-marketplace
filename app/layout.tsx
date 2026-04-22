@@ -6,7 +6,6 @@ import BottomNav from '@/components/layout/BottomNav';
 import SideNav from '@/components/layout/SideNav';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { CartProvider } from '@/components/cart/CartProvider';
-import Chatbot from '@/components/chat/Chatbot';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Toaster } from 'react-hot-toast';
 
@@ -57,7 +56,6 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
                   </div>
                   <BottomNav />
                 </div>
-                <Chatbot />
                 <Toaster 
                   position="bottom-right"
                   toastOptions={{
