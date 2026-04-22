@@ -31,7 +31,7 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
   return (
     <>
       {isMounted && !isSplashComplete && <SplashScreen onComplete={handleSplashComplete} />}
-      <div className={(isMounted && isSplashComplete) ? 'opacity-100' : 'opacity-0'}>
+      <div className={isMounted ? 'opacity-100 transition-opacity duration-500' : 'opacity-0'}>
         <PageTransition>
           {children}
         </PageTransition>

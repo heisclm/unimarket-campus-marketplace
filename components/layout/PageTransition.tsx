@@ -7,9 +7,9 @@ export default function PageTransition({ children }: { children: React.ReactNode
   const pathname = usePathname();
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="wait" initial={false}>
       <motion.div
-        key={pathname}
+        key={pathname || 'initial'}
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}

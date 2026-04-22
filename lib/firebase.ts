@@ -27,21 +27,23 @@ if (!firebaseConfig.apiKey) {
 }
 
 let app: FirebaseApp;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApp();
+let db: Firestore;
+let auth: Auth;
+let storage: FirebaseStorage;
+
+if (firebaseConfig.apiKey) {
+  try {
+    app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    const firestoreDbId = process.env.NEXT_PUBLIC_FIREBASE_FIRESTORE_DATABASE_ID;
+    db = firestoreDbId ? getFirestore(app, firestoreDbId) : getFirestore(app);
+    storage = getStorage(app);
+    auth = getAuth(app);
+  } catch (error) {
+    console.error("Firebase initialization failed:", error);
+  }
 }
 
-// Support custom database instances if configured
-const firestoreDbId = process.env.NEXT_PUBLIC_FIREBASE_FIRESTORE_DATABASE_ID;
-export const db: Firestore = firestoreDbId 
-  ? getFirestore(app, firestoreDbId) 
-  : getFirestore(app);
-
-export const storage: FirebaseStorage = getStorage(app);
-
-export const auth: Auth = getAuth(app);
+export { db, auth, storage };
 export const googleProvider = new GoogleAuthProvider();
 
 export const loginWithGoogle = async () => {
