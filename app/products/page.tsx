@@ -12,6 +12,8 @@ import { motion } from 'motion/react';
 
 import { Suspense } from 'react';
 
+export const dynamic = 'force-dynamic';
+
 function ProductsContent() {
   const searchParams = useSearchParams();
   const urlSearch = searchParams.get('search');
@@ -242,8 +244,8 @@ function ProductsContent() {
 export default function ProductsPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <p>Loading Marketplace...</p>
       </div>
     }>
       <ProductsContent />

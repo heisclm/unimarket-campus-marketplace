@@ -39,8 +39,9 @@ export const viewport: Viewport = {
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="en">
-      <body className="bg-[#f4f4f0] min-h-screen font-sans text-gray-900 antialiased overflow-x-hidden" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
+      <body className="bg-[#f4f4f0] min-h-screen font-sans text-gray-900 antialiased overflow-x-hidden">
+        <script dangerouslySetInnerHTML={{ __html: 'document.body.style.opacity = "1";' }} />
         <ErrorBoundary>
           <AuthProvider>
             <CartProvider>

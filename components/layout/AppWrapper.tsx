@@ -9,8 +9,12 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    // Defer state updates to avoid synchronous cascading render lint error
-    // and ensure hydration completes before state changes
+    // Failsafe: Force show app after 2.5 seconds no matter what
+    const failsafe = setTimeout(() => {
+      setIsMounted(true);
+      setIsSplashComplete(true);
+    }, 2500);
+
     const timer = setTimeout(() => {
       setIsMounted(true);
       if (sessionStorage.getItem('hasSeenSplash')) {
@@ -18,7 +22,10 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
       }
     }, 0);
     
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(failsafe);
+    };
   }, []);
 
   const handleSplashComplete = () => {
