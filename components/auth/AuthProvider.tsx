@@ -33,6 +33,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userData, setUserData] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchUserData = async (uid: string) => {
+    if (!db) return;
+    try {
+      const userDocRef = doc(db, 'users', uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        setRoleState(data.role as UserRole);
+        setUserData(data);
+      } else {
+        setRoleState(null);
+        setUserData(null);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      setRoleState(null);
+      setUserData(null);
+    }
+  };
+
   useEffect(() => {
     // Safety: Skip checks if Firebase is not initialized
     if (!db || !auth) {
@@ -68,27 +89,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => unsubscribe();
   }, []);
-
-  const fetchUserData = async (uid: string) => {
-    if (!db) return;
-    try {
-      const userDocRef = doc(db, 'users', uid);
-      const userDoc = await getDoc(userDocRef);
-      
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        setRoleState(data.role as UserRole);
-        setUserData(data);
-      } else {
-        setRoleState(null);
-        setUserData(null);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      setRoleState(null);
-      setUserData(null);
-    }
-  };
 
   const refreshUserData = async () => {
     if (user) {

@@ -33,7 +33,7 @@ class ErrorBoundary extends Component<Props, State> {
 
       try {
         // Check if it's our JSON firestore error
-        if (this.state.error?.message.startsWith('{')) {
+        if (this.state.error?.message?.startsWith('{')) {
           const info = JSON.parse(this.state.error.message);
           if (info.operationType) {
             isFirestoreError = true;

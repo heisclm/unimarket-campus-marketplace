@@ -6,9 +6,11 @@ import { useAuth, UserRole } from '@/components/auth/AuthProvider';
 import { loginWithGoogle, logout, signInWithEmail, signUpWithEmail, resetPassword, db } from '@/lib/firebase';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { LogIn, LogOut, User as UserIcon, Store, GraduationCap, Mail, Lock, Eye, EyeOff, Wallet, ShieldCheck, History, Package, LayoutDashboard } from 'lucide-react';
-import dynamic from 'next/dynamic';
-const VerificationSection = dynamic(() => import('@/components/profile/VerificationSection'), { ssr: false });
+import dynamicImport from 'next/dynamic';
+const VerificationSection = dynamicImport(() => import('@/components/profile/VerificationSection'), { ssr: false });
 import WalletSection from '@/components/profile/WalletSection';
+
+export const dynamic = 'force-dynamic';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -33,7 +35,7 @@ export default function ProfilePage() {
   const [authMessage, setAuthMessage] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const OrdersSection = dynamic(() => import('@/components/profile/OrdersSection'), { ssr: false });
+  const OrdersSection = dynamicImport(() => import('@/components/profile/OrdersSection'), { ssr: false });
 
   const handleGoogleLogin = async () => {
     try {

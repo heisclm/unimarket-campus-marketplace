@@ -11,6 +11,8 @@ import toast from 'react-hot-toast';
 import { markOrderAsDelivered, confirmOrderReceipt, raiseOrderDispute } from '@/lib/escrow';
 import { deleteImage } from '@/lib/storage';
 
+export const dynamic = 'force-dynamic';
+
 export default function DashboardPage() {
   const { user, role } = useAuth();
   const [products, setProducts] = useState<any[]>([]);

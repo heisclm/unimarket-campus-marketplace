@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import PremiumImage from "@/components/ui/PremiumImage";
+
+export const dynamic = 'force-dynamic';
 import { ArrowUpRight, Star, Heart, Shield, Zap, Users, ShoppingBag, ArrowRight } from "lucide-react";
 import { 
   subscribeToFeaturedProduct, 
