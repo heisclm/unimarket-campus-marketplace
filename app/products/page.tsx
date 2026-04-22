@@ -5,8 +5,8 @@ import { collection, query, getDocs, orderBy, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import PremiumImage from '@/components/ui/PremiumImage';
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { Search, Filter, Clock, Tag, ShieldCheck } from 'lucide-react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { Search, Filter, Clock, Tag, ShieldCheck, AlertCircle } from 'lucide-react';
 
 import { motion } from 'motion/react';
 
@@ -23,6 +23,7 @@ function ProductsContent() {
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     setInputValue(urlSearch || '');
@@ -61,7 +62,12 @@ function ProductsContent() {
 
   useEffect(() => {
     const fetchProducts = async () => {
+      if (!db) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
+      const timer = setTimeout(() => setLoading(false), 8000);
       try {
         let q;
         if (selectedCategory === 'All') {
@@ -88,12 +94,13 @@ function ProductsContent() {
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
+        clearTimeout(timer);
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, [selectedCategory]);
+  }, [selectedCategory, pathname, searchParams]);
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
