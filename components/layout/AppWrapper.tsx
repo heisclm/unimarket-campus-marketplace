@@ -29,13 +29,11 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
   // During SSR and first client render, we must match the server (show splash if not complete)
   // But we use isMounted to ensure we don't trigger hydration mismatch
   return (
-    <>
+    <div className="contents">
       {isMounted && !isSplashComplete && <SplashScreen onComplete={handleSplashComplete} />}
-      <div className={isMounted ? 'opacity-100 transition-opacity duration-500' : 'opacity-0'}>
-        <PageTransition>
-          {children}
-        </PageTransition>
-      </div>
-    </>
+      <PageTransition>
+        {children}
+      </PageTransition>
+    </div>
   );
 }

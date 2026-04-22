@@ -41,9 +41,9 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en">
       <body className="bg-[#f4f4f0] min-h-screen font-sans text-gray-900 antialiased overflow-x-hidden" suppressHydrationWarning>
-        <AuthProvider>
-          <CartProvider>
-            <ErrorBoundary>
+        <ErrorBoundary>
+          <AuthProvider>
+            <CartProvider>
               <AppWrapper>
                 <div className="flex flex-col min-h-screen">
                   <Navbar />
@@ -70,9 +70,9 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
                   }}
                 />
               </AppWrapper>
-            </ErrorBoundary>
-          </CartProvider>
-        </AuthProvider>
+            </CartProvider>
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

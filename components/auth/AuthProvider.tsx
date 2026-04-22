@@ -34,20 +34,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Safety: Skip checks if Firebase is not initialized
+    if (!db || !auth) {
+      console.warn("Firebase Auth or DB not initialized. Skipping connection audit.");
+      setLoading(false);
+      return;
+    }
+
     // Test Firestore connection
     const testConnection = async () => {
       try {
         await getDocFromServer(doc(db, '_connection_test_', 'ping'));
       } catch (error: any) {
         if (error?.message?.includes('the client is offline')) {
-          console.error("Firestore connection failed: The client is offline. Please check your Firebase configuration.");
+          console.error("Firestore connection failed: The client is offline.");
         }
       }
     };
     testConnection();
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        setLoading(true);
+        await fetchUserData(firebaseUser.uid);
+        setUser(firebaseUser);
+      } else {
+        setUser(null);
+        setRoleState(null);
+        setUserData(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const fetchUserData = async (uid: string) => {
+    if (!db) return;
     try {
       const userDocRef = doc(db, 'users', uid);
       const userDoc = await getDoc(userDocRef);
@@ -66,23 +89,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUserData(null);
     }
   };
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        setLoading(true);
-        await fetchUserData(firebaseUser.uid);
-        setUser(firebaseUser);
-      } else {
-        setUser(null);
-        setRoleState(null);
-        setUserData(null);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   const refreshUserData = async () => {
     if (user) {
