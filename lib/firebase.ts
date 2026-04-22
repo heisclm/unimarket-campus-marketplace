@@ -12,10 +12,18 @@ import {
 } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
-import firebaseConfig from '../firebase-config.json';
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+};
 
-if (!firebaseConfig || !firebaseConfig.apiKey) {
-  throw new Error("Firebase configuration is missing or invalid. Please check firebase-config.json.");
+if (!firebaseConfig.apiKey) {
+  console.warn("Firebase configuration is missing. This is expected during build time on Vercel. Ensure environment variables are set in production.");
 }
 
 let app: FirebaseApp;
@@ -25,9 +33,10 @@ if (!getApps().length) {
   app = getApp();
 }
 
-// Handle case where firestoreDatabaseId might be missing in manual configs
-export const db: Firestore = (firebaseConfig as any).firestoreDatabaseId 
-  ? getFirestore(app, (firebaseConfig as any).firestoreDatabaseId) 
+// Support custom database instances if configured
+const firestoreDbId = process.env.NEXT_PUBLIC_FIREBASE_FIRESTORE_DATABASE_ID;
+export const db: Firestore = firestoreDbId 
+  ? getFirestore(app, firestoreDbId) 
   : getFirestore(app);
 
 export const storage: FirebaseStorage = getStorage(app);
