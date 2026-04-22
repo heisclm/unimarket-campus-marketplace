@@ -8,6 +8,7 @@ import { AuthProvider } from '@/components/auth/AuthProvider';
 import { CartProvider } from '@/components/cart/CartProvider';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Toaster } from 'react-hot-toast';
+import { Suspense } from 'react';
 
 import AppWrapper from '@/components/layout/AppWrapper';
 
@@ -50,7 +51,9 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
                   <Navbar />
                   <SideNav />
                   <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8 md:pl-32 lg:pl-8">
-                    {children}
+                    <Suspense fallback={null}>
+                      {children}
+                    </Suspense>
                   </main>
                   <div className="hidden lg:block">
                     <Footer />

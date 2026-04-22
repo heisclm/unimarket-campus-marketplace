@@ -23,7 +23,7 @@ export default function Navbar() {
     let unsubscribeNotifs: () => void;
     let unsubscribeChats: () => void;
 
-    if (!user) {
+    if (!user || !db) {
       setTimeout(() => {
         setUnreadCount(0);
         setUnreadMessageCount(0);

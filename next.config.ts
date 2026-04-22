@@ -31,7 +31,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  output: 'standalone',
   transpilePackages: ['motion'],
   webpack: (config, {dev, isServer}) => {
     // HMR is disabled via DISABLE_HMR env var.
