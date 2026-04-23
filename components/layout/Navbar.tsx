@@ -86,12 +86,34 @@ export default function Navbar() {
             
             {/* Logo & Mobile Menu Toggle */}
             <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center gap-2">
+              {/* Desktop Logo */}
+              <Link href="/" className="hidden sm:flex items-center gap-2">
                 <div className="w-8 h-8 bg-black text-white flex items-center justify-center rounded-lg font-bold text-xl">
                   U
                 </div>
-                <span className="font-bold text-xl tracking-tight hidden sm:block">UniMart.</span>
+                <span className="font-bold text-xl tracking-tight hidden lg:block">UniMart.</span>
               </Link>
+
+              {/* Mobile Profile (Replaces Logo) */}
+              <div className="sm:hidden flex items-center">
+                {!loading && (
+                  user ? (
+                    <Link href="/profile" className="flex items-center justify-center bg-white rounded-full p-0.5 shadow-sm border border-gray-200 min-w-[40px] min-h-[40px]">
+                      <div className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden relative">
+                        {user.photoURL ? (
+                          <Image src={user.photoURL} alt="Profile" fill className="object-cover" referrerPolicy="no-referrer" />
+                        ) : (
+                          <User className="w-5 h-5 text-gray-500" />
+                        )}
+                      </div>
+                    </Link>
+                  ) : (
+                    <Link href="/profile" className="flex items-center justify-center bg-black text-white rounded-full w-10 h-10 shadow-sm">
+                      <LogIn className="w-5 h-5" />
+                    </Link>
+                  )
+                )}
+              </div>
             </div>
 
             {/* Search Bar (Pill Shaped) */}
@@ -149,70 +171,77 @@ export default function Navbar() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {user && (
+              {user && role === 'student' && (
+                <Link href="/dashboard" className="hidden lg:flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-black transition-colors mr-2">
+                  <LayoutDashboard className="w-4 h-4" /> My Dashboard
+                </Link>
+              )}
+
+              {role !== 'admin' && (
                 <>
-                  {role === 'student' && (
-                    <Link href="/dashboard" className="hidden lg:flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-black transition-colors mr-2">
-                      <LayoutDashboard className="w-4 h-4" /> My Dashboard
+                  {user && (
+                    <Link href="/dashboard/messages" className="hidden lg:flex relative w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm hover:shadow transition-shadow text-gray-700">
+                      <MessageSquare className="w-5 h-5" />
+                      {unreadMessageCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
+                          {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+                        </span>
+                      )}
                     </Link>
                   )}
-                  {role !== 'admin' && (
-                    <>
-                      <Link href="/dashboard/messages" className="hidden lg:flex relative w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm hover:shadow transition-shadow text-gray-700">
-                        <MessageSquare className="w-5 h-5" />
-                        {unreadMessageCount > 0 && (
-                          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
-                            {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
-                          </span>
-                        )}
-                      </Link>
-                      <Link href="/notifications" className="relative w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow transition-shadow text-gray-700">
-                        <Bell className="w-5 h-5" />
-                        {unreadCount > 0 && (
-                          <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                        )}
-                      </Link>
-                    </>
+
+                  {/* Wishlist/Favourite (Visible on mobile, first in sequence) */}
+                  {role !== 'vendor' && (
+                    <Link href="/wishlist" className="flex w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm hover:shadow transition-shadow text-red-500">
+                      <Heart className="w-5 h-5" />
+                    </Link>
+                  )}
+
+                  {/* Cart (Visible on mobile, second in sequence) */}
+                  {role !== 'vendor' && (
+                    <Link href="/cart" className="relative w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow transition-shadow text-gray-700">
+                      <ShoppingBag className="w-5 h-5" />
+                      {items.length > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-[#d9ff00] text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                          {items.length}
+                        </span>
+                      )}
+                    </Link>
+                  )}
+
+                  {/* Notifications (Visible on mobile, third in sequence) */}
+                  {user && (
+                    <Link href="/notifications" className="relative w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow transition-shadow text-gray-700">
+                      <Bell className="w-5 h-5" />
+                      {unreadCount > 0 && (
+                        <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                      )}
+                    </Link>
                   )}
                 </>
               )}
               
-              {role !== 'admin' && role !== 'vendor' && (
-                <>
-                  <Link href="/cart" className="relative w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm hover:shadow transition-shadow text-gray-700">
-                    <ShoppingBag className="w-5 h-5" />
-                    {items.length > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-[#d9ff00] text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                        {items.length}
-                      </span>
-                    )}
-                  </Link>
-                  
-                  <Link href="/wishlist" className="hidden lg:flex w-10 h-10 bg-white rounded-full items-center justify-center shadow-sm hover:shadow transition-shadow text-red-500">
-                    <Heart className="w-5 h-5" />
-                  </Link>
-                </>
-              )}
-              
-              {!loading && (
-                user ? (
-                  <Link href="/profile" className="flex items-center justify-center gap-2 bg-white rounded-full p-1.5 sm:pl-4 sm:pr-1.5 shadow-sm hover:shadow transition-shadow ml-1 min-w-[44px] min-h-[44px]">
-                    <span className="text-sm font-medium text-gray-700 capitalize hidden sm:block">{firstName}</span>
-                    <div className="w-8 h-8 sm:w-8 sm:h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden relative">
-                      {user.photoURL ? (
-                        <Image src={user.photoURL} alt="Profile" fill className="object-cover" referrerPolicy="no-referrer" />
-                      ) : (
-                        <User className="w-5 h-5 text-gray-500" />
-                      )}
-                    </div>
-                  </Link>
-                ) : (
-                  <Link href="/profile" className="flex items-center justify-center gap-2 bg-black text-white rounded-full px-3 py-2 sm:px-4 shadow-sm hover:bg-gray-800 transition-colors ml-1 min-w-[44px] min-h-[44px]">
-                    <span className="text-sm font-medium hidden sm:block">Log In</span>
-                    <LogIn className="w-5 h-5 sm:hidden" />
-                  </Link>
-                )
-              )}
+              {/* Profile (Desktop Only - Mobile version is on the left) */}
+              <div className="hidden sm:block">
+                {!loading && (
+                  user ? (
+                    <Link href="/profile" className="flex items-center justify-center gap-2 bg-white rounded-full p-1.5 pl-4 pr-1.5 shadow-sm hover:shadow transition-shadow ml-1 min-w-[44px] min-h-[44px]">
+                      <span className="text-sm font-medium text-gray-700 capitalize">{firstName}</span>
+                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden relative">
+                        {user.photoURL ? (
+                          <Image src={user.photoURL} alt="Profile" fill className="object-cover" referrerPolicy="no-referrer" />
+                        ) : (
+                          <User className="w-5 h-5 text-gray-500" />
+                        )}
+                      </div>
+                    </Link>
+                  ) : (
+                    <Link href="/profile" className="flex items-center justify-center gap-2 bg-black text-white rounded-full px-4 py-2 shadow-sm hover:bg-gray-800 transition-colors ml-1 min-w-[44px] min-h-[44px]">
+                      <span className="text-sm font-medium">Log In</span>
+                    </Link>
+                  )
+                )}
+              </div>
             </div>
 
           </div>
