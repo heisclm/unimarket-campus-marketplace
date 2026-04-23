@@ -43,7 +43,6 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="bg-[#f4f4f0] min-h-screen font-sans text-gray-900 antialiased overflow-x-hidden">
-        <script dangerouslySetInnerHTML={{ __html: 'document.body.style.opacity = "1";' }} />
         <ErrorBoundary>
           <AuthProvider>
             <CartProvider>
@@ -52,15 +51,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
                   <Navbar />
                   <SideNav />
                   <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8 md:pl-32 lg:pl-8">
-                    <Suspense fallback={
-                      <div className="flex items-center justify-center min-h-[50vh] flex-col gap-4">
-                        <div className="animate-spin w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full"></div>
-                        <h1 style={{fontSize: '24px', color: 'red', fontWeight: 'bold', textAlign: 'center'}}>
-                          LOADING NEXT PAGE...<br/>
-                          <span style={{fontSize: '14px', color: 'gray'}}>If this stays on screen, the Vercel data fetch is hanging indefinitely!</span>
-                        </h1>
-                      </div>
-                    }>
+                    <Suspense fallback={null}>
                       {children}
                     </Suspense>
                   </main>

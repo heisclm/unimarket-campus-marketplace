@@ -5,6 +5,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, doc, getDoc, updateDoc, orderBy, onSnapshot, deleteDoc } from 'firebase/firestore';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { ShieldAlert, ShieldCheck, Package, DollarSign, Plus, LayoutDashboard, ShoppingBag, Truck, CheckCircle2, AlertCircle, History, MessageSquare, Clock, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
@@ -15,12 +16,14 @@ export const dynamic = 'force-dynamic';
 
 export default function DashboardPage() {
   const { user, role } = useAuth();
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get('tab') as 'listings' | 'purchases' | 'sales' | null;
   const [products, setProducts] = useState<any[]>([]);
   const [purchases, setPurchases] = useState<any[]>([]);
   const [sales, setSales] = useState<any[]>([]);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState<'listings' | 'purchases' | 'sales'>('listings');
+  const [activeView, setActiveView] = useState<'listings' | 'purchases' | 'sales'>(initialTab || 'listings');
 
   useEffect(() => {
     if (!user) return;

@@ -10,14 +10,23 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { deleteImage } from '@/lib/storage';
 
+import { useRouter } from 'next/navigation';
+
 export default function VendorDashboard() {
   const { user, role, userData, refreshUserData } = useAuth();
+  const router = useRouter();
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders'>('overview');
 
   useEffect(() => {
+    // If the user is a student, transparently route them to their correct seller dashboard
+    if (user && role === 'student') {
+      router.replace('/dashboard?tab=sales');
+      return;
+    }
+    
     if (!user || role !== 'vendor') return;
 
     const productsQuery = query(collection(db, 'products'), where('sellerId', '==', user.uid));
@@ -78,6 +87,8 @@ export default function VendorDashboard() {
       setProductToDelete(null);
     }
   };
+
+  if (role === 'student') return null;
 
   if (role !== 'vendor') {
     return (

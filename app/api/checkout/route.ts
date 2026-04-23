@@ -176,6 +176,8 @@ export async function POST(req: NextRequest) {
           createdAt: FieldValue.serverTimestamp()
         });
 
+        const sellerRole = sellerData.role || 'student';
+
         // Notify the Seller that they sold an item!
         const notifRef = adminDb!.collection('notifications').doc();
         transaction.set(notifRef, {
@@ -183,7 +185,7 @@ export async function POST(req: NextRequest) {
           title: 'New Order Received! 🎉',
           message: `Cha-ching! Someone just bought ${item.title}. The funds are safe in Escrow. Please prepare for shipment or pickup!`,
           type: 'order',
-          link: '/vendor',
+          link: sellerRole === 'vendor' ? '/vendor' : '/dashboard?tab=sales',
           read: false,
           createdAt: FieldValue.serverTimestamp()
         });
