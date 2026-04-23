@@ -10,7 +10,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { useCart } from '@/components/cart/CartProvider';
 import BiddingSection from '@/components/products/BiddingSection';
 import ReportModal from '@/components/shared/ReportModal';
-import { ShoppingBag, Gavel, ArrowLeft, Clock, ShieldCheck, User as UserIcon, AlertTriangle } from 'lucide-react';
+import { ShoppingBag, Gavel, ArrowLeft, Clock, ShieldCheck, User as UserIcon, AlertTriangle, Heart } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ProductDetailPage() {
@@ -24,6 +24,41 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    const favorites = JSON.parse(localStorage.getItem('unimart_favorites') || '[]');
+    if (favorites.some((item: any) => item.id === id)) {
+      setIsFavorite(true);
+    }
+  }, [id]);
+
+  const toggleFavorite = () => {
+    if (!product) return;
+    const favorites = JSON.parse(localStorage.getItem('unimart_favorites') || '[]');
+    if (isFavorite) {
+      const newFavorites = favorites.filter((item: any) => item.id !== product.id);
+      localStorage.setItem('unimart_favorites', JSON.stringify(newFavorites));
+      setIsFavorite(false);
+      toast.success('Removed from wishlist');
+      // Trigger a custom event so the Navbar or other components could potentially listen
+      window.dispatchEvent(new Event('wishlist_updated'));
+    } else {
+      favorites.push({ 
+        id: product.id, 
+        title: product.title, 
+        price: product.price, 
+        previewImage: product.previewImage || product.images?.[0] || '',
+        sellerId: product.sellerId,
+        savedAt: Date.now() 
+      });
+      localStorage.setItem('unimart_favorites', JSON.stringify(favorites));
+      setIsFavorite(true);
+      toast.success('Added to wishlist');
+      window.dispatchEvent(new Event('wishlist_updated'));
+    }
+  };
 
   useEffect(() => {
     const fetchProductAndSeller = async () => {
@@ -248,19 +283,27 @@ export default function ProductDetailPage() {
                 This item is no longer available.
               </div>
             ) : (
-            <div className="flex gap-3 mb-4">
+            <div className="flex flex-wrap sm:flex-nowrap gap-3 mb-4">
               <button 
                 onClick={handleAddToCart}
                 disabled={items.some(i => i.id === product.id) || userData?.role === 'vendor'}
-                className="flex-1 bg-[#d9ff00] text-black py-4 rounded-xl font-bold text-lg hover:bg-[#c4e600] transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-[2] bg-[#d9ff00] text-black py-4 px-4 rounded-xl font-bold text-base sm:text-lg hover:bg-[#c4e600] transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <ShoppingBag className="w-5 h-5 flex-shrink-0" /> {items.some(i => i.id === product.id) ? 'In Cart' : 'Add to Cart'}
               </button>
               
+              <button 
+                onClick={toggleFavorite}
+                className={`flex-1 sm:flex-none sm:w-16 bg-white border ${isFavorite ? 'border-red-500 text-red-500' : 'border-gray-200 text-gray-500 hover:border-gray-300'} py-4 px-4 rounded-xl font-bold text-lg transition-colors shadow-sm flex items-center justify-center gap-2`}
+                aria-label={isFavorite ? "Remove from wishlist" : "Add to wishlist"}
+              >
+                <Heart className={`w-6 h-6 ${isFavorite ? 'fill-current' : ''}`} />
+              </button>
+
               {user && (
                 <Link
                   href={`/dashboard/messages?sellerId=${product.sellerId}&productId=${product.id}`}
-                  className="bg-black text-white px-6 rounded-xl font-bold hover:bg-gray-800 transition-colors shadow-sm flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto bg-black text-white px-6 py-4 sm:py-0 rounded-xl font-bold hover:bg-gray-800 transition-colors shadow-sm flex items-center justify-center gap-2"
                 >
                   Message
                 </Link>
