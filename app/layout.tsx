@@ -11,6 +11,7 @@ import { Toaster } from 'react-hot-toast';
 import { Suspense } from 'react';
 
 import AppWrapper from '@/components/layout/AppWrapper';
+import { RouteLogger } from '@/components/common/RouteLogger';
 
 export const metadata: Metadata = {
   title: 'UniMart - Campus Marketplace',
@@ -51,7 +52,15 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
                   <Navbar />
                   <SideNav />
                   <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8 md:pl-32 lg:pl-8">
-                    <Suspense fallback={null}>
+                    <Suspense fallback={
+                      <div className="flex items-center justify-center min-h-[50vh] flex-col gap-4">
+                        <div className="animate-spin w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full"></div>
+                        <h1 style={{fontSize: '24px', color: 'red', fontWeight: 'bold', textAlign: 'center'}}>
+                          LOADING NEXT PAGE...<br/>
+                          <span style={{fontSize: '14px', color: 'gray'}}>If this stays on screen, the Vercel data fetch is hanging indefinitely!</span>
+                        </h1>
+                      </div>
+                    }>
                       {children}
                     </Suspense>
                   </main>
@@ -73,6 +82,9 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
                     },
                   }}
                 />
+                <Suspense fallback={null}>
+                  <RouteLogger />
+                </Suspense>
               </AppWrapper>
             </CartProvider>
           </AuthProvider>

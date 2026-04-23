@@ -38,9 +38,7 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
   return (
     <div className="contents">
       {isMounted && !isSplashComplete && <SplashScreen onComplete={handleSplashComplete} />}
-      <PageTransition>
-        {children}
-      </PageTransition>
+      {children}
     </div>
   );
 }
