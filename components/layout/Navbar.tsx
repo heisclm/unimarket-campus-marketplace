@@ -137,8 +137,11 @@ export default function Navbar() {
             </form>
 
             {/* Mobile Search Trigger */}
-            <div className="hidden">
-              {/* Removed per user request */}
+            <div className="flex-1 md:hidden">
+              <Link href="/products" className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border border-gray-100 text-gray-400 text-sm">
+                <Search className="w-4 h-4" />
+                <span>Search...</span>
+              </Link>
             </div>
 
             {/* Desktop Center Links */}
