@@ -354,7 +354,7 @@ export default function Home() {
 
       {/* How It Works */}
       <div className="bg-black text-white rounded-[3rem] p-12 md:p-20 overflow-hidden relative">
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="relative z-10 max-w-2xl">
           <div>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8">How UniMart Works</h2>
             <div className="space-y-8">
@@ -383,17 +383,6 @@ export default function Home() {
             <Link href="/profile" className="inline-flex items-center gap-2 bg-white text-black font-bold px-8 py-4 rounded-full mt-12 hover:bg-gray-100 transition-all">
               Get Started Now <ArrowRight className="w-5 h-5" />
             </Link>
-          </div>
-          <div className="relative h-[400px] lg:h-[500px] rounded-[2rem] overflow-hidden">
-            <PremiumImage 
-              src="" 
-              fallbackSrc="https://picsum.photos/seed/campus/800/1000"
-              alt="Campus life" 
-              fill 
-              className="object-cover opacity-80"
-              referrerPolicy="no-referrer"
-              containerClassName="absolute inset-0"
-            />
           </div>
         </div>
         {/* Decorative elements */}
