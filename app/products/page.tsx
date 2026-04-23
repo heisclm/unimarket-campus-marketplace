@@ -7,6 +7,7 @@ import PremiumImage from '@/components/ui/PremiumImage';
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Search, Filter, Clock, Tag, ShieldCheck, AlertCircle } from 'lucide-react';
+import ProductCard from '@/components/products/ProductCard';
 
 import { motion } from 'motion/react';
 
@@ -182,58 +183,7 @@ function ProductsContent() {
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
           {filteredProducts.map(product => (
-            <motion.div
-              key={product.id}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
-              <Link href={`/products/${product.id}`} className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-4 shadow-sm group hover:shadow-md transition-all flex flex-col h-full">
-                <div className="relative w-full aspect-square bg-gray-100 rounded-lg sm:rounded-xl mb-3 sm:mb-4 overflow-hidden">
-                  <PremiumImage 
-                    src={product.previewImage || product.images?.[0] || ""} 
-                    alt={product.title} 
-                    fill 
-                    className="object-cover group-hover:scale-105 transition-transform duration-500" 
-                    referrerPolicy="no-referrer"
-                    containerClassName="absolute inset-0"
-                  />
-                  
-                  {/* Badges */}
-                  <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-col gap-1 sm:gap-2">
-                    {product.type === 'auction' && (
-                      <span className="bg-orange-500 text-white text-[9px] sm:text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded sm:rounded-md flex items-center gap-1 shadow-sm">
-                        <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Auction
-                      </span>
-                    )}
-                    {product.sellerIsVerified && (
-                      <span className="bg-green-500 text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded sm:rounded-md flex items-center gap-1 shadow-sm">
-                        <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> <span className="hidden sm:inline">Verified Seller</span><span className="sm:hidden">Verified</span>
-                      </span>
-                    )}
-                    <span className="bg-white/90 backdrop-blur-sm text-gray-700 text-[9px] sm:text-xs font-medium px-1.5 py-0.5 sm:px-2 sm:py-1 rounded sm:rounded-md shadow-sm line-clamp-1 max-w-[80px]">
-                      {product.category}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="flex-1 flex flex-col px-1 sm:px-0">
-                  <h3 className="font-bold text-sm sm:text-lg line-clamp-1 sm:line-clamp-2 mb-0.5 sm:mb-2 group-hover:text-blue-600 transition-colors leading-tight">{product.title}</h3>
-                  
-                  <div className="flex items-center justify-between mt-auto pt-2 sm:pt-4 sm:border-t border-gray-100">
-                    <div className="flex items-center gap-0.5 sm:gap-1 text-sm sm:text-lg font-black tracking-tight text-gray-900">
-                      <Tag className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                      GH₵{Number(product.price).toFixed(2)}
-                    </div>
-                    {product.status !== 'active' && (
-                      <span className="hidden sm:block text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md capitalize">
-                        {product.status}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}
