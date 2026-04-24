@@ -25,6 +25,7 @@ export default function ProductDetailPage() {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState<number>(0);
 
   useEffect(() => {
     if (!id) return;
@@ -121,15 +122,31 @@ export default function ProductDetailPage() {
   const isOwner = user?.uid === product.sellerId;
 
   const handleAddToCart = () => {
+    let price = Number(product.price);
+    let variantDetails = '';
+    
+    if (product.hasVariations && product.variants?.length > 0) {
+      const selectedVariant = product.variants[selectedVariantIndex];
+      if (selectedVariant.price !== null && selectedVariant.price !== undefined) {
+        price = selectedVariant.price;
+      }
+      variantDetails = ` - ${selectedVariant.size ? `Size: ${selectedVariant.size}` : ''} ${selectedVariant.color ? `Color: ${selectedVariant.color}` : ''}`.trim();
+    }
+
     addToCart({
-      id: product.id,
-      title: product.title,
-      price: Number(product.price),
+      id: product.hasVariations ? `${product.id}-${selectedVariantIndex}` : product.id,
+      productId: product.id,
+      title: product.title + (variantDetails ? ` ${variantDetails}` : ''),
+      price: price,
       image: product.previewImage || product.images?.[0] || '',
       sellerId: product.sellerId
     });
     toast.success('Added to your cart!');
   };
+
+  const currentPrice = product.hasVariations && product.variants?.[selectedVariantIndex]?.price != null 
+    ? Number(product.variants[selectedVariantIndex].price) 
+    : Number(product.price);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -193,11 +210,43 @@ export default function ProductDetailPage() {
             </div>
             <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-4">{product.title}</h1>
             <div className="text-4xl font-bold text-black mb-6">
-              GH₵{Number(product.price).toFixed(2)}
+              GH₵{currentPrice.toFixed(2)}
             </div>
-            <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+            <p className="text-gray-600 leading-relaxed whitespace-pre-wrap mb-6">
               {product.description}
             </p>
+
+            {/* Variations */}
+            {product.hasVariations && product.variants?.length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wider">Select Options</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {product.variants.map((v: any, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedVariantIndex(idx)}
+                      disabled={v.quantity <= 0}
+                      className={`relative flex flex-col items-start p-3 rounded-xl border-2 text-left transition-all ${
+                        selectedVariantIndex === idx 
+                          ? 'border-black bg-gray-50' 
+                          : 'border-gray-100 hover:border-gray-200 bg-white'
+                      } ${v.quantity <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {v.size && <span className="font-bold text-gray-900">{v.size}</span>}
+                      {v.color && <span className="text-sm text-gray-500">{v.color}</span>}
+                      {v.quantity <= 0 && <span className="text-xs text-red-500 font-bold mt-1">Out of Stock</span>}
+                      {v.price != null && (
+                         <span className="text-xs font-bold text-black mt-1">GH₵{v.price.toFixed(2)}</span>
+                      )}
+                      
+                      {selectedVariantIndex === idx && (
+                        <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#d9ff00]" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Seller Info */}
@@ -286,10 +335,10 @@ export default function ProductDetailPage() {
             <div className="flex flex-wrap sm:flex-nowrap gap-3 mb-4">
               <button 
                 onClick={handleAddToCart}
-                disabled={items.some(i => i.id === product.id) || userData?.role === 'vendor'}
+                disabled={items.some(i => i.id === (product.hasVariations ? `${product.id}-${selectedVariantIndex}` : product.id)) || userData?.role === 'vendor' || (product.hasVariations && product.variants?.[selectedVariantIndex]?.quantity <= 0)}
                 className="flex-[2] bg-[#d9ff00] text-black py-4 px-4 rounded-xl font-bold text-base sm:text-lg hover:bg-[#c4e600] transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <ShoppingBag className="w-5 h-5 flex-shrink-0" /> {items.some(i => i.id === product.id) ? 'In Cart' : 'Add to Cart'}
+                <ShoppingBag className="w-5 h-5 flex-shrink-0" /> {items.some(i => i.id === (product.hasVariations ? `${product.id}-${selectedVariantIndex}` : product.id)) ? 'In Cart' : 'Add to Cart'}
               </button>
               
               <button 

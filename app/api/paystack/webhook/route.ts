@@ -54,13 +54,21 @@ export async function POST(req: Request) {
           const { buyerId, items, deliveryMethod } = metadata;
           const totalAmount = items.reduce((sum: number, item: any) => sum + item.price, 0);
 
-          // FETCH USERS FOR CHAT BEFORE WRITES (Transactions require reads before writes)
+          // FETCH USERS & PRODUCTS BEFORE WRITES (Transactions require reads before writes)
           const uniqueSellerIds = Array.from(new Set(items.map((item: any) => item.sellerId)));
           const userRefs = [
             adminDb.collection('users').doc(buyerId),
             ...uniqueSellerIds.map(id => adminDb.collection('users').doc(id as string))
           ];
-          const userSnaps = await transaction.getAll(...userRefs);
+          
+          const productRefs = items.map((item: any) => adminDb.collection('products').doc(item.productId || item.id));
+
+          const allRefs = [...userRefs, ...productRefs];
+          const allSnaps = await transaction.getAll(...allRefs);
+          
+          const userSnaps = allSnaps.slice(0, userRefs.length);
+          const productSnaps = allSnaps.slice(userRefs.length);
+
           const buyerData = userSnaps[0].data() || {};
           
           const sellerDataMap: Record<string, any> = {};
@@ -68,6 +76,14 @@ export async function POST(req: Request) {
             const snap = userSnaps[i];
             if (snap.exists) {
               sellerDataMap[snap.id] = snap.data() || {};
+            }
+          }
+          
+          const productDataMap: Record<string, any> = {};
+          for (let i = 0; i < productSnaps.length; i++) {
+            const snap = productSnaps[i];
+            if (snap.exists) {
+              productDataMap[snap.id] = snap.data() || {};
             }
           }
           
@@ -106,9 +122,33 @@ export async function POST(req: Request) {
               createdAt: FieldValue.serverTimestamp(),
             });
 
-            // Update Product Status
-            const productRef = adminDb.collection('products').doc(item.id);
-            transaction.update(productRef, { status: 'sold' });
+            // Update Product Status/Quantity
+            const productRef = adminDb.collection('products').doc(item.productId || item.id);
+            const productData = productDataMap[item.productId || item.id] || {};
+            
+            let newTotalQuantity = productData.quantity || 1;
+            let updateData: any = {};
+            
+            if (productData.hasVariations && item.id.includes('-')) {
+              const variantIndex = parseInt(item.id.split('-')[1]);
+              if (!isNaN(variantIndex) && productData.variants && productData.variants[variantIndex]) {
+                const variants = [...productData.variants];
+                variants[variantIndex] = {
+                   ...variants[variantIndex],
+                   quantity: Math.max(0, (variants[variantIndex].quantity || 1) - 1)
+                };
+                updateData.variants = variants;
+                newTotalQuantity = variants.reduce((sum: number, v: any) => sum + (v.quantity || 0), 0);
+              }
+            } else {
+              newTotalQuantity = Math.max(0, (productData.quantity || 1) - 1);
+            }
+
+            updateData.quantity = newTotalQuantity;
+            if (newTotalQuantity <= 0) {
+               updateData.status = 'sold';
+            }
+            transaction.update(productRef, updateData);
 
             // Create Chat
             const deterministicChatId = `${buyerId}_${item.sellerId}_${item.id}`;

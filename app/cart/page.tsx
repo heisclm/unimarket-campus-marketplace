@@ -98,7 +98,7 @@ export default function CartPage() {
             'Authorization': `Bearer ${idToken}`
           },
           body: JSON.stringify({
-            items: items.map(item => ({ id: item.id, title: item.title, price: item.price, sellerId: item.sellerId })),
+            items: items.map(item => ({ id: item.id, productId: item.productId, title: item.title, price: item.price, sellerId: item.sellerId })),
             deliveryMethod
           })
         });
@@ -134,6 +134,7 @@ export default function CartPage() {
               deliveryMethod,
               items: items.map(item => ({
                 id: item.id,
+                productId: item.productId,
                 title: item.title,
                 price: item.price,
                 sellerId: item.sellerId

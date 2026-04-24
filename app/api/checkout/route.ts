@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     // 3. Execute Secure Transaction
     const result = await adminDb.runTransaction(async (transaction) => {
       // Fetch all products to verify prices and availability
-      const productRefs = items.map(item => adminDb!.collection('products').doc(item.id));
+      const productRefs = items.map(item => adminDb!.collection('products').doc(item.productId || item.id));
       const productSnaps = await transaction.getAll(...productRefs);
 
       let subtotal = 0;
@@ -64,13 +64,26 @@ export async function POST(req: NextRequest) {
           throw new Error(`You cannot buy your own product: ${data.title}`);
         }
 
-        subtotal += data.price;
+        let productPrice = data.price;
+        if (data.hasVariations && items[i].id.includes('-')) {
+          const variantIndex = parseInt(items[i].id.split('-')[1]);
+          if (!isNaN(variantIndex) && data.variants && data.variants[variantIndex]) {
+            const variant = data.variants[variantIndex];
+            if (variant.price != null && variant.price !== undefined) {
+              productPrice = variant.price;
+            }
+          }
+        }
+
+        subtotal += productPrice;
         validItems.push({
           id: snap.id,
-          title: data.title,
-          price: data.price,
+          cartItemId: items[i].id,
+          title: data.hasVariations ? items[i].title : data.title,
+          price: productPrice,
           sellerId: data.sellerId,
-          ref: snap.ref
+          ref: snap.ref,
+          productData: data
         });
       }
 
@@ -135,10 +148,34 @@ export async function POST(req: NextRequest) {
           updatedAt: FieldValue.serverTimestamp()
         });
 
-        transaction.update(item.ref, {
-          status: 'sold',
-          updatedAt: FieldValue.serverTimestamp()
-        });
+        // Calculate new quantity
+        const productData = item.productData;
+        let newTotalQuantity = productData.quantity || 1;
+        let updateData: any = {
+           updatedAt: FieldValue.serverTimestamp()
+        };
+
+        if (productData.hasVariations && item.cartItemId.includes('-')) {
+          const variantIndex = parseInt(item.cartItemId.split('-')[1]);
+          if (!isNaN(variantIndex) && productData.variants && productData.variants[variantIndex]) {
+            const variants = [...productData.variants];
+            variants[variantIndex] = {
+               ...variants[variantIndex],
+               quantity: Math.max(0, (variants[variantIndex].quantity || 1) - 1)
+            };
+            updateData.variants = variants;
+            newTotalQuantity = variants.reduce((sum: number, v: any) => sum + (v.quantity || 0), 0);
+          }
+        } else {
+          newTotalQuantity = Math.max(0, (productData.quantity || 1) - 1);
+        }
+
+        updateData.quantity = newTotalQuantity;
+        if (newTotalQuantity <= 0) {
+           updateData.status = 'sold';
+        }
+
+        transaction.update(item.ref, updateData);
 
         // Create or update Chat using Idempotent / Deterministic IDs
         const deterministicChatId = `${buyerId}_${item.sellerId}_${item.id}`;

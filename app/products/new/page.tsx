@@ -22,7 +22,7 @@ export default function NewProductPage() {
   const [offersDelivery, setOffersDelivery] = useState(false);
   const [hasVariations, setHasVariations] = useState(false);
   const [quantity, setQuantity] = useState('1');
-  const [variants, setVariants] = useState([{ id: 1, size: '', color: '', quantity: '1' }]);
+  const [variants, setVariants] = useState([{ id: 1, size: '', color: '', quantity: '1', price: '' }]);
   const [auctionDuration, setAuctionDuration] = useState('24'); // hours
   const [customAuctionDate, setCustomAuctionDate] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -123,7 +123,8 @@ export default function NewProductPage() {
   };
 
   const addVariant = () => {
-    setVariants([...variants, { id: Date.now(), size: '', color: '', quantity: '1' }]);
+    const newId = variants.length > 0 ? Math.max(...variants.map(v => v.id)) + 1 : 1;
+    setVariants([...variants, { id: newId, size: '', color: '', quantity: '1', price: '' }]);
   };
 
   const updateVariant = (id: number, field: string, value: string) => {
@@ -163,7 +164,7 @@ export default function NewProductPage() {
         : parseInt(quantity) || 1;
 
       const finalVariants = hasVariations 
-        ? variants.map(v => ({ size: v.size, color: v.color, quantity: parseInt(v.quantity) || 0 }))
+        ? variants.map(v => ({ size: v.size, color: v.color, quantity: parseInt(v.quantity) || 0, price: v.price ? parseFloat(v.price) : null }))
         : [];
 
       // 1. Create product document first to get ID
@@ -344,15 +345,16 @@ export default function NewProductPage() {
           ) : (
             <div className="space-y-4 animate-in fade-in">
               <div className="hidden md:grid grid-cols-12 gap-4 text-sm font-bold text-gray-500 px-2">
-                <div className="col-span-4">Size (e.g., L, 42)</div>
-                <div className="col-span-4">Color</div>
-                <div className="col-span-3">Quantity</div>
+                <div className="col-span-3">Size</div>
+                <div className="col-span-3">Color</div>
+                <div className="col-span-2">Quantity</div>
+                <div className="col-span-3">Price (Opt)</div>
                 <div className="col-span-1 text-center">Action</div>
               </div>
               
               {variants.map((variant, index) => (
                 <div key={variant.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-gray-50 md:bg-transparent p-4 md:p-0 rounded-xl border md:border-none border-gray-200">
-                  <div className="col-span-1 md:col-span-4">
+                  <div className="col-span-1 md:col-span-3">
                     <label className="block md:hidden text-xs font-bold text-gray-500 mb-1">Size</label>
                     <input 
                       type="text" 
@@ -362,7 +364,7 @@ export default function NewProductPage() {
                       className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                     />
                   </div>
-                  <div className="col-span-1 md:col-span-4">
+                  <div className="col-span-1 md:col-span-3">
                      <label className="block md:hidden text-xs font-bold text-gray-500 mb-1">Color</label>
                     <input 
                       type="text" 
@@ -372,13 +374,25 @@ export default function NewProductPage() {
                       className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                     />
                   </div>
-                  <div className="col-span-1 md:col-span-3">
+                  <div className="col-span-1 md:col-span-2">
                      <label className="block md:hidden text-xs font-bold text-gray-500 mb-1">Quantity</label>
                     <input 
                       type="number" 
                       min="0"
                       value={variant.quantity}
                       onChange={(e) => updateVariant(variant.id, 'quantity', e.target.value)}
+                      className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                  </div>
+                  <div className="col-span-1 md:col-span-3">
+                     <label className="block md:hidden text-xs font-bold text-gray-500 mb-1">Price Override (GH₵)</label>
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      min="0"
+                      placeholder="Leave empty for base price"
+                      value={variant.price || ''}
+                      onChange={(e) => updateVariant(variant.id, 'price', e.target.value)}
                       className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                     />
                   </div>

@@ -67,8 +67,22 @@ export async function GET(req: Request) {
       if (metadata.type === 'cart_checkout') {
         const { buyerId, items, deliveryMethod } = metadata;
         const totalAmount = items.reduce((sum: number, item: any) => sum + item.price, 0);
-        
+
         const buyerRef = adminDb.collection('users').doc(buyerId);
+        
+        const productRefs = items.map((item: any) => adminDb.collection('products').doc(item.productId || item.id));
+        const allRefs = [buyerRef, ...productRefs];
+        const allSnaps = await transaction.getAll(...allRefs);
+
+        const productSnaps = allSnaps.slice(1);
+        const productDataMap: Record<string, any> = {};
+        for (let i = 0; i < productSnaps.length; i++) {
+          const snap = productSnaps[i];
+          if (snap.exists) {
+            productDataMap[snap.id] = snap.data() || {};
+          }
+        }
+        
         transaction.update(buyerRef, {
           totalSpent: FieldValue.increment(totalAmount)
         });
@@ -78,7 +92,7 @@ export async function GET(req: Request) {
           transaction.set(orderRef, {
             buyerId,
             sellerId: item.sellerId,
-            productId: item.id,
+            productId: item.productId || item.id,
             productTitle: item.title,
             amount: item.price,
             status: 'escrow_held',
@@ -100,8 +114,32 @@ export async function GET(req: Request) {
             createdAt: FieldValue.serverTimestamp(),
           });
 
-          const productRef = adminDb.collection('products').doc(item.id);
-          transaction.update(productRef, { status: 'sold' });
+          const productRef = adminDb.collection('products').doc(item.productId || item.id);
+          const productData = productDataMap[item.productId || item.id] || {};
+            
+          let newTotalQuantity = productData.quantity || 1;
+          let updateData: any = {};
+          
+          if (productData.hasVariations && item.id.includes('-')) {
+            const variantIndex = parseInt(item.id.split('-')[1]);
+            if (!isNaN(variantIndex) && productData.variants && productData.variants[variantIndex]) {
+              const variants = [...productData.variants];
+              variants[variantIndex] = {
+                 ...variants[variantIndex],
+                 quantity: Math.max(0, (variants[variantIndex].quantity || 1) - 1)
+              };
+              updateData.variants = variants;
+              newTotalQuantity = variants.reduce((sum: number, v: any) => sum + (v.quantity || 0), 0);
+            }
+          } else {
+            newTotalQuantity = Math.max(0, (productData.quantity || 1) - 1);
+          }
+
+          updateData.quantity = newTotalQuantity;
+          if (newTotalQuantity <= 0) {
+             updateData.status = 'sold';
+          }
+          transaction.update(productRef, updateData);
 
           const chatRef = adminDb.collection('chats').doc();
           transaction.set(chatRef, {
