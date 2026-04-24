@@ -17,7 +17,7 @@ export default function ProductCard({ product }: { product: any }) {
   useEffect(() => {
     const favorites = JSON.parse(localStorage.getItem('unimart_favorites') || '[]');
     if (favorites.some((item: any) => item.id === product.id)) {
-      setIsFavorite(true);
+      setTimeout(() => setIsFavorite(true), 0);
     }
 
     const handleWishlistUpdate = () => {

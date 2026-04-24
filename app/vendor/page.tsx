@@ -48,7 +48,7 @@ export default function VendorDashboard() {
       unsubProducts();
       unsubOrders();
     };
-  }, [user, role]);
+  }, [user, role, router]);
 
   const handleMarkDelivered = async (order: any) => {
     if (order.status !== 'escrow_held') return;

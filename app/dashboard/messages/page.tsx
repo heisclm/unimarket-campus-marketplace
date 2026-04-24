@@ -5,11 +5,12 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, setDoc, limit, getDocs, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { confirmOrderReceipt, rejectOrderReceipt, respondToRejection } from '@/lib/escrow';
-import { Search, Send, User, ArrowLeft, Clock, ShoppingBag, MessageSquare, AlertTriangle, ShieldCheck, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Send, User, ArrowLeft, Clock, ShoppingBag, MessageSquare, AlertTriangle, ShieldCheck, CheckCircle, XCircle, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
+import toast from 'react-hot-toast';
 
 interface Chat {
   id: string;
@@ -21,6 +22,7 @@ interface Chat {
   productId?: string;
   productTitle?: string;
   unreadCount?: Record<string, number>;
+  isCompleted?: boolean;
 }
 
 interface Message {
@@ -41,6 +43,14 @@ function MessagesContent() {
   const [isProcessingAction, setIsProcessingAction] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
+  
+  // Review System State
+  const [hasReviewed, setHasReviewed] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const initializingRef = useRef(false);
   const searchParams = useSearchParams();
@@ -185,7 +195,15 @@ function MessagesContent() {
 
     const unsubscribe = onSnapshot(doc(db, 'orders', activeChat.orderId), (snapshot) => {
       if (snapshot.exists()) {
-        setActiveOrder({ id: snapshot.id, ...snapshot.data() });
+        const orderData = { id: snapshot.id, ...snapshot.data() };
+        setActiveOrder(orderData);
+        
+        // Auto-archive chat if order is completed
+        if (orderData.status === 'completed' && !activeChat.isCompleted) {
+           updateDoc(doc(db, 'chats', activeChatId), {
+             isCompleted: true
+           }).catch(console.error);
+        }
       } else {
         setActiveOrder(null);
       }
@@ -193,6 +211,46 @@ function MessagesContent() {
 
     return () => unsubscribe();
   }, [activeChatId, chats]);
+
+  // Check if User Has Reviewed Completed Order
+  useEffect(() => {
+    if (!activeOrder || !user) return;
+    
+    if (activeOrder.status === 'completed' && activeOrder.buyerId === user.uid) {
+      const fetchReview = async () => {
+        const q = query(
+          collection(db, 'reviews'),
+          where('orderId', '==', activeOrder.id),
+          where('buyerId', '==', user.uid)
+        );
+        const snap = await getDocs(q);
+        setHasReviewed(!snap.empty);
+      };
+      fetchReview();
+    }
+  }, [activeOrder, user]);
+
+  const submitReview = async () => {
+    if (!activeOrder || !user || !rating) return;
+    try {
+      setIsSubmittingReview(true);
+      await addDoc(collection(db, 'reviews'), {
+        buyerId: user.uid,
+        sellerId: activeOrder.sellerId,
+        orderId: activeOrder.id,
+        rating,
+        comment: reviewComment,
+        createdAt: serverTimestamp()
+      });
+      setHasReviewed(true);
+      toast.success('Review submitted successfully!');
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to submit review');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -243,7 +301,13 @@ function MessagesContent() {
   const filteredChats = chats.filter(chat => {
     const otherId = chat.participants.find(id => id !== user?.uid);
     const otherName = otherId ? chat.participantDetails?.[otherId]?.name?.toLowerCase() : '';
-    return otherName?.includes(searchQuery.toLowerCase()) || chat.productTitle?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = otherName?.includes(searchQuery.toLowerCase()) || chat.productTitle?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    if (activeTab === 'completed') {
+      return matchesSearch && chat.isCompleted;
+    } else {
+      return matchesSearch && !chat.isCompleted;
+    }
   });
 
   if (!user) return null;
@@ -254,8 +318,22 @@ function MessagesContent() {
         
         {/* Chat List (Left Pane) */}
         <div className={`w-full md:w-96 flex-shrink-0 border-r border-gray-100 flex flex-col ${activeChatId ? 'hidden md:flex' : 'flex'}`}>
-          <div className="p-4 sm:p-6 border-b border-gray-100">
-            <h1 className="text-2xl font-black tracking-tight text-gray-900 mb-4">Messages</h1>
+          <div className="p-4 sm:p-6 border-b border-gray-100 flex flex-col gap-4">
+            <h1 className="text-2xl font-black tracking-tight text-gray-900">Messages</h1>
+            <div className="flex bg-gray-100 p-1 rounded-xl">
+              <button
+                onClick={() => setActiveTab('active')}
+                className={`flex-1 py-1.5 text-sm font-bold rounded-lg transition-colors ${activeTab === 'active' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
+              >
+                Active
+              </button>
+              <button
+                onClick={() => setActiveTab('completed')}
+                className={`flex-1 py-1.5 text-sm font-bold rounded-lg transition-colors ${activeTab === 'completed' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'}`}
+              >
+                Completed
+              </button>
+            </div>
             <div className="relative">
               <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -466,24 +544,72 @@ function MessagesContent() {
                 <div ref={messagesEndRef} className="h-4" />
               </div>
 
-              {/* Input Area */}
+              {/* Input Area / Review Area */}
               <div className="p-4 sm:p-6 bg-white border-t border-gray-100 flex-shrink-0 pb-safe">
-                <form onSubmit={handleSendMessage} className="flex items-center gap-3">
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
-                    className="flex-1 bg-gray-50 border-none rounded-full px-6 py-4 text-sm focus:ring-2 focus:ring-[#d9ff00] focus:bg-white transition-all"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!newMessage.trim()}
-                    className="w-12 h-12 bg-[#d9ff00] text-black rounded-full flex items-center justify-center hover:bg-[#c4e600] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 shadow-sm"
-                  >
-                    <Send className="w-5 h-5 ml-1" />
-                  </button>
-                </form>
+                {activeOrder?.status === 'completed' ? (
+                  <div className="bg-gray-50 rounded-2xl p-6 text-center shadow-inner border border-gray-100">
+                    <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                    <h4 className="font-bold text-gray-900 mb-1">Order Completed</h4>
+                    <p className="text-sm text-gray-500 mb-4">This chat is now read-only.</p>
+                    
+                    {user.uid === activeOrder.buyerId && (
+                      <div className="mt-4 bg-white p-4 rounded-xl border border-gray-200">
+                        {hasReviewed ? (
+                          <div className="flex items-center justify-center gap-2 text-green-600 font-bold text-sm">
+                            <Star className="w-4 h-4 fill-current" />
+                            You have reviewed this order.
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <h5 className="font-bold text-sm text-gray-900">Leave a Review for {otherParticipant.name}</h5>
+                            <div className="flex justify-center gap-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  onClick={() => setRating(star)}
+                                  className={`p-1 transition-transform hover:scale-110 ${rating >= star ? 'text-yellow-400' : 'text-gray-200'}`}
+                                >
+                                  <Star className={`w-8 h-8 ${rating >= star ? 'fill-current' : ''}`} />
+                                </button>
+                              ))}
+                            </div>
+                            <textarea
+                              value={reviewComment}
+                              onChange={(e) => setReviewComment(e.target.value)}
+                              placeholder="Write a short review... (optional)"
+                              className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#d9ff00]"
+                              rows={2}
+                            />
+                            <button
+                              onClick={submitReview}
+                              disabled={isSubmittingReview || !rating}
+                              className="w-full bg-black text-white py-2 rounded-xl text-sm font-bold hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                            >
+                              {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <form onSubmit={handleSendMessage} className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Type a message..."
+                      className="flex-1 bg-gray-50 border-none rounded-full px-6 py-4 text-sm focus:ring-2 focus:ring-[#d9ff00] focus:bg-white transition-all"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!newMessage.trim()}
+                      className="w-12 h-12 bg-[#d9ff00] text-black rounded-full flex items-center justify-center hover:bg-[#c4e600] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 shadow-sm"
+                    >
+                      <Send className="w-5 h-5 ml-1" />
+                    </button>
+                  </form>
+                )}
               </div>
             </>
           ) : (

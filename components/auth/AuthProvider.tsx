@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Safety: Skip checks if Firebase is not initialized
     if (!db || !auth) {
       console.warn("Firebase Auth or DB not initialized. Skipping connection audit.");
-      setLoading(false);
+      setTimeout(() => setLoading(false), 0);
       return;
     }
 

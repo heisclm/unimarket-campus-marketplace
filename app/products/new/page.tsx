@@ -22,7 +22,7 @@ export default function NewProductPage() {
   const [offersDelivery, setOffersDelivery] = useState(false);
   const [hasVariations, setHasVariations] = useState(false);
   const [quantity, setQuantity] = useState('1');
-  const [variants, setVariants] = useState([{ id: Date.now(), size: '', color: '', quantity: '1' }]);
+  const [variants, setVariants] = useState([{ id: 1, size: '', color: '', quantity: '1' }]);
   const [auctionDuration, setAuctionDuration] = useState('24'); // hours
   const [customAuctionDate, setCustomAuctionDate] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -304,7 +304,7 @@ export default function NewProductPage() {
             />
             <div className="flex flex-col">
               <span className="font-bold text-gray-900">Offer Campus/Dorm Delivery</span>
-              <span className="text-sm text-gray-500 font-normal">Delivery fee will be calculated at checkout based on buyer's location.</span>
+              <span className="text-sm text-gray-500 font-normal">Delivery fee will be calculated at checkout based on buyer&apos;s location.</span>
             </div>
           </label>
         </div>

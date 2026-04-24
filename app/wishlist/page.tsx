@@ -37,7 +37,7 @@ export default function WishlistPage() {
         </div>
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-2">Your Wishlist is Empty</h1>
-          <p className="text-gray-500 max-w-md mx-auto mb-8">You haven't saved any items yet. Start exploring the marketplace and save items you love!</p>
+          <p className="text-gray-500 max-w-md mx-auto mb-8">You haven&apos;t saved any items yet. Start exploring the marketplace and save items you love!</p>
           <Link href="/products" className="bg-black text-white px-8 py-3 rounded-full font-bold inline-flex items-center gap-2 hover:bg-gray-800 transition-colors">
             Explore Marketplace <ArrowRight className="w-4 h-4" />
           </Link>
