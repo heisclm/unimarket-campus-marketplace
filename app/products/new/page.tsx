@@ -6,7 +6,7 @@ import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/fi
 import { db } from '@/lib/firebase';
 import { uploadImage } from '@/lib/storage';
 import { useRouter } from 'next/navigation';
-import { Package, DollarSign, Image as ImageIcon, AlignLeft, Tag, ShieldCheck, X, UploadCloud } from 'lucide-react';
+import { Package, DollarSign, Image as ImageIcon, AlignLeft, Tag, ShieldCheck, X, UploadCloud, Plus, Trash2, Layers } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 
@@ -20,7 +20,9 @@ export default function NewProductPage() {
   const [category, setCategory] = useState('Electronics');
   const [type, setType] = useState('fixed');
   const [offersDelivery, setOffersDelivery] = useState(false);
-  const [deliveryFee, setDeliveryFee] = useState('');
+  const [hasVariations, setHasVariations] = useState(false);
+  const [quantity, setQuantity] = useState('1');
+  const [variants, setVariants] = useState([{ id: Date.now(), size: '', color: '', quantity: '1' }]);
   const [auctionDuration, setAuctionDuration] = useState('24'); // hours
   const [customAuctionDate, setCustomAuctionDate] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -120,6 +122,20 @@ export default function NewProductPage() {
     }
   };
 
+  const addVariant = () => {
+    setVariants([...variants, { id: Date.now(), size: '', color: '', quantity: '1' }]);
+  };
+
+  const updateVariant = (id: number, field: string, value: string) => {
+    setVariants(variants.map(v => v.id === id ? { ...v, [field]: value } : v));
+  };
+
+  const removeVariant = (id: number) => {
+    if (variants.length > 1) {
+      setVariants(variants.filter(v => v.id !== id));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -142,6 +158,14 @@ export default function NewProductPage() {
         }
       }
 
+      const totalQuantity = hasVariations 
+        ? variants.reduce((sum, v) => sum + (parseInt(v.quantity) || 0), 0)
+        : parseInt(quantity) || 1;
+
+      const finalVariants = hasVariations 
+        ? variants.map(v => ({ size: v.size, color: v.color, quantity: parseInt(v.quantity) || 0 }))
+        : [];
+
       // 1. Create product document first to get ID
       const productData = {
         title,
@@ -151,7 +175,9 @@ export default function NewProductPage() {
         sellerIsVerified: true,
         category,
         offersDelivery,
-        deliveryFee: offersDelivery ? parseFloat(deliveryFee) || 0 : 0,
+        hasVariations,
+        quantity: totalQuantity,
+        variants: finalVariants,
         images: [], // Will update after upload
         previewImage: '', // Will update after upload
         status: 'active', // Bypassing Admin Approval since user is already KYC verified
@@ -268,7 +294,7 @@ export default function NewProductPage() {
         </div>
 
         {/* Delivery Options */}
-        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-2">
           <label className="flex items-center gap-3 cursor-pointer">
             <input 
               type="checkbox"
@@ -276,26 +302,106 @@ export default function NewProductPage() {
               onChange={(e) => setOffersDelivery(e.target.checked)}
               className="w-5 h-5 accent-black rounded border-gray-300 text-black focus:ring-black"
             />
-            <span className="font-bold text-gray-900">Offer Campus/Dorm Delivery</span>
+            <div className="flex flex-col">
+              <span className="font-bold text-gray-900">Offer Campus/Dorm Delivery</span>
+              <span className="text-sm text-gray-500 font-normal">Delivery fee will be calculated at checkout based on buyer's location.</span>
+            </div>
           </label>
-          
-          {offersDelivery && (
-            <div className="mt-4 animate-in fade-in slide-in-from-top-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Delivery Fee (GH₵)</label>
+        </div>
+
+        {/* Inventory & Variations */}
+        <div className="bg-white border rounded-2xl border-gray-200 p-6">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h3 className="text-lg font-bold">Inventory & Options</h3>
+              <p className="text-sm text-gray-500">Manage stock and product variations.</p>
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer bg-gray-50 px-3 py-2 rounded-lg border">
+              <input 
+                type="checkbox"
+                checked={hasVariations}
+                onChange={(e) => setHasVariations(e.target.checked)}
+                className="w-4 h-4 accent-black rounded"
+              />
+              <span className="text-sm font-medium text-gray-900">Has multiple sizes/colors</span>
+            </label>
+          </div>
+
+          {!hasVariations ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Total Quantity Available</label>
               <div className="relative">
-                <DollarSign className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                <Layers className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
                 <input 
                   type="number" 
-                  step="0.01"
-                  min="0"
-                  value={deliveryFee}
-                  onChange={(e) => setDeliveryFee(e.target.value)}
-                  placeholder="e.g., 5.00"
-                  required={offersDelivery}
-                  className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all"
+                  min="1"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  className="w-full md:w-1/2 pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-2">Set how much you charge to deliver this item directly to a buyer&apos;s dorm.</p>
+            </div>
+          ) : (
+            <div className="space-y-4 animate-in fade-in">
+              <div className="hidden md:grid grid-cols-12 gap-4 text-sm font-bold text-gray-500 px-2">
+                <div className="col-span-4">Size (e.g., L, 42)</div>
+                <div className="col-span-4">Color</div>
+                <div className="col-span-3">Quantity</div>
+                <div className="col-span-1 text-center">Action</div>
+              </div>
+              
+              {variants.map((variant, index) => (
+                <div key={variant.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-gray-50 md:bg-transparent p-4 md:p-0 rounded-xl border md:border-none border-gray-200">
+                  <div className="col-span-1 md:col-span-4">
+                    <label className="block md:hidden text-xs font-bold text-gray-500 mb-1">Size</label>
+                    <input 
+                      type="text" 
+                      placeholder="Size"
+                      value={variant.size}
+                      onChange={(e) => updateVariant(variant.id, 'size', e.target.value)}
+                      className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                  </div>
+                  <div className="col-span-1 md:col-span-4">
+                     <label className="block md:hidden text-xs font-bold text-gray-500 mb-1">Color</label>
+                    <input 
+                      type="text" 
+                      placeholder="Color"
+                      value={variant.color}
+                      onChange={(e) => updateVariant(variant.id, 'color', e.target.value)}
+                      className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                  </div>
+                  <div className="col-span-1 md:col-span-3">
+                     <label className="block md:hidden text-xs font-bold text-gray-500 mb-1">Quantity</label>
+                    <input 
+                      type="number" 
+                      min="0"
+                      value={variant.quantity}
+                      onChange={(e) => updateVariant(variant.id, 'quantity', e.target.value)}
+                      className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                  </div>
+                  <div className="col-span-1 flex justify-end md:justify-center mt-2 md:mt-0">
+                    <button 
+                      type="button" 
+                      onClick={() => removeVariant(variant.id)}
+                      disabled={variants.length === 1}
+                      className="p-2 text-gray-400 hover:text-red-500 disabled:opacity-30 transition-colors"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              
+              <button
+                type="button"
+                onClick={addVariant}
+                className="flex items-center gap-2 text-sm font-bold text-black border border-gray-200 bg-gray-50 hover:bg-gray-100 rounded-lg px-4 py-2 transition-all mt-2"
+              >
+                <Plus className="w-4 h-4" /> Add Variation
+              </button>
             </div>
           )}
         </div>
