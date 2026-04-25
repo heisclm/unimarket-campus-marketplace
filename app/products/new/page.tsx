@@ -22,7 +22,7 @@ export default function NewProductPage() {
   const [offersDelivery, setOffersDelivery] = useState(false);
   const [hasVariations, setHasVariations] = useState(false);
   const [quantity, setQuantity] = useState('1');
-  const [variants, setVariants] = useState([{ id: 1, size: '', color: '', quantity: '1', price: '' }]);
+  const [variants, setVariants] = useState([{ id: 1, name: '', quantity: '1', price: '' }]);
   const [auctionDuration, setAuctionDuration] = useState('24'); // hours
   const [customAuctionDate, setCustomAuctionDate] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -124,7 +124,7 @@ export default function NewProductPage() {
 
   const addVariant = () => {
     const newId = variants.length > 0 ? Math.max(...variants.map(v => v.id)) + 1 : 1;
-    setVariants([...variants, { id: newId, size: '', color: '', quantity: '1', price: '' }]);
+    setVariants([...variants, { id: newId, name: '', quantity: '1', price: '' }]);
   };
 
   const updateVariant = (id: number, field: string, value: string) => {
@@ -164,7 +164,7 @@ export default function NewProductPage() {
         : parseInt(quantity) || 1;
 
       const finalVariants = hasVariations 
-        ? variants.map(v => ({ size: v.size, color: v.color, quantity: parseInt(v.quantity) || 0, price: v.price ? parseFloat(v.price) : null }))
+        ? variants.map(v => ({ name: v.name, quantity: parseInt(v.quantity) || 0, price: v.price ? parseFloat(v.price) : null }))
         : [];
 
       // 1. Create product document first to get ID
@@ -324,7 +324,7 @@ export default function NewProductPage() {
                 onChange={(e) => setHasVariations(e.target.checked)}
                 className="w-4 h-4 accent-black rounded"
               />
-              <span className="text-sm font-medium text-gray-900">Has multiple sizes/colors</span>
+              <span className="text-sm font-medium text-gray-900">Enable multiple variations</span>
             </label>
           </div>
 
@@ -345,8 +345,7 @@ export default function NewProductPage() {
           ) : (
             <div className="space-y-4 animate-in fade-in">
               <div className="hidden md:grid grid-cols-12 gap-4 text-sm font-bold text-gray-500 px-2">
-                <div className="col-span-3">Size</div>
-                <div className="col-span-3">Color</div>
+                <div className="col-span-6">Variation Details (e.g. 128GB, Large - Red, XL, 512GB SSD)</div>
                 <div className="col-span-2">Quantity</div>
                 <div className="col-span-3">Price (Opt)</div>
                 <div className="col-span-1 text-center">Action</div>
@@ -354,23 +353,13 @@ export default function NewProductPage() {
               
               {variants.map((variant, index) => (
                 <div key={variant.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center bg-gray-50 md:bg-transparent p-4 md:p-0 rounded-xl border md:border-none border-gray-200">
-                  <div className="col-span-1 md:col-span-3">
-                    <label className="block md:hidden text-xs font-bold text-gray-500 mb-1">Size</label>
+                  <div className="col-span-1 md:col-span-6">
+                    <label className="block md:hidden text-xs font-bold text-gray-500 mb-1">Variation Details</label>
                     <input 
                       type="text" 
-                      placeholder="Size"
-                      value={variant.size}
-                      onChange={(e) => updateVariant(variant.id, 'size', e.target.value)}
-                      className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                    />
-                  </div>
-                  <div className="col-span-1 md:col-span-3">
-                     <label className="block md:hidden text-xs font-bold text-gray-500 mb-1">Color</label>
-                    <input 
-                      type="text" 
-                      placeholder="Color"
-                      value={variant.color}
-                      onChange={(e) => updateVariant(variant.id, 'color', e.target.value)}
+                      placeholder="e.g., Space Gray - 256GB"
+                      value={variant.name}
+                      onChange={(e) => updateVariant(variant.id, 'name', e.target.value)}
                       className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                     />
                   </div>

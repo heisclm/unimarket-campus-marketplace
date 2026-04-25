@@ -130,7 +130,7 @@ export default function ProductDetailPage() {
       if (selectedVariant.price !== null && selectedVariant.price !== undefined) {
         price = selectedVariant.price;
       }
-      variantDetails = ` - ${selectedVariant.size ? `Size: ${selectedVariant.size}` : ''} ${selectedVariant.color ? `Color: ${selectedVariant.color}` : ''}`.trim();
+      variantDetails = ` - ${selectedVariant.name || [selectedVariant.size, selectedVariant.color].filter(Boolean).join(', ')}`.trim();
     }
 
     addToCart({
@@ -232,8 +232,9 @@ export default function ProductDetailPage() {
                           : 'border-gray-100 hover:border-gray-200 bg-white'
                       } ${v.quantity <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                      {v.size && <span className="font-bold text-gray-900">{v.size}</span>}
-                      {v.color && <span className="text-sm text-gray-500">{v.color}</span>}
+                      {v.name && <span className="font-bold text-gray-900">{v.name}</span>}
+                      {!v.name && v.size && <span className="font-bold text-gray-900">{v.size}</span>}
+                      {!v.name && v.color && <span className="text-sm text-gray-500">{v.color}</span>}
                       {v.quantity <= 0 && <span className="text-xs text-red-500 font-bold mt-1">Out of Stock</span>}
                       {v.price != null && (
                          <span className="text-xs font-bold text-black mt-1">GH₵{v.price.toFixed(2)}</span>
