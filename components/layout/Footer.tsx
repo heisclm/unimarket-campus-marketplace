@@ -39,10 +39,10 @@ export default function Footer() {
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 mb-6">Marketplace</h3>
             <ul className="space-y-4">
               <li><Link href="/products" className="text-gray-500 hover:text-black transition-colors text-sm">All Products</Link></li>
+              <li><Link href="/products?category=academic%20materials" className="text-gray-500 hover:text-black transition-colors text-sm">Academic Materials</Link></li>
+              <li><Link href="/products?category=hostel%20essentials" className="text-gray-500 hover:text-black transition-colors text-sm">Hostel Essentials</Link></li>
+              <li><Link href="/products?category=food" className="text-gray-500 hover:text-black transition-colors text-sm">Food</Link></li>
               <li><Link href="/products?category=electronics" className="text-gray-500 hover:text-black transition-colors text-sm">Electronics</Link></li>
-              <li><Link href="/products?category=textbooks" className="text-gray-500 hover:text-black transition-colors text-sm">Textbooks</Link></li>
-              <li><Link href="/products?category=furniture" className="text-gray-500 hover:text-black transition-colors text-sm">Furniture</Link></li>
-              <li><Link href="/products?category=clothing" className="text-gray-500 hover:text-black transition-colors text-sm">Clothing</Link></li>
             </ul>
           </div>
 

@@ -19,7 +19,7 @@ import { Gavel } from "lucide-react";
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>(['Tech', 'Books', 'Furniture', 'Clothing', 'Sports']);
+  const [categories, setCategories] = useState<string[]>(['Academic Materials', 'Hostel Essentials', 'Food', 'Tech', 'Furniture', 'Clothing']);
   const [loading, setLoading] = useState(true);
   const [heroIndex, setHeroIndex] = useState(0);
 

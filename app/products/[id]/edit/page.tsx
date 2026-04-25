@@ -39,7 +39,7 @@ export default function EditProductPage() {
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const categories = ['Electronics', 'Books', 'Clothing', 'Services', 'Other'];
+  const categories = ['Academic Materials', 'Hostel Essentials', 'Food', 'Electronics', 'Books', 'Clothing', 'Services', 'Other'];
 
   useEffect(() => {
     const fetchProduct = async () => {

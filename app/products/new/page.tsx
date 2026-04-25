@@ -32,7 +32,7 @@ export default function NewProductPage() {
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const categories = ['Electronics', 'Books', 'Clothing', 'Services', 'Other'];
+  const categories = ['Academic Materials', 'Hostel Essentials', 'Food', 'Electronics', 'Books', 'Clothing', 'Services', 'Other'];
 
   if (!user) {
     return (
