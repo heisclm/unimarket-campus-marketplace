@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, increment, addDoc, serverTimestamp, getDocs, deleteDoc } from 'firebase/firestore';
-import { Store, Package, DollarSign, CheckCircle2, Clock, Trash2, Plus, ExternalLink, ShoppingBag } from 'lucide-react';
+import { Store, Package, DollarSign, CheckCircle2, Clock, Trash2, Plus, ExternalLink, ShoppingBag, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -271,6 +271,12 @@ export default function VendorDashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
+                    <Link
+                      href={`/dashboard/messages?chatId=${order.id}`}
+                      className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-black transition-colors"
+                    >
+                      <MessageSquare className="w-4 h-4" /> Message Buyer
+                    </Link>
                     <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full ${order.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
                       {order.status.replace('_', ' ')}
                     </span>

@@ -106,6 +106,9 @@ export async function POST(req: Request) {
           for (const item of items) {
             const requestedQuantity = item.quantity || 1;
             
+            // Calculate the platform fee per item
+            const itemPlatformFee = item.price * requestedQuantity * 0.02;
+
             // Create Order
             const orderRef = adminDb.collection('orders').doc();
             transaction.set(orderRef, {
@@ -115,6 +118,8 @@ export async function POST(req: Request) {
               productTitle: item.title,
               amount: item.price * requestedQuantity,
               quantity: requestedQuantity,
+              platformFee: itemPlatformFee,
+              netAmount: (item.price * requestedQuantity) - itemPlatformFee,
               status: 'escrow_held',
               createdAt: FieldValue.serverTimestamp(),
               updatedAt: FieldValue.serverTimestamp(),

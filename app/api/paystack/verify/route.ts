@@ -68,16 +68,31 @@ export async function GET(req: Request) {
         const { buyerId, items } = metadata;
         const totalAmount = items.reduce((sum: number, item: any) => sum + item.price, 0);
 
-        const buyerRef = adminDb.collection('users').doc(buyerId);
+        // FETCH USERS & PRODUCTS BEFORE WRITES
+        const uniqueSellerIds = Array.from(new Set(items.map((item: any) => item.sellerId)));
+        const userRefs = [
+          adminDb.collection('users').doc(buyerId),
+          ...uniqueSellerIds.map(id => adminDb.collection('users').doc(id as string))
+        ];
         
         const productRefs = items.map((item: any) => adminDb.collection('products').doc(item.productId || item.id));
-        const allRefs = [buyerRef, ...productRefs];
+
+        const allRefs = [...userRefs, ...productRefs];
         const allSnaps = await transaction.getAll(...allRefs);
+        
+        const userSnaps = allSnaps.slice(0, userRefs.length);
+        const productSnaps = allSnaps.slice(userRefs.length);
 
-        const buyerData = allSnaps[0].data() as any || {};
-        const { useCoins } = metadata;
-
-        const productSnaps = allSnaps.slice(1);
+        const buyerData = userSnaps[0].data() as any || {};
+        
+        const sellerDataMap: Record<string, any> = {};
+        for (let i = 1; i < userSnaps.length; i++) {
+          const snap = userSnaps[i];
+          if (snap.exists) {
+            sellerDataMap[snap.id] = snap.data() || {};
+          }
+        }
+        
         const productDataMap: Record<string, any> = {};
         for (let i = 0; i < productSnaps.length; i++) {
           const snap = productSnaps[i];
@@ -86,8 +101,11 @@ export async function GET(req: Request) {
           }
         }
         
+        // Update buyer total spent
         const amountPaid = paystackData.amount / 100;
-
+        const { useCoins } = metadata;
+        
+        const buyerRef = adminDb.collection('users').doc(buyerId);
         const updateData: any = {
           totalSpent: FieldValue.increment(amountPaid),
           totalCoinsEarned: FieldValue.increment(Math.floor(amountPaid))
@@ -100,34 +118,45 @@ export async function GET(req: Request) {
         transaction.update(buyerRef, updateData);
 
         for (const item of items) {
+          const requestedQuantity = item.quantity || 1;
+          
+          // Calculate the platform fee per item
+          const itemPlatformFee = item.price * requestedQuantity * 0.02;
+
+          // Create Order
           const orderRef = adminDb.collection('orders').doc();
           transaction.set(orderRef, {
             buyerId,
             sellerId: item.sellerId,
             productId: item.productId || item.id,
             productTitle: item.title,
-            amount: item.price,
+            amount: item.price * requestedQuantity,
+            quantity: requestedQuantity,
+            platformFee: itemPlatformFee,
+            netAmount: (item.price * requestedQuantity) - itemPlatformFee,
             status: 'escrow_held',
             createdAt: FieldValue.serverTimestamp(),
             updatedAt: FieldValue.serverTimestamp(),
           });
 
+          // Record Transaction (Hold)
           const txDocRef = adminDb.collection('transactions').doc();
           transaction.set(txDocRef, {
             userId: buyerId,
             senderId: buyerId,
             receiverId: 'escrow',
             orderId: orderRef.id,
-            amount: item.price,
+            amount: item.price * requestedQuantity,
             type: 'escrow_hold',
             status: 'completed',
             reference,
             createdAt: FieldValue.serverTimestamp(),
           });
 
+          // Update Product Status/Quantity
           const productRef = adminDb.collection('products').doc(item.productId || item.id);
           const productData = productDataMap[item.productId || item.id] || {};
-            
+          
           let newTotalQuantity = productData.quantity || 1;
           let updateData: any = {};
           
@@ -137,13 +166,13 @@ export async function GET(req: Request) {
               const variants = [...productData.variants];
               variants[variantIndex] = {
                  ...variants[variantIndex],
-                 quantity: Math.max(0, (variants[variantIndex].quantity || 1) - 1)
+                 quantity: Math.max(0, (variants[variantIndex].quantity || 0) - requestedQuantity)
               };
               updateData.variants = variants;
               newTotalQuantity = variants.reduce((sum: number, v: any) => sum + (v.quantity || 0), 0);
             }
           } else {
-            newTotalQuantity = Math.max(0, (productData.quantity || 1) - 1);
+            newTotalQuantity = Math.max(0, (productData.quantity || 0) - requestedQuantity);
           }
 
           updateData.quantity = newTotalQuantity;
@@ -152,18 +181,57 @@ export async function GET(req: Request) {
           }
           transaction.update(productRef, updateData);
 
-          const chatRef = adminDb.collection('chats').doc();
+          // Create Chat
+          const deterministicChatId = orderRef.id;
+          const chatRef = adminDb.collection('chats').doc(deterministicChatId);
+          
+          const sellerData = sellerDataMap[item.sellerId] || {};
+
           transaction.set(chatRef, {
             participants: [buyerId, item.sellerId],
             buyerId,
             sellerId: item.sellerId,
             orderId: orderRef.id,
+            productId: item.id,
+            productTitle: item.title,
+            participantDetails: {
+              [buyerId]: { name: buyerData.displayName || 'Buyer', photoURL: buyerData.photoURL || '', role: buyerData.role || 'student' },
+              [item.sellerId]: { name: sellerData.displayName || 'Seller', photoURL: sellerData.photoURL || '', role: sellerData.role || 'vendor' }
+            },
             createdAt: FieldValue.serverTimestamp(),
             lastMessage: 'Order placed. Start chatting with the seller!',
             lastMessageAt: FieldValue.serverTimestamp(),
+            [`unreadCount.${item.sellerId}`]: FieldValue.increment(1)
+          }, { merge: true });
+          
+          // Add a system message indicating the start of Escrow
+          const msgRef = adminDb.collection(`chats/${deterministicChatId}/messages`).doc();
+          transaction.set(msgRef, {
+            chatId: deterministicChatId,
+            senderId: 'system',
+            text: `Checkout Alert: Escrow has received funds securely via Paystack. Please communicate to arrange delivery or pickup.`,
+            isSystem: true,
+            productId: item.id,
+            status: 'sent',
+            createdAt: FieldValue.serverTimestamp()
+          });
+
+          const sellerRole = sellerData.role || 'student';
+
+          // Notify the Seller
+          const notifRef = adminDb.collection('notifications').doc();
+          transaction.set(notifRef, {
+            userId: item.sellerId,
+            title: 'New Order Received! 🎉',
+            message: `Cha-ching! Someone just bought ${item.title}. The funds are safe in Escrow. Please prepare for shipment or pickup!`,
+            type: 'order',
+            link: sellerRole === 'vendor' ? '/vendor' : '/dashboard?tab=sales',
+            read: false,
+            createdAt: FieldValue.serverTimestamp()
           });
         }
 
+        // Handle fees
         const platformFee = (paystackData.amount / 100) - totalAmount;
         if (platformFee > 0) {
           const feeTxRef = adminDb.collection('transactions').doc();
