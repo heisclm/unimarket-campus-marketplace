@@ -163,7 +163,7 @@ export async function POST(req: Request) {
             transaction.update(productRef, updateData);
 
             // Create Chat
-            const deterministicChatId = `${buyerId}_${item.sellerId}_${item.id}`;
+            const deterministicChatId = orderRef.id;
             const chatRef = adminDb.collection('chats').doc(deterministicChatId);
             
             const sellerData = sellerDataMap[item.sellerId] || {};

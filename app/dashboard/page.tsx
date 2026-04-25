@@ -410,7 +410,13 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-3 w-full md:w-auto">
+                    <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                      <Link
+                        href={`/dashboard/messages?chatId=${order.id}`}
+                        className="flex-1 md:flex-none border border-gray-200 text-gray-700 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                      >
+                        <MessageSquare className="w-4 h-4" /> Message Seller
+                      </Link>
                       {order.status === 'delivered' && (
                         <button 
                           onClick={() => setOrderToConfirm(order.id)}
@@ -469,7 +475,13 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-3 w-full md:w-auto">
+                    <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                      <Link
+                        href={`/dashboard/messages?chatId=${order.id}`}
+                        className="flex-1 md:flex-none border border-gray-200 text-gray-700 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                      >
+                        <MessageSquare className="w-4 h-4" /> Message Buyer
+                      </Link>
                       {order.status === 'escrow_held' && (
                         <button 
                           onClick={() => handleMarkDelivered(order.id)}

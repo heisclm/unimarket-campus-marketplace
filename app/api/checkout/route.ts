@@ -187,7 +187,7 @@ export async function POST(req: NextRequest) {
         transaction.update(item.ref, updateData);
 
         // Create or update Chat using Idempotent / Deterministic IDs
-        const deterministicChatId = `${buyerId}_${item.sellerId}_${item.id}`;
+        const deterministicChatId = orderRef.id;
         const chatRef = adminDb!.collection('chats').doc(deterministicChatId);
         
         const sellerData = sellerDataMap[item.sellerId] || {};

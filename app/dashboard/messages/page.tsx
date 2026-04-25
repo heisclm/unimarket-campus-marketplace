@@ -68,6 +68,16 @@ function MessagesContent() {
     if (!user || !userData) return;
     const sellerId = searchParams.get('sellerId');
     const productId = searchParams.get('productId');
+    const directChatId = searchParams.get('chatId');
+
+    if (directChatId && !initializingRef.current) {
+      // If we directly pass a chatId (e.g. from an order), switch to it immediately
+      setActiveChatId(directChatId);
+      setTimeout(() => {
+        router.replace('/dashboard/messages');
+      }, 500);
+      return;
+    }
     
     if (sellerId && productId && !initializingRef.current) {
       initializingRef.current = true;
