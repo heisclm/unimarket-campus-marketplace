@@ -191,8 +191,18 @@ service cloud.firestore {
       allow create: if isAuthenticated() && 
                       request.resource.data.authorId == request.auth.uid &&
                       hasRequiredFields(['authorId', 'authorName', 'content', 'likes', 'createdAt']);
-      allow update: if isAuthenticated() && (request.auth.uid == resource.data.authorId || hasOnlyAllowedFields(['likes']) || isAdmin());
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.authorId || 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likedBy']) || 
+        isAdmin()
+      );
       allow delete: if isAuthenticated() && (request.auth.uid == resource.data.authorId || isAdmin());
+      
+      match /replies/{replyId} {
+        allow read: if true;
+        allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+        allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.authorId || isAdmin());
+      }
     }
 
     // Reports Collection

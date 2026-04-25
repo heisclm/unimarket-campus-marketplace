@@ -65,7 +65,7 @@ export async function GET(req: Request) {
       }
 
       if (metadata.type === 'cart_checkout') {
-        const { buyerId, items, deliveryMethod } = metadata;
+        const { buyerId, items } = metadata;
         const totalAmount = items.reduce((sum: number, item: any) => sum + item.price, 0);
 
         const buyerRef = adminDb.collection('users').doc(buyerId);
@@ -108,7 +108,6 @@ export async function GET(req: Request) {
             productTitle: item.title,
             amount: item.price,
             status: 'escrow_held',
-            deliveryMethod,
             createdAt: FieldValue.serverTimestamp(),
             updatedAt: FieldValue.serverTimestamp(),
           });

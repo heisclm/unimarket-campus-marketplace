@@ -17,7 +17,6 @@ export default function CartPage() {
   const { user, userData, refreshUserData } = useAuth();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup'); // Deprecated, kept for compatibility with API for now
   const [paymentMethod, setPaymentMethod] = useState<'wallet' | 'paystack'>('paystack');
   const [useCoins, setUseCoins] = useState(false);
   const [unavailableItems, setUnavailableItems] = useState<string[]>([]);
@@ -34,7 +33,8 @@ export default function CartPage() {
       try {
         const itemChecks = await Promise.all(items.map(async (item) => {
           try {
-            const productRef = doc(db, 'products', item.productId || item.id);
+            const resolvedProductId = item.productId || (item.id.includes('-') ? item.id.split('-')[0] : item.id);
+            const productRef = doc(db, 'products', resolvedProductId);
             const productSnap = await getDoc(productRef);
             if (!productSnap.exists()) {
               console.log("Cart item not found:", item.title);
@@ -110,8 +110,7 @@ export default function CartPage() {
             'Authorization': `Bearer ${idToken}`
           },
           body: JSON.stringify({
-            items: items.map(item => ({ id: item.id, productId: item.productId, title: item.title, price: item.price, sellerId: item.sellerId })),
-            deliveryMethod,
+            items: items.map(item => ({ id: item.id, productId: item.productId || (item.id.includes('-') ? item.id.split('-')[0] : item.id), title: item.title, price: item.price, sellerId: item.sellerId })),
             useCoins
           })
         });
@@ -144,11 +143,10 @@ export default function CartPage() {
             metadata: {
               type: 'cart_checkout',
               buyerId: user.uid,
-              deliveryMethod,
               useCoins,
               items: items.map(item => ({
                 id: item.id,
-                productId: item.productId,
+                productId: item.productId || (item.id.includes('-') ? item.id.split('-')[0] : item.id),
                 title: item.title,
                 price: item.price,
                 sellerId: item.sellerId

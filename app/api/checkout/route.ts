@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const buyerId = decodedToken.uid;
 
     // 2. Parse Request Body
-    const { items, deliveryMethod, useCoins } = await req.json();
+    const { items, useCoins } = await req.json();
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
     }
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
 
       // Identify unique sellers for delivery calculation
       const uniqueSellers = new Set(validItems.map(item => item.sellerId)).size;
-      const deliveryFee = deliveryMethod === 'delivery' ? (uniqueSellers * 2.00) : 0;
+      const deliveryFee = 0; // Delivery is external
       
       // FETCH USERS FOR CHAT BEFORE WRITES (Transactions require reads before writes)
       const uniqueSellerIds = Array.from(new Set(validItems.map(item => item.sellerId)));
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
         userId: buyerId,
         amount: -buyerTotalAmount,
         type: 'escrow_hold',
-        description: `Cart checkout (${validItems.length} items) + Delivery`
+        description: `Cart checkout (${validItems.length} items)`
       });
 
       const orderIds = [];
@@ -130,7 +130,7 @@ export async function POST(req: NextRequest) {
         // Calculate the platform fee per item (2% for students, could be higher for vendors later)
         const itemPlatformFee = item.price * 0.02;
         // The delivery fee per item can just be attributed to the order if they chose delivery
-        const itemDeliveryFee = deliveryMethod === 'delivery' ? 2.00 : 0; // simplistic: per seller, assuming 1 item per seller for now, or just record it cleanly. 
+        const itemDeliveryFee = 0; // simplistic: per seller, assuming 1 item per seller for now, or just record it cleanly. 
         totalPlatformFeeHeld += itemPlatformFee;
 
         transaction.set(orderRef, {
@@ -142,7 +142,6 @@ export async function POST(req: NextRequest) {
           platformFee: itemPlatformFee, // What the platform takes
           netAmount: item.price - itemPlatformFee, // What the seller actually receives for the item
           status: 'escrow_held',
-          deliveryMethod,
           createdAt: FieldValue.serverTimestamp(),
           updatedAt: FieldValue.serverTimestamp()
         });
@@ -205,7 +204,7 @@ export async function POST(req: NextRequest) {
         transaction.set(msgRef, {
           chatId: deterministicChatId,
           senderId: 'system',
-          text: `Checkout Alert: Escrow has received funds securely. \nDelivery Method Chosen: ${deliveryMethod === 'delivery' ? 'Dorm Delivery' : 'Campus Pickup'}`,
+          text: `Checkout Alert: Escrow has received funds securely. Please communicate to arrange delivery or pickup.`,
           isSystem: true,
           productId: item.id,
           status: 'sent',

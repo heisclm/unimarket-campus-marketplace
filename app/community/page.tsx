@@ -153,59 +153,15 @@ export default function CommunityPage() {
 
       <div className="space-y-6">
         {posts.map(post => (
-          <div key={post.id} className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 hover:border-gray-200 transition-colors group">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm text-gray-700 font-bold">
-                  {post.authorName ? post.authorName.charAt(0).toUpperCase() : 'U'}
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900">{post.authorName}</h3>
-                  <p className="text-xs text-gray-500">
-                    {post.createdAt?.toDate ? post.createdAt.toDate().toLocaleDateString() : 'Just now'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {user && user.uid === post.authorId && (
-                  <button 
-                    onClick={() => handleDelete(post.id)}
-                    className="text-gray-300 hover:text-red-500 transition-colors p-2 opacity-0 group-hover:opacity-100"
-                    title="Delete Post"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-                {user && user.uid !== post.authorId && (
-                  <button 
-                    onClick={() => setReportTarget({ id: post.id, type: 'post' })}
-                    className="text-gray-300 hover:text-red-500 transition-colors p-2 opacity-0 group-hover:opacity-100"
-                    title="Report Post"
-                  >
-                    <AlertTriangle className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-            <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{post.content}</p>
-            <div className="flex items-center gap-6 mt-6 pt-4 border-t border-gray-50">
-              <button 
-                onClick={() => handleLike(post)}
-                className="flex items-center gap-2 text-gray-400 hover:text-red-500 transition-colors text-sm font-semibold group/like"
-              >
-                <Heart className={`w-4 h-4 group-active/like:scale-125 transition-transform ${(post.likedBy?.includes(user?.uid) || (post.likes > 0 && !post.likedBy)) ? 'fill-red-500 text-red-500' : ''}`} /> {post.likedBy !== undefined ? post.likedBy.length : (post.likes || 0)}
-              </button>
-              <button className="flex items-center gap-2 text-gray-400 hover:text-blue-500 transition-colors text-sm font-semibold">
-                <MessageSquare className="w-4 h-4" /> Reply
-              </button>
-              <button 
-                onClick={() => handleShare(post)}
-                className="flex items-center gap-2 text-gray-400 hover:text-black transition-colors text-sm font-semibold ml-auto"
-              >
-                <Share2 className="w-4 h-4" /> Share
-              </button>
-            </div>
-          </div>
+          <PostCard 
+            key={post.id} 
+            post={post} 
+            user={user} 
+            handleDelete={handleDelete} 
+            handleLike={handleLike} 
+            handleShare={handleShare} 
+            setReportTarget={setReportTarget} 
+          />
         ))}
         {posts.length === 0 && (
           <div className="bg-white rounded-[2rem] p-20 text-center border border-dashed border-gray-200">
@@ -222,6 +178,155 @@ export default function CommunityPage() {
         targetId={reportTarget?.id || ''}
         targetType={reportTarget?.type || 'post'}
       />
+    </div>
+  );
+}
+
+function PostCard({ post, user, handleDelete, handleLike, handleShare, setReportTarget }: any) {
+  const [showReplies, setShowReplies] = useState(false);
+  const [replyContent, setReplyContent] = useState('');
+  const [replies, setReplies] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!showReplies) return;
+    const q = query(collection(db, `posts/${post.id}/replies`), orderBy('createdAt', 'asc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setReplies(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsubscribe();
+  }, [showReplies, post.id]);
+
+  const handleReplySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !replyContent.trim()) return;
+    setIsSubmitting(true);
+    try {
+      await addDoc(collection(db, `posts/${post.id}/replies`), {
+        authorId: user.uid,
+        authorName: user.displayName || 'Anonymous Student',
+        content: replyContent.trim(),
+        createdAt: serverTimestamp()
+      });
+      setReplyContent('');
+      toast.success('Reply added!');
+    } catch (error) {
+      console.error('Error adding reply:', error);
+      toast.error('Failed to add reply');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 hover:border-gray-200 transition-colors group">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm text-gray-700 font-bold">
+            {post.authorName ? post.authorName.charAt(0).toUpperCase() : 'U'}
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-900">{post.authorName}</h3>
+            <p className="text-xs text-gray-500">
+              {post.createdAt?.toDate ? post.createdAt.toDate().toLocaleDateString() : 'Just now'}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {user && user.uid === post.authorId && (
+            <button 
+              onClick={() => handleDelete(post.id)}
+              className="text-gray-300 hover:text-red-500 transition-colors p-2 opacity-0 group-hover:opacity-100"
+              title="Delete Post"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+          {user && user.uid !== post.authorId && (
+            <button 
+              onClick={() => setReportTarget({ id: post.id, type: 'post' })}
+              className="text-gray-300 hover:text-red-500 transition-colors p-2 opacity-0 group-hover:opacity-100"
+              title="Report Post"
+            >
+              <AlertTriangle className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+      </div>
+      <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{post.content}</p>
+      
+      <div className="flex items-center gap-6 mt-6 pt-4 border-t border-gray-50">
+        <button 
+          onClick={() => handleLike(post)}
+          className="flex items-center gap-2 text-gray-400 hover:text-red-500 transition-colors text-sm font-semibold group/like"
+        >
+          <Heart className={`w-4 h-4 group-active/like:scale-125 transition-transform ${(post.likedBy?.includes(user?.uid) || (post.likes > 0 && !post.likedBy)) ? 'fill-red-500 text-red-500' : ''}`} /> 
+          {post.likedBy !== undefined ? post.likedBy.length : (post.likes || 0)}
+        </button>
+        <button 
+          onClick={() => setShowReplies(!showReplies)}
+          className={`flex items-center gap-2 transition-colors text-sm font-semibold ${showReplies ? 'text-blue-500' : 'text-gray-400 hover:text-blue-500'}`}
+        >
+          <MessageSquare className="w-4 h-4" /> Reply
+        </button>
+        <button 
+          onClick={() => handleShare(post)}
+          className="flex items-center gap-2 text-gray-400 hover:text-black transition-colors text-sm font-semibold ml-auto"
+        >
+          <Share2 className="w-4 h-4" /> Share
+        </button>
+      </div>
+
+      {showReplies && (
+        <div className="mt-6 pt-6 border-t border-gray-50/50 space-y-4">
+          {/* List of Replies */}
+          <div className="space-y-4">
+            {replies.map(reply => (
+              <div key={reply.id} className="flex gap-3 bg-gray-50/50 p-4 rounded-2xl">
+                <div className="w-8 h-8 shrink-0 bg-gray-200 rounded-full flex items-center justify-center text-xs font-bold text-gray-600">
+                  {reply.authorName?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <span className="font-semibold text-sm text-gray-900">{reply.authorName}</span>
+                    <span className="text-[10px] text-gray-400">
+                      {reply.createdAt?.toDate ? reply.createdAt.toDate().toLocaleDateString() : 'Just now'}
+                    </span>
+                  </div>
+                  <p className="text-gray-700 text-sm whitespace-pre-wrap">{reply.content}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Reply Form */}
+          {user ? (
+            <form onSubmit={handleReplySubmit} className="flex gap-3 items-start mt-4">
+              <div className="w-8 h-8 shrink-0 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'ME'}
+              </div>
+              <div className="flex-1 flex gap-2">
+                <textarea
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                  placeholder="Write a reply..."
+                  className="flex-1 bg-gray-50 rounded-xl p-3 border-none focus:ring-1 focus:ring-blue-500 text-sm resize-none h-10 leading-tight focus:outline-none"
+                  rows={1}
+                />
+                <button
+                  type="submit"
+                  disabled={!replyContent.trim() || isSubmitting}
+                  className="bg-blue-500 text-white p-3 rounded-full hover:bg-blue-600 disabled:opacity-50 transition-all"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
+          ) : (
+            <p className="text-sm text-gray-500 mt-2 text-center">Log in to reply.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

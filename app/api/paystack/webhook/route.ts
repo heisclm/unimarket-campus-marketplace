@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 
         // 2. Process based on metadata type
         if (metadata.type === 'cart_checkout') {
-          const { buyerId, items, deliveryMethod } = metadata;
+          const { buyerId, items } = metadata;
           const totalAmount = items.reduce((sum: number, item: any) => sum + item.price, 0);
 
           // FETCH USERS & PRODUCTS BEFORE WRITES (Transactions require reads before writes)
@@ -113,7 +113,6 @@ export async function POST(req: Request) {
               productTitle: item.title,
               amount: item.price,
               status: 'escrow_held',
-              deliveryMethod,
               createdAt: FieldValue.serverTimestamp(),
               updatedAt: FieldValue.serverTimestamp(),
             });
@@ -188,7 +187,7 @@ export async function POST(req: Request) {
             transaction.set(msgRef, {
               chatId: deterministicChatId,
               senderId: 'system',
-              text: `Checkout Alert: Escrow has received funds securely via Paystack. \nDelivery Method Chosen: ${deliveryMethod === 'delivery' ? 'Dorm Delivery' : 'Campus Pickup'}`,
+              text: `Checkout Alert: Escrow has received funds securely via Paystack. Please communicate to arrange delivery or pickup.`,
               isSystem: true,
               productId: item.id,
               status: 'sent',
