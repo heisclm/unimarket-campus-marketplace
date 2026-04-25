@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useParams, useRouter } from 'next/navigation';
 import PremiumImage from '@/components/ui/PremiumImage';
@@ -10,7 +10,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { useCart } from '@/components/cart/CartProvider';
 import BiddingSection from '@/components/products/BiddingSection';
 import ReportModal from '@/components/shared/ReportModal';
-import { ShoppingBag, Gavel, ArrowLeft, Clock, ShieldCheck, User as UserIcon, AlertTriangle, Heart } from 'lucide-react';
+import { ShoppingBag, Gavel, ArrowLeft, Clock, ShieldCheck, User as UserIcon, AlertTriangle, Heart, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ProductDetailPage() {
@@ -21,6 +21,7 @@ export default function ProductDetailPage() {
   
   const [product, setProduct] = useState<any>(null);
   const [seller, setSeller] = useState<any>(null);
+  const [sellerRating, setSellerRating] = useState<{average: number, count: number} | null>(null);
   const [loading, setLoading] = useState(true);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -85,6 +86,20 @@ export default function ProductDetailPage() {
             const sellerSnap = await getDoc(sellerRef);
             if (sellerSnap.exists()) {
               setSeller(sellerSnap.data());
+            }
+
+            // Fetch seller ratings
+            try {
+              const reviewsQuery = query(collection(db, 'reviews'), where('sellerId', '==', productData.sellerId));
+              const reviewsSnap = await getDocs(reviewsQuery);
+              if (!reviewsSnap.empty) {
+                let totalRating = 0;
+                reviewsSnap.forEach(r => totalRating += r.data().rating || 5);
+                const avgRating = totalRating / reviewsSnap.size;
+                setSellerRating({ average: avgRating, count: reviewsSnap.size });
+              }
+            } catch (err) {
+              console.error("Error fetching ratings:", err);
             }
           }
         }
@@ -261,7 +276,16 @@ export default function ProductDetailPage() {
             </div>
             <div className="flex-1">
               <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-0.5">Listed By</p>
-              <p className="font-semibold text-gray-900">{seller?.displayName || 'Anonymous User'}</p>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                <p className="font-semibold text-gray-900">{seller?.displayName || 'Anonymous User'}</p>
+                {sellerRating && (
+                  <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded-full w-fit border border-yellow-100">
+                    <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                    <span className="text-xs font-bold text-yellow-700">{sellerRating.average.toFixed(1)}</span>
+                    <span className="text-xs text-yellow-600">({sellerRating.count} {sellerRating.count === 1 ? 'review' : 'reviews'})</span>
+                  </div>
+                )}
+              </div>
             </div>
             {seller?.isVerified && (
               <div className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-1 rounded-md text-xs font-bold">
