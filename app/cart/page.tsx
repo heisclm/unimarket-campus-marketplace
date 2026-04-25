@@ -17,7 +17,7 @@ export default function CartPage() {
   const { user, userData, refreshUserData } = useAuth();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
+  const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup'); // Deprecated, kept for compatibility with API for now
   const [paymentMethod, setPaymentMethod] = useState<'wallet' | 'paystack'>('paystack');
   const [useCoins, setUseCoins] = useState(false);
   const [unavailableItems, setUnavailableItems] = useState<string[]>([]);
@@ -33,12 +33,23 @@ export default function CartPage() {
       
       try {
         const itemChecks = await Promise.all(items.map(async (item) => {
-          const productRef = doc(db, 'products', item.id);
-          const productSnap = await getDoc(productRef);
-          if (!productSnap.exists() || productSnap.data().status !== 'active') {
+          try {
+            const productRef = doc(db, 'products', item.productId || item.id);
+            const productSnap = await getDoc(productRef);
+            if (!productSnap.exists()) {
+              console.log("Cart item not found:", item.title);
+              return item.id;
+            }
+            if (productSnap.data()?.status !== 'active') {
+              console.log("Cart item not active:", item.title, productSnap.data()?.status);
+              return item.id;
+            }
+            return null;
+          } catch (err) {
+            console.error("Failed to check item:", item.title, err);
+            // Default to unavailable if we can't check
             return item.id;
           }
-          return null;
         }));
         
         const unavailable = itemChecks.filter(id => id !== null) as string[];
@@ -79,8 +90,7 @@ export default function CartPage() {
       return;
     }
 
-    const uniqueSellers = new Set(items.map(item => item.sellerId)).size;
-    const deliveryFee = deliveryMethod === 'delivery' ? (uniqueSellers * 2.00) : 0;
+    const deliveryFee = 0; // Delivery is handled outside the system now
     const coinDiscount = useCoins ? (userData?.coins || 0) * 0.005 : 0;
     const finalTotal = Math.max(0, total + deliveryFee - coinDiscount);
 
@@ -168,7 +178,7 @@ export default function CartPage() {
         </div>
         <h1 className="text-3xl font-bold mb-4 tracking-tight">Checkout Successful!</h1>
         <p className="text-gray-500 mb-8 leading-relaxed">
-          Your funds are now securely held in escrow. The seller has been notified to prepare your items for {deliveryMethod}.
+          Your funds are now securely held in escrow. Please arrange delivery with the seller via chat.
         </p>
         <Link href="/products" className="inline-block bg-black text-white px-8 py-3 rounded-full font-bold hover:bg-gray-800 transition-all hover:scale-105 active:scale-95 shadow-lg">
           Continue Shopping
@@ -235,29 +245,6 @@ export default function CartPage() {
           );
         })}
 
-        {/* Delivery Method Selection */}
-        <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50 mt-8">
-          <h3 className="font-bold text-lg mb-4">Delivery Method</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <button 
-              onClick={() => setDeliveryMethod('pickup')}
-              className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${deliveryMethod === 'pickup' ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200'}`}
-            >
-              <ShoppingBag className="w-6 h-6" />
-              <span className="font-bold text-sm">Campus Pickup</span>
-              <span className="text-xs text-gray-400">Free</span>
-            </button>
-            <button 
-              onClick={() => setDeliveryMethod('delivery')}
-              className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${deliveryMethod === 'delivery' ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200'}`}
-            >
-              <ArrowRight className="w-6 h-6" />
-              <span className="font-bold text-sm">Dorm Delivery</span>
-              <span className="text-xs text-gray-400">+GH₵2.00</span>
-            </button>
-          </div>
-        </div>
-
         {/* Payment Method Selection */}
         <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50 mt-8">
           <h3 className="font-bold text-lg mb-4">Payment Method</h3>
@@ -292,15 +279,6 @@ export default function CartPage() {
               <span>Subtotal</span>
               <span className="text-gray-900">GH₵{total.toFixed(2)}</span>
             </div>
-            {deliveryMethod === 'delivery' && (
-              <div className="flex justify-between text-gray-500 font-medium">
-                <span className="flex flex-col">
-                  <span>Delivery Fee</span>
-                  <span className="text-[10px] text-gray-400">GH₵2.00 per seller ({new Set(items.map(i => i.sellerId)).size} distinct)</span>
-                </span>
-                <span className="text-gray-900">GH₵{(new Set(items.map(i => i.sellerId)).size * 2).toFixed(2)}</span>
-              </div>
-            )}
             <div className="flex justify-between text-gray-400 font-medium text-xs">
               <span>Platform Fee</span>
               <span>Paid by seller</span>
@@ -320,7 +298,7 @@ export default function CartPage() {
 
             <div className="pt-6 border-t border-gray-100 flex justify-between font-bold text-2xl text-black">
               <span>Total</span>
-              <span>GH₵{Math.max(0, (total + (deliveryMethod === 'delivery' ? new Set(items.map(i => i.sellerId)).size * 2 : 0)) - (useCoins ? (userData?.coins || 0) * 0.005 : 0)).toFixed(2)}</span>
+              <span>GH₵{Math.max(0, total - (useCoins ? (userData?.coins || 0) * 0.005 : 0)).toFixed(2)}</span>
             </div>
           </div>
 
@@ -329,7 +307,7 @@ export default function CartPage() {
               <Wallet className="w-4 h-4 text-gray-400" />
               <span className="text-sm font-medium text-gray-600">Wallet Balance</span>
             </div>
-            <span className={`font-bold ${(userData?.walletBalance || 0) < Math.max(0, (total + (deliveryMethod === 'delivery' ? new Set(items.map(i => i.sellerId)).size * 2 : 0)) - (useCoins ? (userData?.coins || 0) * 0.005 : 0)) ? 'text-red-500' : 'text-green-600'}`}>
+            <span className={`font-bold ${(userData?.walletBalance || 0) < Math.max(0, total - (useCoins ? (userData?.coins || 0) * 0.005 : 0)) ? 'text-red-500' : 'text-green-600'}`}>
               GH₵{(userData?.walletBalance || 0).toFixed(2)}
             </span>
           </div>
