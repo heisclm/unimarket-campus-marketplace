@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PremiumImage from '@/components/ui/PremiumImage';
-import { Tag, Clock, ShieldCheck, Heart, ShoppingBag } from 'lucide-react';
+import { Tag, Clock, ShieldCheck, Heart, ShoppingBag, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useCart } from '@/components/cart/CartProvider';
@@ -102,7 +102,7 @@ export default function ProductCard({ product }: { product: any }) {
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
       className="h-full"
     >
-      <Link href={`/products/${product.id}`} className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm group hover:shadow-md transition-all flex flex-col h-full relative">
+      <Link href={`/products/${product.id}`} className={`bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 group hover:shadow-md transition-all flex flex-col h-full relative ${product.isSponsored ? 'shadow-[0_0_15px_rgba(245,158,11,0.2)] border-2 border-orange-400' : 'shadow-sm'}`}>
         
         {/* Quick Actions overlay */}
         <div className="absolute top-2 sm:top-5 right-2 sm:right-5 z-20 flex flex-col gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
@@ -136,6 +136,11 @@ export default function ProductCard({ product }: { product: any }) {
           
           {/* Badges */}
           <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 flex flex-col gap-1 sm:gap-2 z-10 pointer-events-none">
+            {product.isSponsored && (
+              <span className="bg-gradient-to-r from-orange-400 to-amber-500 text-white text-[9px] sm:text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded sm:rounded-md flex items-center gap-1 shadow-sm">
+                <Zap className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" /> Sponsored
+              </span>
+            )}
             {product.type === 'auction' && (
               <span className="bg-orange-500 text-white text-[9px] sm:text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded sm:rounded-md flex items-center gap-1 shadow-sm">
                 <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Auction

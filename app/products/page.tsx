@@ -109,6 +109,10 @@ function ProductsContent() {
     const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           product.description.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
+  }).sort((a, b) => {
+    if (a.isSponsored && !b.isSponsored) return -1;
+    if (!a.isSponsored && b.isSponsored) return 1;
+    return 0;
   });
 
   return (
