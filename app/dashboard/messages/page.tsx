@@ -195,7 +195,7 @@ function MessagesContent() {
 
     const unsubscribe = onSnapshot(doc(db, 'orders', activeChat.orderId), (snapshot) => {
       if (snapshot.exists()) {
-        const orderData = { id: snapshot.id, ...snapshot.data() };
+        const orderData = { id: snapshot.id, ...(snapshot.data() as any) };
         setActiveOrder(orderData);
         
         // Auto-archive chat if order is completed
@@ -382,9 +382,9 @@ function MessagesContent() {
                               <span className="text-[10px] text-gray-400">
                                 {new Date(chat.lastMessageAt?.toDate()).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                               </span>
-                              {chat.unreadCount?.[user.uid] > 0 && (
+                              {(chat.unreadCount as any)?.[user?.uid || ''] > 0 && (
                                 <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                                  {chat.unreadCount[user.uid]}
+                                  {(chat.unreadCount as any)[user?.uid || '']}
                                 </span>
                               )}
                             </div>

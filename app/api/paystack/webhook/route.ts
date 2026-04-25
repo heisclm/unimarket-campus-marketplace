@@ -69,7 +69,7 @@ export async function POST(req: Request) {
           const userSnaps = allSnaps.slice(0, userRefs.length);
           const productSnaps = allSnaps.slice(userRefs.length);
 
-          const buyerData = userSnaps[0].data() || {};
+          const buyerData = userSnaps[0].data() as any || {};
           
           const sellerDataMap: Record<string, any> = {};
           for (let i = 1; i < userSnaps.length; i++) {

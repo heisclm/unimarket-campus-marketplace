@@ -83,7 +83,7 @@ export default function ChatModal({ order, onClose }: ChatModalProps) {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const msgs = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
       setMessages(msgs);
       setLoading(false);
       

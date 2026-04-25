@@ -74,7 +74,7 @@ export async function GET(req: Request) {
         const allRefs = [buyerRef, ...productRefs];
         const allSnaps = await transaction.getAll(...allRefs);
 
-        const buyerData = allSnaps[0].data() || {};
+        const buyerData = allSnaps[0].data() as any || {};
         const { useCoins } = metadata;
 
         const productSnaps = allSnaps.slice(1);

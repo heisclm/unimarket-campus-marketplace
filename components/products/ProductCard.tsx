@@ -80,15 +80,15 @@ export default function ProductCard({ product }: { product: any }) {
       return;
     }
 
-    addToCart({
+    const itemToAdd = {
       id: product.id,
+      productId: product.id,
       title: product.title,
       price: Number(product.price),
-      quantity: 1,
       image: product.previewImage || product.images?.[0] || '',
-      sellerId: product.sellerId,
-      type: product.type || 'fixed'
-    });
+      sellerId: product.sellerId
+    };
+    addToCart(itemToAdd as any);
   };
 
   const isInCart = items.some(i => i.id === product.id);

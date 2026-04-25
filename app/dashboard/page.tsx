@@ -169,7 +169,7 @@ export default function DashboardPage() {
 
   const activeListings = products.filter(p => p.status === 'active').length;
   const soldListings = products.filter(p => p.status === 'sold').length;
-  const totalRevenue = products.filter(p => p.status === 'sold').reduce((sum, p) => sum + Number(p.price), 0);
+  const totalRevenue = sales.reduce((sum, s) => sum + Number(s.netAmount || s.amount || 0), 0);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 py-8">
@@ -243,7 +243,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${role === 'vendor' ? '4' : '3'} gap-6`}>
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                   <div className="flex items-center gap-3 text-gray-500 mb-2">
                     <Package className="w-5 h-5" /> Active Listings
@@ -279,6 +279,18 @@ export default function DashboardPage() {
                     </div>
                     <div className="text-3xl font-bold">{userData?.coins || 0}</div>
                     <p className="text-xs text-gray-400 mt-1">100 Coins = GH₵0.5</p>
+                  </div>
+                )}
+                {role === 'vendor' && (
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div className="flex items-center justify-between gap-3 text-gray-500 mb-2">
+                      <div className="flex items-center gap-3">
+                         <DollarSign className="w-5 h-5 text-green-500" /> Monthly Volume Bonus
+                      </div>
+                      <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">0.5% CashBack</span>
+                    </div>
+                    <div className="text-3xl font-bold text-green-600">+ GH₵{(totalRevenue * 0.005).toFixed(2)}</div>
+                    <p className="text-xs text-gray-400 mt-1">Automatically credited to your wallet 1st of every month</p>
                   </div>
                 )}
               </div>
