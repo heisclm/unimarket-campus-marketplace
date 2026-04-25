@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, increment, addDoc, serverTimestamp, getDocs, deleteDoc } from 'firebase/firestore';
-import { Store, Package, DollarSign, CheckCircle2, Clock, Trash2, Plus, ExternalLink, ShoppingBag, MessageSquare } from 'lucide-react';
+import { Store, Package, DollarSign, CheckCircle2, Clock, Trash2, Plus, ExternalLink, ShoppingBag, MessageSquare, Zap } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -68,6 +68,33 @@ export default function VendorDashboard() {
   };
 
   const [productToDelete, setProductToDelete] = useState<any>(null);
+  const [productToPromote, setProductToPromote] = useState<any>(null);
+
+  const handlePromoteProduct = async () => {
+    if (!productToPromote || !user) return;
+    try {
+      const idToken = await user.getIdToken();
+      const res = await fetch('/api/products/promote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ productId: productToPromote.id })
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to promote product');
+      }
+
+      toast.success('Product successfully promoted!');
+      setProductToPromote(null);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to promote product');
+      setProductToPromote(null);
+    }
+  };
 
   const handleDeleteProduct = async () => {
     if (!productToDelete) return;
@@ -240,6 +267,13 @@ export default function VendorDashboard() {
                       </td>
                       <td className="py-4">
                         <div className="flex items-center gap-2">
+                          {!product.promotedAt ? (
+                            <button onClick={() => setProductToPromote(product)} className="text-sm font-semibold text-[#b8d900] hover:text-[#d9ff00] bg-black px-2 py-1 rounded-md transition-colors flex items-center gap-1">
+                              <Zap className="w-3 h-3" /> Promote
+                            </button>
+                          ) : (
+                            <span className="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-1 rounded-md">Promoted</span>
+                          )}
                           <Link href={`/products/${product.id}`} className="p-2 text-gray-400 hover:text-black transition-colors">
                             <ExternalLink className="w-4 h-4" />
                           </Link>
@@ -295,6 +329,34 @@ export default function VendorDashboard() {
           </div>
         )}
       </div>
+
+      {/* Promote Modal */}
+      {productToPromote && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-xl">
+            <h3 className="text-2xl font-bold mb-4 flex items-center gap-2"><Zap className="w-6 h-6 text-[#d9ff00] bg-black rounded-md p-1"/> Promote Listing</h3>
+            <p className="text-gray-600 mb-8">
+              Promote <span className="font-bold text-black">{productToPromote.title}</span> to the homepage highlight section. 
+              This will cost <span className="font-bold text-black">50 coins</span>. Do you want to proceed?
+            </p>
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setProductToPromote(null)}
+                className="flex-1 bg-gray-100 text-black px-6 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handlePromoteProduct}
+                className="flex-1 bg-black text-[#d9ff00] px-6 py-3 rounded-xl font-bold hover:bg-gray-900 transition-colors flex items-center justify-center gap-2"
+              >
+                <Zap className="w-5 h-5" />
+                Pay & Promote
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {productToDelete && (
