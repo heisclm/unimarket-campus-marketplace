@@ -54,59 +54,21 @@ export async function POST(req: NextRequest) {
       const amount = orderData.amount;
       const netAmount = orderData.netAmount || amount;
 
-      // 1. Update Seller Wallet Securely with Ledger
-      await updateWalletWithLedger(transaction, {
-        userId: sellerId,
-        amount: netAmount,
-        type: 'escrow_release',
-        orderId: orderId,
-        description: `Escrow release for order ${orderId}: ${orderData.productTitle}`
-      });
-
-      // 2. Update Order Status
-      transaction.update(orderRef, {
-        status: 'completed',
-        updatedAt: FieldValue.serverTimestamp()
-      });
-
-      // Notify the Seller that their funds cleared
-      const notifRef = adminDb.collection('notifications').doc();
-      transaction.set(notifRef, {
-        userId: sellerId,
-        title: 'Escrow Released! 💰',
-        message: `The buyer accepted ${orderData.productTitle}. GH₵${netAmount.toFixed(2)} has been added to your wallet!`,
-        type: 'wallet',
-        link: '/profile',
-        read: false,
-        createdAt: FieldValue.serverTimestamp()
-      });
-
-      // 3. Record Public Transaction (for history)
-      const txRef = adminDb.collection('transactions').doc();
-      transaction.set(txRef, {
-        userId: sellerId,
-        senderId: 'escrow',
-        receiverId: sellerId,
-        orderId: orderId,
-        amount: netAmount,
-        type: 'escrow_release',
-        status: 'completed',
-        createdAt: FieldValue.serverTimestamp()
-      });
-
-      // 4. Update the seller's totalEarned and give Vendor Bonus
+      // --- ALL READS ---
       const sellerRef = adminDb.collection('users').doc(sellerId);
       const sellerSnap = await transaction.get(sellerRef);
       
       let prevEarned = 0;
-      if (sellerSnap.exists) {
-        prevEarned = sellerSnap.data()?.totalEarned || 0;
-      }
-      const newEarned = prevEarned + netAmount;
+      let userData: any = {};
+      let previousBalance = 0;
       
-      transaction.update(sellerRef, {
-        totalEarned: FieldValue.increment(netAmount)
-      });
+      if (sellerSnap.exists) {
+        userData = sellerSnap.data() || {};
+        prevEarned = userData.totalEarned || 0;
+        previousBalance = userData.walletBalance || 0;
+      }
+      
+      const newEarned = prevEarned + netAmount;
       
       let bonus = 0;
       let bonusReason = '';
@@ -123,17 +85,77 @@ export async function POST(req: NextRequest) {
         bonus += 150;
         bonusReason += ' + 2000 Sales Milestone';
       }
+
+      const totalToAdd = netAmount + bonus;
+      const newBalance = previousBalance + totalToAdd;
+
+      // --- ALL WRITES ---
+      // 1. Update Seller Wallet and totalEarned
+      transaction.update(sellerRef, {
+        walletBalance: newBalance,
+        totalEarned: FieldValue.increment(netAmount),
+        updatedAt: FieldValue.serverTimestamp()
+      });
+
+      // 2. Ledger Entry for Escrow Release
+      const escrowLedgerRef = adminDb.collection('wallet_ledger').doc();
+      transaction.set(escrowLedgerRef, {
+        userId: sellerId,
+        amount: netAmount,
+        type: 'escrow_release',
+        orderId: orderId,
+        previousBalance: previousBalance,
+        newBalance: previousBalance + netAmount,
+        description: `Escrow release for order ${orderId}: ${orderData.productTitle}`,
+        createdAt: FieldValue.serverTimestamp()
+      });
+
+      // 3. Update Order Status
+      transaction.update(orderRef, {
+        status: 'completed',
+        updatedAt: FieldValue.serverTimestamp()
+      });
+
+      // 4. Notify the Seller that their funds cleared
+      const notifRef = adminDb.collection('notifications').doc();
+      transaction.set(notifRef, {
+        userId: sellerId,
+        title: 'Escrow Released! 💰',
+        message: `The buyer accepted ${orderData.productTitle}. GH₵${netAmount.toFixed(2)} has been added to your wallet!`,
+        type: 'wallet',
+        link: '/profile',
+        read: false,
+        createdAt: FieldValue.serverTimestamp()
+      });
+
+      // 5. Record Public Transaction (for history)
+      const txRef = adminDb.collection('transactions').doc();
+      transaction.set(txRef, {
+        userId: sellerId,
+        senderId: 'escrow',
+        receiverId: sellerId,
+        orderId: orderId,
+        amount: netAmount,
+        type: 'escrow_release',
+        status: 'completed',
+        createdAt: FieldValue.serverTimestamp()
+      });
       
+      // 6. Vendor Bonus Writes (if applicable)
       if (bonus > 0 && sellerSnap.exists) {
-        await updateWalletWithLedger(transaction, {
+        const bonusLedgerRef = adminDb.collection('wallet_ledger').doc();
+        transaction.set(bonusLedgerRef, {
           userId: sellerId,
           amount: bonus,
           type: 'vendor_bonus',
           orderId: orderId,
-          description: `Vendor Bonus: ${bonusReason}`
+          previousBalance: previousBalance + netAmount,
+          newBalance: newBalance,
+          description: `Vendor Bonus: ${bonusReason}`,
+          createdAt: FieldValue.serverTimestamp()
         });
         
-        // Notify them
+        // Notify them of the bonus
         const bonusNotifRef = adminDb.collection('notifications').doc();
         transaction.set(bonusNotifRef, {
           userId: sellerId,
