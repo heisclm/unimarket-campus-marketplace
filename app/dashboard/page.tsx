@@ -352,7 +352,7 @@ export default function DashboardPage() {
                         </td>
                         <td className="py-4 text-right">
                           <div className="flex items-center justify-end gap-3">
-                            {role === 'vendor' && product.status === 'active' && !product.isSponsored && (
+                            {product.status === 'active' && !product.isSponsored && (
                               <button onClick={() => setProductToPromote(product)} className="text-sm font-semibold text-[#b8d900] hover:text-[#d9ff00] bg-black px-2 py-1 rounded-md transition-colors flex items-center gap-1">
                                 <Zap className="w-3 h-3" /> Promote
                               </button>
