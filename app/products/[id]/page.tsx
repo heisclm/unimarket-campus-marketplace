@@ -313,30 +313,34 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Seller Info */}
-          <div className="bg-gray-50 rounded-2xl p-4 mb-8 flex items-center gap-4 border border-gray-100">
-            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center overflow-hidden relative shadow-sm">
-              {seller?.photoURL ? (
-                <PremiumImage src={seller.photoURL} alt={seller.displayName || 'Seller'} fill className="object-cover" referrerPolicy="no-referrer" containerClassName="absolute inset-0" />
-              ) : (
-                <UserIcon className="w-6 h-6 text-gray-400" />
-              )}
-            </div>
-            <div className="flex-1">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-0.5">Listed By</p>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                <p className="font-semibold text-gray-900">{seller?.displayName || 'Anonymous User'}</p>
-                {sellerRating && (
-                  <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded-full w-fit border border-yellow-100">
-                    <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                    <span className="text-xs font-bold text-yellow-700">{sellerRating.average.toFixed(1)}</span>
-                    <span className="text-xs text-yellow-600">({sellerRating.count} {sellerRating.count === 1 ? 'review' : 'reviews'})</span>
-                  </div>
+          <div className="bg-gray-50 rounded-2xl p-4 mb-8 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-4 border border-gray-100">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="w-12 h-12 flex-shrink-0 bg-white rounded-full flex items-center justify-center overflow-hidden relative shadow-sm">
+                {seller?.photoURL ? (
+                  <PremiumImage src={seller.photoURL} alt={seller.displayName || 'Seller'} fill className="object-cover" referrerPolicy="no-referrer" containerClassName="absolute inset-0" />
+                ) : (
+                  <UserIcon className="w-6 h-6 text-gray-400" />
                 )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-0.5">Listed By</p>
+                <div className="flex flex-col gap-1">
+                  <p className="font-semibold text-gray-900 truncate">{seller?.displayName || 'Anonymous User'}</p>
+                  {sellerRating && (
+                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded-full w-fit border border-yellow-100">
+                      <Star className="w-3 h-3 text-yellow-500 fill-current flex-shrink-0" />
+                      <span className="text-xs font-bold text-yellow-700">{sellerRating.average.toFixed(1)}</span>
+                      <span className="text-xs text-yellow-600 truncate">({sellerRating.count} {sellerRating.count === 1 ? 'review' : 'reviews'})</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             {seller?.isVerified && (
-              <div className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-1 rounded-md text-xs font-bold">
-                <ShieldCheck className="w-4 h-4" /> Verified
+              <div className="flex items-center justify-start sm:justify-center w-full sm:w-auto mt-2 sm:mt-0 sm:ml-auto">
+                <div className="flex items-center gap-1 text-green-600 bg-green-50 px-3 py-1.5 rounded-lg text-xs font-bold border border-green-100">
+                  <ShieldCheck className="w-4 h-4" /> Verified
+                </div>
               </div>
             )}
           </div>

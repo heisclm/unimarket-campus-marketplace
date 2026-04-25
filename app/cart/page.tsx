@@ -207,62 +207,67 @@ export default function CartPage() {
         {items.map((item) => {
           const isUnavailable = unavailableItems.includes(item.id);
           return (
-            <div key={item.id} className={`bg-white rounded-[2rem] p-4 shadow-sm flex items-center gap-4 border ${isUnavailable ? 'border-red-200 bg-red-50/30' : 'border-gray-50 hover:border-gray-100'} transition-colors group relative`}>
+            <div key={item.id} className={`bg-white rounded-[2rem] p-4 shadow-sm flex flex-col sm:flex-row sm:items-center gap-4 border ${isUnavailable ? 'border-red-200 bg-red-50/30' : 'border-gray-50 hover:border-gray-100'} transition-colors group relative`}>
               {isUnavailable && (
                 <div className="absolute top-2 right-2 bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-bold shadow-sm z-10">
                   Sold Out / Unavailable
                 </div>
               )}
-              <div className={`w-24 h-24 bg-gray-50 rounded-2xl relative overflow-hidden flex-shrink-0 border border-gray-100 ${isUnavailable ? 'opacity-50 grayscale' : ''}`}>
-                {item.image ? (
-                  <Image src={item.image} alt={item.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">No Image</div>
-                )}
+              
+              <div className="flex items-start gap-4 flex-1 w-full">
+                <div className={`w-20 h-20 sm:w-24 sm:h-24 bg-gray-50 rounded-2xl relative overflow-hidden flex-shrink-0 border border-gray-100 ${isUnavailable ? 'opacity-50 grayscale' : ''}`}>
+                  {item.image ? (
+                    <Image src={item.image} alt={item.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" referrerPolicy="no-referrer" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">No Image</div>
+                  )}
+                </div>
+                
+                <div className={`flex-1 ${isUnavailable ? 'opacity-50' : ''}`}>
+                  <h3 className="font-bold text-base sm:text-lg line-clamp-1 text-gray-900">{item.title}</h3>
+                  <p className="text-gray-400 text-xs mb-1 sm:mb-2 font-medium uppercase tracking-wider line-clamp-1">Seller: {item.sellerId.slice(0, 8)}...</p>
+                  <div className="font-bold text-lg sm:text-xl text-black">GH₵{item.price.toFixed(2)}</div>
+                </div>
               </div>
               
-              <div className={`flex-1 ${isUnavailable ? 'opacity-50' : ''}`}>
-                <h3 className="font-bold text-lg line-clamp-1 text-gray-900">{item.title}</h3>
-                <p className="text-gray-400 text-xs mb-2 font-medium uppercase tracking-wider">Seller: {item.sellerId.slice(0, 8)}...</p>
-                <div className="font-bold text-xl text-black">GH₵{item.price.toFixed(2)}</div>
-              </div>
-              
-              <div className={`flex items-center bg-gray-50 rounded-xl p-1 border border-gray-100 ${isUnavailable ? 'hidden' : ''}`}>
-                <button 
-                  onClick={() => {
-                    if ((item.quantity || 1) > 1) {
-                      updateQuantity(item.id, (item.quantity || 1) - 1);
-                    }
-                  }}
-                  className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black hover:bg-white rounded-lg transition-all"
-                >
-                  -
-                </button>
-                <span className="w-8 text-center font-bold">{item.quantity || 1}</span>
-                <button 
-                  onClick={() => {
-                    const currentQuantity = item.quantity || 1;
-                    const maxQty = item.maxQuantity || 999;
-                    if (currentQuantity < maxQty) {
-                      updateQuantity(item.id, currentQuantity + 1);
-                    } else {
-                      toast.error(`Only ${maxQty} available in stock`);
-                    }
-                  }}
-                  disabled={(item.quantity || 1) >= (item.maxQuantity || 999)}
-                  className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black hover:bg-white rounded-lg transition-all disabled:opacity-50"
-                >
-                  +
-                </button>
-              </div>
+              <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100">
+                <div className={`flex items-center bg-gray-50 rounded-xl p-1 border border-gray-100 ${isUnavailable ? 'invisible' : ''}`}>
+                  <button 
+                    onClick={() => {
+                      if ((item.quantity || 1) > 1) {
+                        updateQuantity(item.id, (item.quantity || 1) - 1);
+                      }
+                    }}
+                    className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black hover:bg-white rounded-lg transition-all"
+                  >
+                    -
+                  </button>
+                  <span className="w-8 text-center font-bold text-sm">{item.quantity || 1}</span>
+                  <button 
+                    onClick={() => {
+                      const currentQuantity = item.quantity || 1;
+                      const maxQty = item.maxQuantity || 999;
+                      if (currentQuantity < maxQty) {
+                        updateQuantity(item.id, currentQuantity + 1);
+                      } else {
+                        toast.error(`Only ${maxQty} available in stock`);
+                      }
+                    }}
+                    disabled={(item.quantity || 1) >= (item.maxQuantity || 999)}
+                    className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black hover:bg-white rounded-lg transition-all disabled:opacity-50"
+                  >
+                    +
+                  </button>
+                </div>
 
-              <button 
-                onClick={() => handleRemove(item.id)}
-                className="p-3 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all active:scale-90"
-                title="Remove from cart"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
+                <button 
+                  onClick={() => handleRemove(item.id)}
+                  className="p-2 sm:p-3 text-red-400 hover:text-red-600 hover:bg-red-50 bg-red-50/50 sm:bg-transparent rounded-xl transition-all active:scale-90"
+                  title="Remove from cart"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           );
         })}
