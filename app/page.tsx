@@ -21,6 +21,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>(['Tech', 'Books', 'Furniture', 'Clothing', 'Sports']);
   const [loading, setLoading] = useState(true);
+  const [heroIndex, setHeroIndex] = useState(0);
 
   useEffect(() => {
     const unsubAll = subscribeToAllActiveProducts((fetchedProducts) => {
@@ -43,11 +44,25 @@ export default function Home() {
   // Sort products by newest first
   const sortedProducts = [...products].sort((a, b) => getTime(b) - getTime(a));
 
-  // 1. Featured product (isSponsored, then isFeatured, then latest)
-  const featuredProduct = sortedProducts.find(p => p.isSponsored) || sortedProducts.find(p => p.isFeatured) || sortedProducts[0] || null;
+  // 1. Featured product pool (isSponsored first, then isFeatured, then latest 3)
+  const sponsoredProducts = sortedProducts.filter(p => p.isSponsored);
+  const featuredProducts = sortedProducts.filter(p => p.isFeatured);
+  const heroPool = sponsoredProducts.length > 0 ? sponsoredProducts : (featuredProducts.length > 0 ? featuredProducts : sortedProducts.slice(0, 3));
+
+  // Auto-rotate hero product
+  useEffect(() => {
+    if (heroPool.length <= 1) return;
+    const interval = setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % heroPool.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [heroPool.length]);
+
+  const featuredProduct = heroPool[heroIndex] || null;
   
-  // Remove featured from remaining pool to avoid duplicates
-  let remainingProducts = sortedProducts.filter(p => p.id !== featuredProduct?.id);
+  // Remove all hero pool products from remaining pool to avoid duplicates
+  let remainingProducts = sortedProducts.filter(p => !heroPool.find(hp => hp.id === p.id));
+
 
   // 2. Popular product (for highlight card)
   const highlightProduct = remainingProducts.find(p => p.isPopular) || remainingProducts[0] || null;
@@ -88,7 +103,7 @@ export default function Home() {
               )}
             </h1>
             <div className="flex items-start gap-4 mb-8">
-              <span className="text-4xl font-light text-gray-300">01</span>
+              <span className="text-4xl font-light text-gray-300">0{heroIndex + 1}</span>
               <div className="flex-1">
                 <h3 className="font-semibold text-lg">{featuredProduct?.isSponsored ? 'Ad' : 'Featured Item'}</h3>
                 {loading ? (
@@ -103,12 +118,28 @@ export default function Home() {
                 )}
               </div>
             </div>
-            <Link href={featuredProduct ? `/products/${featuredProduct.id}` : "/products"} className="inline-flex items-center gap-3 bg-[#d9ff00] text-black font-semibold px-6 py-3 rounded-full hover:bg-[#c4e600] transition-colors">
-              {featuredProduct ? 'View Details' : 'View All Products'}
-              <span className="bg-black text-white p-1.5 rounded-full">
-                <ArrowUpRight className="w-4 h-4" />
-              </span>
-            </Link>
+            
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <Link href={featuredProduct ? `/products/${featuredProduct.id}` : "/products"} className="inline-flex items-center gap-3 bg-[#d9ff00] text-black font-semibold px-6 py-3 rounded-full hover:bg-[#c4e600] transition-colors">
+                {featuredProduct ? 'View Details' : 'View All Products'}
+                <span className="bg-black text-white p-1.5 rounded-full">
+                  <ArrowUpRight className="w-4 h-4" />
+                </span>
+              </Link>
+              
+              {heroPool.length > 1 && (
+                <div className="flex items-center gap-2">
+                  {heroPool.map((_, idx) => (
+                    <button 
+                      key={idx}
+                      onClick={() => setHeroIndex(idx)}
+                      className={`h-2 rounded-full transition-all duration-300 ${idx === heroIndex ? 'w-6 bg-black' : 'w-2 bg-gray-200 hover:bg-gray-300'}`}
+                      aria-label={`Go to slide ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           
           {/* Hero Image */}

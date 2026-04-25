@@ -94,11 +94,57 @@ export async function POST(req: NextRequest) {
         createdAt: FieldValue.serverTimestamp()
       });
 
-      // 4. Update the seller's totalEarned
+      // 4. Update the seller's totalEarned and give Vendor Bonus
       const sellerRef = adminDb.collection('users').doc(sellerId);
+      const sellerSnap = await transaction.get(sellerRef);
+      
+      let prevEarned = 0;
+      if (sellerSnap.exists) {
+        prevEarned = sellerSnap.data()?.totalEarned || 0;
+      }
+      const newEarned = prevEarned + netAmount;
+      
       transaction.update(sellerRef, {
         totalEarned: FieldValue.increment(netAmount)
       });
+      
+      let bonus = 0;
+      let bonusReason = '';
+      
+      // Base Cashback: 1% cashback on every sale as a vendor bonus
+      bonus += Number((netAmount * 0.01).toFixed(2));
+      bonusReason = '1% Vendor Sales Bonus';
+      
+      // Velocity milestones
+      if (prevEarned < 500 && newEarned >= 500) {
+        bonus += 50;
+        bonusReason += ' + 500 Sales Milestone';
+      } else if (prevEarned < 2000 && newEarned >= 2000) {
+        bonus += 150;
+        bonusReason += ' + 2000 Sales Milestone';
+      }
+      
+      if (bonus > 0 && sellerSnap.exists) {
+        await updateWalletWithLedger(transaction, {
+          userId: sellerId,
+          amount: bonus,
+          type: 'vendor_bonus',
+          orderId: orderId,
+          description: `Vendor Bonus: ${bonusReason}`
+        });
+        
+        // Notify them
+        const bonusNotifRef = adminDb.collection('notifications').doc();
+        transaction.set(bonusNotifRef, {
+          userId: sellerId,
+          title: 'Vendor Bonus Earned! 🎉',
+          message: `You earned a vendor bonus of GH₵${bonus.toFixed(2)} for: ${bonusReason}! Keep up the great work!`,
+          type: 'wallet',
+          link: '/profile',
+          read: false,
+          createdAt: FieldValue.serverTimestamp()
+        });
+      }
 
       return { success: true };
     });

@@ -7,7 +7,8 @@ export type LedgerTransactionType =
   | 'escrow_hold' 
   | 'escrow_release' 
   | 'escrow_refund' 
-  | 'payment_received';
+  | 'payment_received'
+  | 'vendor_bonus';
 
 interface LedgerEntry {
   userId: string;
