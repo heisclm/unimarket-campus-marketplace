@@ -267,7 +267,7 @@ export default function VendorDashboard() {
                       </td>
                       <td className="py-4">
                         <div className="flex items-center gap-2">
-                          {!product.promotedAt ? (
+                          {!product.isSponsored ? (
                             <button onClick={() => setProductToPromote(product)} className="text-sm font-semibold text-[#b8d900] hover:text-[#d9ff00] bg-black px-2 py-1 rounded-md transition-colors flex items-center gap-1">
                               <Zap className="w-3 h-3" /> Promote
                             </button>
