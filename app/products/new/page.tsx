@@ -19,7 +19,6 @@ export default function NewProductPage() {
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('Electronics');
   const [type, setType] = useState('fixed');
-  const [offersDelivery, setOffersDelivery] = useState(false);
   const [hasVariations, setHasVariations] = useState(false);
   const [quantity, setQuantity] = useState('1');
   const [variants, setVariants] = useState([{ id: 1, name: '', quantity: '1', price: '' }]);
@@ -175,7 +174,6 @@ export default function NewProductPage() {
         sellerId: user.uid,
         sellerIsVerified: true,
         category,
-        offersDelivery,
         hasVariations,
         quantity: totalQuantity,
         variants: finalVariants,
@@ -292,22 +290,6 @@ export default function NewProductPage() {
               </select>
             </div>
           </div>
-        </div>
-
-        {/* Delivery Options */}
-        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-2">
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input 
-              type="checkbox"
-              checked={offersDelivery}
-              onChange={(e) => setOffersDelivery(e.target.checked)}
-              className="w-5 h-5 accent-black rounded border-gray-300 text-black focus:ring-black"
-            />
-            <div className="flex flex-col">
-              <span className="font-bold text-gray-900">Offer Campus/Dorm Delivery</span>
-              <span className="text-sm text-gray-500 font-normal">Delivery fee will be calculated at checkout based on buyer&apos;s location.</span>
-            </div>
-          </label>
         </div>
 
         {/* Inventory & Variations */}
