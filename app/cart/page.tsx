@@ -14,7 +14,7 @@ import { placeOrderWithEscrow } from '@/lib/escrow';
 import CheckoutSuccess from '@/components/checkout/CheckoutSuccess';
 
 export default function CartPage() {
-  const { items, removeFromCart, total, clearCart } = useCart();
+  const { items, removeFromCart, updateQuantity, total, clearCart } = useCart();
   const { user, userData, refreshUserData } = useAuth();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -112,7 +112,7 @@ export default function CartPage() {
             'Authorization': `Bearer ${idToken}`
           },
           body: JSON.stringify({
-            items: items.map(item => ({ id: item.id, productId: item.productId || (item.id.includes('-') ? item.id.split('-')[0] : item.id), title: item.title, price: item.price, sellerId: item.sellerId })),
+            items: items.map(item => ({ id: item.id, productId: item.productId || (item.id.includes('-') ? item.id.split('-')[0] : item.id), title: item.title, price: item.price, sellerId: item.sellerId, quantity: item.quantity || 1 })),
             useCoins
           })
         });
@@ -152,7 +152,8 @@ export default function CartPage() {
                 productId: item.productId || (item.id.includes('-') ? item.id.split('-')[0] : item.id),
                 title: item.title,
                 price: item.price,
-                sellerId: item.sellerId
+                sellerId: item.sellerId,
+                quantity: item.quantity || 1
               }))
             }
           })
@@ -226,6 +227,28 @@ export default function CartPage() {
                 <div className="font-bold text-xl text-black">GH₵{item.price.toFixed(2)}</div>
               </div>
               
+              <div className={`flex items-center bg-gray-50 rounded-xl p-1 border border-gray-100 ${isUnavailable ? 'hidden' : ''}`}>
+                <button 
+                  onClick={() => {
+                    if ((item.quantity || 1) > 1) {
+                      updateQuantity(item.id, (item.quantity || 1) - 1);
+                    }
+                  }}
+                  className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black hover:bg-white rounded-lg transition-all"
+                >
+                  -
+                </button>
+                <span className="w-8 text-center font-bold">{item.quantity || 1}</span>
+                <button 
+                  onClick={() => {
+                    updateQuantity(item.id, (item.quantity || 1) + 1);
+                  }}
+                  className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black hover:bg-white rounded-lg transition-all"
+                >
+                  +
+                </button>
+              </div>
+
               <button 
                 onClick={() => handleRemove(item.id)}
                 className="p-3 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all active:scale-90"

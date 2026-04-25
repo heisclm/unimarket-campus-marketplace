@@ -104,6 +104,8 @@ export async function POST(req: Request) {
           transaction.update(buyerRef, updateData);
 
           for (const item of items) {
+            const requestedQuantity = item.quantity || 1;
+            
             // Create Order
             const orderRef = adminDb.collection('orders').doc();
             transaction.set(orderRef, {
@@ -111,7 +113,8 @@ export async function POST(req: Request) {
               sellerId: item.sellerId,
               productId: item.id,
               productTitle: item.title,
-              amount: item.price,
+              amount: item.price * requestedQuantity,
+              quantity: requestedQuantity,
               status: 'escrow_held',
               createdAt: FieldValue.serverTimestamp(),
               updatedAt: FieldValue.serverTimestamp(),
@@ -124,7 +127,7 @@ export async function POST(req: Request) {
               senderId: buyerId,
               receiverId: 'escrow',
               orderId: orderRef.id,
-              amount: item.price,
+              amount: item.price * requestedQuantity,
               type: 'escrow_hold',
               status: 'completed',
               reference,
@@ -144,13 +147,13 @@ export async function POST(req: Request) {
                 const variants = [...productData.variants];
                 variants[variantIndex] = {
                    ...variants[variantIndex],
-                   quantity: Math.max(0, (variants[variantIndex].quantity || 1) - 1)
+                   quantity: Math.max(0, (variants[variantIndex].quantity || 0) - requestedQuantity)
                 };
                 updateData.variants = variants;
                 newTotalQuantity = variants.reduce((sum: number, v: any) => sum + (v.quantity || 0), 0);
               }
             } else {
-              newTotalQuantity = Math.max(0, (productData.quantity || 1) - 1);
+              newTotalQuantity = Math.max(0, (productData.quantity || 0) - requestedQuantity);
             }
 
             updateData.quantity = newTotalQuantity;

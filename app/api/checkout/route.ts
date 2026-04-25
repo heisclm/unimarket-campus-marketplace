@@ -65,6 +65,8 @@ export async function POST(req: NextRequest) {
         }
 
         let productPrice = data.price;
+        const requestedQuantity = items[i].quantity || 1;
+        
         if (data.hasVariations && items[i].id.includes('-')) {
           const variantIndex = parseInt(items[i].id.split('-')[1]);
           if (!isNaN(variantIndex) && data.variants && data.variants[variantIndex]) {
@@ -72,15 +74,23 @@ export async function POST(req: NextRequest) {
             if (variant.price != null && variant.price !== undefined) {
               productPrice = variant.price;
             }
+            if ((variant.quantity || 0) < requestedQuantity) {
+              throw new Error(`Not enough stock for variant of ${data.title}`);
+            }
+          }
+        } else {
+          if ((data.quantity || 0) < requestedQuantity) {
+            throw new Error(`Not enough stock for ${data.title}`);
           }
         }
 
-        subtotal += productPrice;
+        subtotal += productPrice * requestedQuantity;
         validItems.push({
           id: snap.id,
           cartItemId: items[i].id,
           title: data.hasVariations ? items[i].title : data.title,
           price: productPrice,
+          quantity: requestedQuantity,
           sellerId: data.sellerId,
           ref: snap.ref,
           productData: data
@@ -128,7 +138,7 @@ export async function POST(req: NextRequest) {
         orderIds.push(orderRef.id);
         
         // Calculate the platform fee per item (2% for students, could be higher for vendors later)
-        const itemPlatformFee = item.price * 0.02;
+        const itemPlatformFee = item.price * item.quantity * 0.02;
         // The delivery fee per item can just be attributed to the order if they chose delivery
         const itemDeliveryFee = 0; // simplistic: per seller, assuming 1 item per seller for now, or just record it cleanly. 
         totalPlatformFeeHeld += itemPlatformFee;
@@ -138,9 +148,10 @@ export async function POST(req: NextRequest) {
           sellerId: item.sellerId,
           productId: item.id,
           productTitle: item.title,
-          amount: item.price, // Gross amount
+          amount: item.price * item.quantity, // Gross amount
+          quantity: item.quantity,
           platformFee: itemPlatformFee, // What the platform takes
-          netAmount: item.price - itemPlatformFee, // What the seller actually receives for the item
+          netAmount: (item.price * item.quantity) - itemPlatformFee, // What the seller actually receives for the item
           status: 'escrow_held',
           createdAt: FieldValue.serverTimestamp(),
           updatedAt: FieldValue.serverTimestamp()
@@ -159,13 +170,13 @@ export async function POST(req: NextRequest) {
             const variants = [...productData.variants];
             variants[variantIndex] = {
                ...variants[variantIndex],
-               quantity: Math.max(0, (variants[variantIndex].quantity || 1) - 1)
+               quantity: Math.max(0, (variants[variantIndex].quantity || 0) - item.quantity)
             };
             updateData.variants = variants;
             newTotalQuantity = variants.reduce((sum: number, v: any) => sum + (v.quantity || 0), 0);
           }
         } else {
-          newTotalQuantity = Math.max(0, (productData.quantity || 1) - 1);
+          newTotalQuantity = Math.max(0, (productData.quantity || 0) - item.quantity);
         }
 
         updateData.quantity = newTotalQuantity;
