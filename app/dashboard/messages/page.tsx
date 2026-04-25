@@ -56,6 +56,13 @@ function MessagesContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  useEffect(() => {
+    const initMessage = searchParams.get('initMessage');
+    if (initMessage) {
+      setNewMessage(initMessage);
+    }
+  }, [searchParams]);
+
   // Handle URL Params for new chat initiation
   useEffect(() => {
     if (!user || !userData) return;

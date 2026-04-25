@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { placeOrderWithEscrow } from '@/lib/escrow';
+import CheckoutSuccess from '@/components/checkout/CheckoutSuccess';
 
 export default function CartPage() {
   const { items, removeFromCart, total, clearCart } = useCart();
@@ -21,6 +22,7 @@ export default function CartPage() {
   const [useCoins, setUseCoins] = useState(false);
   const [unavailableItems, setUnavailableItems] = useState<string[]>([]);
   const [isValidatingCart, setIsValidatingCart] = useState(true);
+  const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -121,6 +123,7 @@ export default function CartPage() {
         }
 
         await refreshUserData();
+        setPurchasedItems(items.map(item => ({...item}))); // save the snapshot of items before clearing
         clearCart();
         setSuccess(true);
         toast.success('Checkout successful!');
@@ -170,17 +173,8 @@ export default function CartPage() {
 
   if (success) {
     return (
-      <div className="max-w-2xl mx-auto bg-white rounded-[2rem] p-12 shadow-sm text-center border border-green-50">
-        <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-          <CheckCircle2 className="w-10 h-10" />
-        </div>
-        <h1 className="text-3xl font-bold mb-4 tracking-tight">Checkout Successful!</h1>
-        <p className="text-gray-500 mb-8 leading-relaxed">
-          Your funds are now securely held in escrow. Please arrange delivery with the seller via chat.
-        </p>
-        <Link href="/products" className="inline-block bg-black text-white px-8 py-3 rounded-full font-bold hover:bg-gray-800 transition-all hover:scale-105 active:scale-95 shadow-lg">
-          Continue Shopping
-        </Link>
+      <div className="py-10">
+        <CheckoutSuccess items={purchasedItems} />
       </div>
     );
   }

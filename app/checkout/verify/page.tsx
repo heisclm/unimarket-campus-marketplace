@@ -6,6 +6,7 @@ import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/components/cart/CartProvider';
 import { useAuth } from '@/components/auth/AuthProvider';
+import CheckoutSuccess from '@/components/checkout/CheckoutSuccess';
 
 function VerifyPaymentContent() {
   const searchParams = useSearchParams();
@@ -17,6 +18,7 @@ function VerifyPaymentContent() {
   
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Verifying your payment...');
+  const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
   const hasVerified = useRef(false);
 
   useEffect(() => {
@@ -43,6 +45,9 @@ function VerifyPaymentContent() {
 
         if (res.ok && data.status === 'success') {
           if (data.metadata?.type === 'cart_checkout') {
+            if (data.metadata.items) {
+               setPurchasedItems(data.metadata.items);
+            }
             clearCart();
           }
           setStatus('success');
@@ -60,6 +65,14 @@ function VerifyPaymentContent() {
 
     verifyAndProcess();
   }, [reference, clearCart, user]);
+
+  if (status === 'success' && purchasedItems.length > 0) {
+    return (
+      <div className="py-10">
+        <CheckoutSuccess items={purchasedItems} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-4">
