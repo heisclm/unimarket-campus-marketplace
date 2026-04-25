@@ -335,10 +335,16 @@ export default function VendorDashboard() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-xl">
             <h3 className="text-2xl font-bold mb-4 flex items-center gap-2"><Zap className="w-6 h-6 text-[#d9ff00] bg-black rounded-md p-1"/> Promote Listing</h3>
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-600 mb-6">
               Promote <span className="font-bold text-black">{productToPromote.title}</span> to the homepage highlight section. 
-              This will cost <span className="font-bold text-black">50 coins</span>. Do you want to proceed?
             </p>
+            <div className="bg-gray-50 border border-gray-100 p-4 rounded-xl mb-8 flex justify-between items-center">
+              <div>
+                 <p className="font-semibold text-gray-900">Featured Placement</p>
+                 <p className="text-xs text-gray-500">7 Days duration</p>
+              </div>
+              <div className="font-bold text-lg">GH₵ 50.00</div>
+            </div>
             <div className="flex gap-4">
               <button 
                 onClick={() => setProductToPromote(null)}
