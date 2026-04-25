@@ -187,7 +187,7 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold flex items-center gap-3">
           <LayoutDashboard className="w-8 h-8 text-gray-400" /> 
-          {role === 'vendor' ? 'Vendor Dashboard' : 'Seller Dashboard'}
+          {role === 'vendor' ? 'Vendor Dashboard' : 'My Dashboard'}
         </h1>
         <Link href="/products/new" className="bg-[#d9ff00] text-black px-6 py-2.5 rounded-full font-semibold hover:bg-[#c4e600] transition-colors flex items-center gap-2">
           <Plus className="w-5 h-5" /> New Listing
