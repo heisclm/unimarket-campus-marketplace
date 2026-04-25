@@ -391,7 +391,7 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <h4 className="font-bold text-lg">{order.productTitle || 'Product Purchase'} {order.quantity > 1 ? `(x${order.quantity})` : ''}</h4>
-                        <p className="text-sm text-gray-500">Order ID: #{order.id?.slice(0, 8)} • GH₵{order.amount?.toFixed(2) || '0.00'}</p>
+                        <p className="text-sm text-gray-500">Order ID: #{order.id?.slice(0, 8)} • GH₵{Number(order.amount || 0).toFixed(2)}</p>
                         <div className="mt-2 flex items-center gap-2">
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                             order.status === 'completed' ? 'bg-green-100 text-green-700' :
@@ -455,7 +455,7 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <h4 className="font-bold text-lg">{order.productTitle || 'Product Sale'} {order.quantity > 1 ? `(x${order.quantity})` : ''}</h4>
-                        <p className="text-sm text-gray-500">Order ID: #{order.id?.slice(0, 8)} • GH₵{order.amount?.toFixed(2) || '0.00'}</p>
+                        <p className="text-sm text-gray-500">Order ID: #{order.id?.slice(0, 8)} • GH₵{Number(order.amount || 0).toFixed(2)}</p>
                         <div className="mt-2 flex items-center gap-2">
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                             order.status === 'completed' ? 'bg-green-100 text-green-700' :

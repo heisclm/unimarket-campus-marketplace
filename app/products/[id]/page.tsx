@@ -29,6 +29,11 @@ export default function ProductDetailPage() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState<number>(0);
+  const [selectedQuantity, setSelectedQuantity] = useState<number>(1);
+
+  useEffect(() => {
+    setSelectedQuantity(1);
+  }, [selectedVariantIndex]);
 
   useEffect(() => {
     if (!id) return;
@@ -186,7 +191,9 @@ export default function ProductDetailPage() {
       title: product.title + (variantDetails ? ` ${variantDetails}` : ''),
       price: price,
       image: product.previewImage || product.images?.[0] || '',
-      sellerId: product.sellerId
+      sellerId: product.sellerId,
+      quantity: selectedQuantity,
+      maxQuantity: maxAvailable
     });
     toast.success('Added to your cart!');
   };
@@ -194,6 +201,14 @@ export default function ProductDetailPage() {
   const currentPrice = product.hasVariations && product.variants?.[selectedVariantIndex]?.price != null 
     ? Number(product.variants[selectedVariantIndex].price) 
     : Number(product.price);
+
+  const maxAvailable = product.hasVariations 
+    ? (product.variants?.[selectedVariantIndex]?.quantity || 0) 
+    : (product.quantity || 0);
+
+  const currentCartId = product.hasVariations ? `${product.id}-${selectedVariantIndex}` : product.id;
+  const currentCartQty = items.find(i => i.id === currentCartId)?.quantity || 0;
+  const maxAllowedToAdd = Math.max(0, maxAvailable - currentCartQty);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -389,32 +404,58 @@ export default function ProductDetailPage() {
                 This item is no longer available.
               </div>
             ) : (
-            <div className="flex flex-wrap sm:flex-nowrap gap-3 mb-4">
-              <button 
-                onClick={handleAddToCart}
-                disabled={items.some(i => i.id === (product.hasVariations ? `${product.id}-${selectedVariantIndex}` : product.id)) || userData?.role === 'vendor' || (product.hasVariations && product.variants?.[selectedVariantIndex]?.quantity <= 0)}
-                className="flex-[2] bg-[#d9ff00] text-black py-4 px-4 rounded-xl font-bold text-base sm:text-lg hover:bg-[#c4e600] transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                <ShoppingBag className="w-5 h-5 flex-shrink-0" /> {items.some(i => i.id === (product.hasVariations ? `${product.id}-${selectedVariantIndex}` : product.id)) ? 'In Cart' : 'Add to Cart'}
-              </button>
-              
-              <button 
-                onClick={toggleFavorite}
-                className={`flex-1 sm:flex-none sm:w-16 bg-white border ${isFavorite ? 'border-red-500 text-red-500' : 'border-gray-200 text-gray-500 hover:border-gray-300'} py-4 px-4 rounded-xl font-bold text-lg transition-colors shadow-sm flex items-center justify-center gap-2`}
-                aria-label={isFavorite ? "Remove from wishlist" : "Add to wishlist"}
-              >
-                <Heart className={`w-6 h-6 ${isFavorite ? 'fill-current' : ''}`} />
-              </button>
-
-              {user && (
-                <Link
-                  href={`/dashboard/messages?sellerId=${product.sellerId}&productId=${product.id}`}
-                  className="w-full sm:w-auto bg-black text-white px-6 py-4 sm:py-0 rounded-xl font-bold hover:bg-gray-800 transition-colors shadow-sm flex items-center justify-center gap-2"
+            <>
+              <div className="flex items-center gap-4 mb-5">
+                <span className="text-sm font-bold text-gray-900 uppercase tracking-wider">Quantity</span>
+                <div className="flex items-center bg-gray-50 rounded-xl p-1 border border-gray-200">
+                  <button 
+                    onClick={() => setSelectedQuantity(Math.max(1, selectedQuantity - 1))}
+                    disabled={selectedQuantity <= 1}
+                    className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-black hover:bg-white rounded-lg transition-all disabled:opacity-50"
+                  >
+                    -
+                  </button>
+                  <span className="w-12 text-center font-bold text-lg">{selectedQuantity}</span>
+                  <button 
+                    onClick={() => setSelectedQuantity(Math.min(maxAllowedToAdd, selectedQuantity + 1))}
+                    disabled={selectedQuantity >= maxAllowedToAdd}
+                    className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-black hover:bg-white rounded-lg transition-all disabled:opacity-50"
+                  >
+                    +
+                  </button>
+                </div>
+                <span className="text-sm text-gray-500 font-medium">
+                  {maxAvailable} available {currentCartQty > 0 && `(${currentCartQty} in cart)`}
+                </span>
+              </div>
+            
+              <div className="flex flex-wrap sm:flex-nowrap gap-3 mb-4">
+                <button 
+                  onClick={handleAddToCart}
+                  disabled={selectedQuantity > maxAllowedToAdd || userData?.role === 'vendor' || maxAllowedToAdd <= 0}
+                  className="flex-[2] bg-[#d9ff00] text-black py-4 px-4 rounded-xl font-bold text-base sm:text-lg hover:bg-[#c4e600] transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  Message
-                </Link>
-              )}
-            </div>
+                  <ShoppingBag className="w-5 h-5 flex-shrink-0" /> {maxAllowedToAdd <= 0 ? 'Max Reached' : 'Add to Cart'}
+                </button>
+                
+                <button 
+                  onClick={toggleFavorite}
+                  className={`flex-1 sm:flex-none sm:w-16 bg-white border ${isFavorite ? 'border-red-500 text-red-500' : 'border-gray-200 text-gray-500 hover:border-gray-300'} py-4 px-4 rounded-xl font-bold text-lg transition-colors shadow-sm flex items-center justify-center gap-2`}
+                  aria-label={isFavorite ? "Remove from wishlist" : "Add to wishlist"}
+                >
+                  <Heart className={`w-6 h-6 ${isFavorite ? 'fill-current' : ''}`} />
+                </button>
+
+                {user && (
+                  <Link
+                    href={`/dashboard/messages?sellerId=${product.sellerId}&productId=${product.id}`}
+                    className="w-full sm:w-auto bg-black text-white px-6 py-4 sm:py-0 rounded-xl font-bold hover:bg-gray-800 transition-colors shadow-sm flex items-center justify-center gap-2"
+                  >
+                    Message
+                  </Link>
+                )}
+              </div>
+            </>
             )}
 
             {!isOwner && user && (

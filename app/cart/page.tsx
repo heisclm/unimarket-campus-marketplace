@@ -241,9 +241,16 @@ export default function CartPage() {
                 <span className="w-8 text-center font-bold">{item.quantity || 1}</span>
                 <button 
                   onClick={() => {
-                    updateQuantity(item.id, (item.quantity || 1) + 1);
+                    const currentQuantity = item.quantity || 1;
+                    const maxQty = item.maxQuantity || 999;
+                    if (currentQuantity < maxQty) {
+                      updateQuantity(item.id, currentQuantity + 1);
+                    } else {
+                      toast.error(`Only ${maxQty} available in stock`);
+                    }
                   }}
-                  className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black hover:bg-white rounded-lg transition-all"
+                  disabled={(item.quantity || 1) >= (item.maxQuantity || 999)}
+                  className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black hover:bg-white rounded-lg transition-all disabled:opacity-50"
                 >
                   +
                 </button>
