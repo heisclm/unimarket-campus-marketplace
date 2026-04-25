@@ -14,12 +14,15 @@ export async function POST(req: NextRequest) {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const userId = decodedToken.uid;
 
-    const { productId } = await req.json();
+    const { productId, duration, cost, currency } = await req.json();
     if (!productId) {
       return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
     }
 
-    const promotionCost = 50.00;
+    // Default values for backwards compatibility (e.g. students)
+    const promotionCost = cost || 50;
+    const promotionDuration = duration || 7;
+    const paymentCurrency = currency || 'cash';
 
     await adminDb.runTransaction(async (transaction) => {
       const userRef = adminDb.collection('users').doc(userId);
@@ -28,8 +31,27 @@ export async function POST(req: NextRequest) {
       if (!userSnap.exists) throw new Error('User not found');
       
       const userData = userSnap.data()!;
-      if ((userData.walletBalance || 0) < promotionCost) {
-        throw new Error(`Insufficient wallet balance. Promotion costs GH₵${promotionCost.toFixed(2)}.`);
+      
+      if (paymentCurrency === 'coins') {
+        if ((userData.coins || 0) < promotionCost) {
+          throw new Error(`Insufficient coins. Promotion costs ${promotionCost} coins.`);
+        }
+        // Deduct coins from user
+        transaction.update(userRef, {
+          coins: FieldValue.increment(-promotionCost),
+          updatedAt: FieldValue.serverTimestamp()
+        });
+      } else {
+        if ((userData.walletBalance || 0) < promotionCost) {
+          throw new Error(`Insufficient wallet balance. Promotion costs GH₵${promotionCost.toFixed(2)}.`);
+        }
+        // Deduct via ledger
+        await updateWalletWithLedger(transaction, {
+          userId,
+          amount: -promotionCost,
+          type: 'withdrawal',
+          description: `Promoted Product: ${productId}`
+        });
       }
 
       const productRef = adminDb.collection('products').doc(productId);
@@ -38,25 +60,27 @@ export async function POST(req: NextRequest) {
       if (!productSnap.exists) throw new Error('Product not found');
       if (productSnap.data()?.sellerId !== userId) throw new Error('Not your product');
 
-      // Deduct via ledger
-      await updateWalletWithLedger(transaction, {
-        userId,
-        amount: -promotionCost,
-        type: 'withdrawal',
-        description: `Promoted Product: ${productSnap.data()?.title}`
-      });
+      // Update product with isSponsored and duration
+      const sponsoredUntil = new Date();
+      sponsoredUntil.setDate(sponsoredUntil.getDate() + promotionDuration);
 
-      // Update product
       transaction.update(productRef, {
         isSponsored: true,
-        sponsoredAt: FieldValue.serverTimestamp()
+        sponsoredAt: FieldValue.serverTimestamp(),
+        sponsoredUntil: sponsoredUntil
       });
       
-      // Update platform revenue
+      // Update platform revenue ledger
       const platformRef = adminDb.collection('platform').doc('stats');
-      transaction.set(platformRef, {
-        totalPromotionRevenue: FieldValue.increment(promotionCost)
-      }, { merge: true });
+      if (paymentCurrency === 'coins') {
+        transaction.set(platformRef, {
+          totalPromotionCoinsSpent: FieldValue.increment(promotionCost)
+        }, { merge: true });
+      } else {
+        transaction.set(platformRef, {
+          totalPromotionRevenue: FieldValue.increment(promotionCost)
+        }, { merge: true });
+      }
     });
 
     return NextResponse.json({ success: true });

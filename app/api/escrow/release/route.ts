@@ -70,30 +70,32 @@ export async function POST(req: NextRequest) {
       
       const newEarned = prevEarned + netAmount;
       
-      let bonus = 0;
+      let bonusCoins = 0;
       let bonusReason = '';
       
-      // Base Cashback: 1% cashback on every sale as a vendor bonus
-      bonus += Number((netAmount * 0.01).toFixed(2));
-      bonusReason = '1% Vendor Sales Bonus';
+      // Base Cashback: 2 coins for every GH₵ earned
+      bonusCoins += Math.floor(netAmount * 2);
+      bonusReason = 'Sales Coin Bonus';
       
       // Velocity milestones
       if (prevEarned < 500 && newEarned >= 500) {
-        bonus += 50;
+        bonusCoins += 1000;
         bonusReason += ' + 500 Sales Milestone';
       } else if (prevEarned < 2000 && newEarned >= 2000) {
-        bonus += 150;
+        bonusCoins += 3000;
         bonusReason += ' + 2000 Sales Milestone';
       }
 
-      const totalToAdd = netAmount + bonus;
-      const newBalance = previousBalance + totalToAdd;
+      const newBalance = previousBalance + netAmount;
+      const currentCoins = sellerData.coins || 0;
+      const newCoins = currentCoins + bonusCoins;
 
       // --- ALL WRITES ---
       // 1. Update Seller Wallet and totalEarned
       transaction.update(sellerRef, {
         walletBalance: newBalance,
         totalEarned: FieldValue.increment(netAmount),
+        coins: FieldValue.increment(bonusCoins),
         updatedAt: FieldValue.serverTimestamp()
       });
 
@@ -142,15 +144,15 @@ export async function POST(req: NextRequest) {
       });
       
       // 6. Vendor Bonus Writes (if applicable)
-      if (bonus > 0 && sellerSnap.exists) {
+      if (bonusCoins > 0 && sellerSnap.exists) {
         const bonusLedgerRef = adminDb.collection('wallet_ledger').doc();
         transaction.set(bonusLedgerRef, {
           userId: sellerId,
-          amount: bonus,
-          type: 'vendor_bonus',
+          amount: bonusCoins, // Recorded as coins, not cash amount
+          type: 'vendor_bonus_coins',
           orderId: orderId,
-          previousBalance: previousBalance + netAmount,
-          newBalance: newBalance,
+          previousBalance: currentCoins,
+          newBalance: newCoins,
           description: `Vendor Bonus: ${bonusReason}`,
           createdAt: FieldValue.serverTimestamp()
         });
@@ -160,7 +162,7 @@ export async function POST(req: NextRequest) {
         transaction.set(bonusNotifRef, {
           userId: sellerId,
           title: 'Vendor Bonus Earned! 🎉',
-          message: `You earned a vendor bonus of GH₵${bonus.toFixed(2)} for: ${bonusReason}! Keep up the great work!`,
+          message: `You earned a vendor bonus of ${bonusCoins} coins for: ${bonusReason}! Keep up the great work!`,
           type: 'wallet',
           link: '/profile',
           read: false,
