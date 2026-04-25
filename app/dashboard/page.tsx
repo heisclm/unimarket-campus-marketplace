@@ -391,7 +391,7 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <h4 className="font-bold text-lg">{order.productTitle || 'Product Purchase'}</h4>
-                        <p className="text-sm text-gray-500">Order ID: #{order.id.slice(0, 8)} • GH₵{order.amount.toFixed(2)}</p>
+                        <p className="text-sm text-gray-500">Order ID: #{order.id?.slice(0, 8)} • GH₵{order.amount?.toFixed(2) || '0.00'}</p>
                         <div className="mt-2 flex items-center gap-2">
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                             order.status === 'completed' ? 'bg-green-100 text-green-700' :
@@ -399,7 +399,7 @@ export default function DashboardPage() {
                             order.status === 'delivered' ? 'bg-blue-100 text-blue-700' :
                             'bg-orange-100 text-orange-700'
                           }`}>
-                            {order.status.replace('_', ' ')}
+                            {order.status?.replace('_', ' ') || 'UNKNOWN'}
                           </span>
                           {order.status === 'escrow_held' && (
                             <span className="text-[10px] text-gray-400 font-medium italic flex items-center gap-1">
@@ -455,7 +455,7 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <h4 className="font-bold text-lg">{order.productTitle || 'Product Sale'}</h4>
-                        <p className="text-sm text-gray-500">Order ID: #{order.id.slice(0, 8)} • GH₵{order.amount.toFixed(2)}</p>
+                        <p className="text-sm text-gray-500">Order ID: #{order.id?.slice(0, 8)} • GH₵{order.amount?.toFixed(2) || '0.00'}</p>
                         <div className="mt-2 flex items-center gap-2">
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${
                             order.status === 'completed' ? 'bg-green-100 text-green-700' :
@@ -463,7 +463,7 @@ export default function DashboardPage() {
                             order.status === 'delivered' ? 'bg-blue-100 text-blue-700' :
                             'bg-orange-100 text-orange-700'
                           }`}>
-                            {order.status.replace('_', ' ')}
+                            {order.status?.replace('_', ' ') || 'UNKNOWN'}
                           </span>
                         </div>
                       </div>
