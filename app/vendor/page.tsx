@@ -100,8 +100,8 @@ export default function VendorDashboard() {
     );
   }
 
-  const totalEarnings = orders.filter(o => o.status === 'delivered').reduce((acc, o) => acc + o.amount, 0);
-  const pendingEscrow = orders.filter(o => o.status === 'escrow_held').reduce((acc, o) => acc + o.amount, 0);
+  const totalEarnings = orders.filter(o => o.status === 'delivered').reduce((acc, o) => acc + (o.amount || 0), 0);
+  const pendingEscrow = orders.filter(o => o.status === 'escrow_held').reduce((acc, o) => acc + (o.amount || 0), 0);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 py-8">
@@ -176,8 +176,8 @@ export default function VendorDashboard() {
                   orders.slice(0, 5).map(order => (
                     <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
                       <div>
-                        <p className="font-bold text-sm">Order #{order.id.slice(0, 6)}</p>
-                        <p className="text-xs text-gray-500">GH₵{order.amount.toFixed(2)} • {order.status}</p>
+                        <p className="font-bold text-sm">Order #{(order.id || '').slice(0, 6)}</p>
+                        <p className="text-xs text-gray-500">GH₵{Number(order.amount || 0).toFixed(2)} • {order.status?.replace('_', ' ') || 'Pending'}</p>
                       </div>
                       {order.status === 'escrow_held' && (
                         <button 
@@ -232,7 +232,7 @@ export default function VendorDashboard() {
                           <span className="font-bold text-sm">{product.title}</span>
                         </div>
                       </td>
-                      <td className="py-4 font-bold text-sm">GH₵{product.price.toFixed(2)}</td>
+                      <td className="py-4 font-bold text-sm">GH₵{Number(product.price || 0).toFixed(2)}</td>
                       <td className="py-4">
                         <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full ${product.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
                           {product.status}
@@ -266,8 +266,8 @@ export default function VendorDashboard() {
                       <ShoppingBag className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className="font-bold">Order #{order.id.slice(0, 8)}</p>
-                      <p className="text-sm text-gray-500">Amount: GH₵{order.amount.toFixed(2)} • Method: {order.deliveryMethod}</p>
+                      <p className="font-bold">Order #{(order.id || '').slice(0, 8)}</p>
+                      <p className="text-sm text-gray-500">Amount: GH₵{Number(order.amount || 0).toFixed(2)} • Method: {order.deliveryMethod || 'Standard'}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -278,7 +278,7 @@ export default function VendorDashboard() {
                       <MessageSquare className="w-4 h-4" /> Message Buyer
                     </Link>
                     <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full ${order.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                      {order.status.replace('_', ' ')}
+                      {order.status?.replace('_', ' ') || 'Pending'}
                     </span>
                     {order.status === 'escrow_held' && (
                       <button 
