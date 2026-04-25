@@ -330,7 +330,7 @@ function MessagesContent() {
   if (!user) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 py-0 sm:py-8 h-[calc(100vh-80px)] sm:h-[calc(100vh-140px)]">
+    <div className="max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 py-0 sm:py-8 h-[calc(100dvh-80px)] sm:h-[calc(100vh-140px)]">
       <div className="bg-white sm:rounded-3xl sm:shadow-sm border-x sm:border border-gray-100 h-full flex overflow-hidden">
         
         {/* Chat List (Left Pane) */}
@@ -363,7 +363,7 @@ function MessagesContent() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto pb-[90px] md:pb-0">
             {filteredChats.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
                 <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
@@ -562,7 +562,7 @@ function MessagesContent() {
               </div>
 
               {/* Input Area / Review Area */}
-              <div className="p-4 sm:p-6 bg-white border-t border-gray-100 flex-shrink-0 pb-safe">
+              <div className="p-4 sm:p-6 bg-white border-t border-gray-100 flex-shrink-0 pb-[90px] md:pb-6">
                 {activeOrder?.status === 'completed' ? (
                   <div className="bg-gray-50 rounded-2xl p-6 text-center shadow-inner border border-gray-100">
                     <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
