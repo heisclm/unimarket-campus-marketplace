@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useParams, useRouter } from 'next/navigation';
 import PremiumImage from '@/components/ui/PremiumImage';
@@ -10,6 +10,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { useCart } from '@/components/cart/CartProvider';
 import BiddingSection from '@/components/products/BiddingSection';
 import ReportModal from '@/components/shared/ReportModal';
+import ProductCard from '@/components/products/ProductCard';
 import { ShoppingBag, Gavel, ArrowLeft, Clock, ShieldCheck, User as UserIcon, AlertTriangle, Heart, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -22,6 +23,7 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<any>(null);
   const [seller, setSeller] = useState<any>(null);
   const [sellerRating, setSellerRating] = useState<{average: number, count: number} | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -100,6 +102,36 @@ export default function ProductDetailPage() {
               }
             } catch (err) {
               console.error("Error fetching ratings:", err);
+            }
+          }
+
+          // Fetch related products
+          if (productData.category) {
+            try {
+              const relatedQuery = query(
+                collection(db, 'products'),
+                where('category', '==', productData.category),
+                where('status', '==', 'active'),
+                limit(10)
+              );
+              const relatedSnap = await getDocs(relatedQuery);
+              const relatedItems: any[] = [];
+              relatedSnap.forEach(doc => {
+                if (doc.id !== productData.id) {
+                  relatedItems.push({ id: doc.id, ...doc.data() });
+                }
+              });
+              
+              // Sort to prioritize sponsored products
+              relatedItems.sort((a, b) => {
+                if (a.isSponsored && !b.isSponsored) return -1;
+                if (!a.isSponsored && b.isSponsored) return 1;
+                return 0;
+              });
+
+              setRelatedProducts(relatedItems.slice(0, 4));
+            } catch (err) {
+              console.error("Error fetching related products:", err);
             }
           }
         }
@@ -397,6 +429,17 @@ export default function ProductDetailPage() {
         </div>
 
       </div>
+
+      {relatedProducts.length > 0 && (
+        <div className="mt-12 bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm">
+          <h2 className="text-2xl font-bold mb-6 text-gray-900 border-b pb-4">Related Items</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            {relatedProducts.map(relatedProduct => (
+              <ProductCard key={relatedProduct.id} product={relatedProduct} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {product && (
         <ReportModal 
