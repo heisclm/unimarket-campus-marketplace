@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const buyerId = decodedToken.uid;
 
     // 2. Parse Request Body
-    const { items, deliveryMethod } = await req.json();
+    const { items, deliveryMethod, useCoins } = await req.json();
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
     }
@@ -91,10 +91,6 @@ export async function POST(req: NextRequest) {
       const uniqueSellers = new Set(validItems.map(item => item.sellerId)).size;
       const deliveryFee = deliveryMethod === 'delivery' ? (uniqueSellers * 2.00) : 0;
       
-      // The platform fee is now handled on the seller's side (deducted from their payout), 
-      // so the buyer ONLY pays the subtotal + delivery.
-      const buyerTotalAmount = subtotal + deliveryFee;
-
       // FETCH USERS FOR CHAT BEFORE WRITES (Transactions require reads before writes)
       const uniqueSellerIds = Array.from(new Set(validItems.map(item => item.sellerId)));
       const userRefs = [
@@ -104,6 +100,9 @@ export async function POST(req: NextRequest) {
       const userSnaps = await transaction.getAll(...userRefs);
       const buyerData = userSnaps[0].data() || {};
       
+      const coinDiscount = useCoins ? (buyerData.coins || 0) * 0.005 : 0;
+      const buyerTotalAmount = Math.max(0, subtotal + deliveryFee - coinDiscount);
+
       const sellerDataMap: Record<string, any> = {};
       for (let i = 1; i < userSnaps.length; i++) {
         const snap = userSnaps[i];
@@ -243,9 +242,17 @@ export async function POST(req: NextRequest) {
 
       // Update user total spent (including subtotal, not just delivery fee)
       const userRef = adminDb!.collection('users').doc(buyerId);
-      transaction.update(userRef, {
-        totalSpent: FieldValue.increment(buyerTotalAmount)
-      });
+      const updateData: any = {
+        totalSpent: FieldValue.increment(buyerTotalAmount),
+        totalCoinsEarned: FieldValue.increment(Math.floor(buyerTotalAmount))
+      };
+      if (useCoins && (buyerData.coins || 0) > 0) {
+        // Simple logic: If they use coins, wipe out their previous coins and just give them coins for this new purchase
+        updateData.coins = Math.floor(buyerTotalAmount);
+      } else {
+        updateData.coins = FieldValue.increment(Math.floor(buyerTotalAmount));
+      }
+      transaction.update(userRef, updateData);
 
       return { success: true, orderIds };
     });

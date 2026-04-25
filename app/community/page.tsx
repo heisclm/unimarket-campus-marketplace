@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { db } from '@/lib/firebase';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
-import { Users, Send, Heart, MessageSquare, AlertTriangle, MessageCircle, Share2, ShieldCheck } from 'lucide-react';
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { Users, Send, Heart, MessageSquare, AlertTriangle, MessageCircle, Share2, ShieldCheck, Trash2 } from 'lucide-react';
 import ReportModal from '@/components/shared/ReportModal';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -40,6 +40,7 @@ export default function CommunityPage() {
         authorName: user.displayName || 'Anonymous Student',
         content: newPost.trim(),
         likes: 0,
+        likedBy: [],
         createdAt: serverTimestamp()
       });
       setNewPost('');
@@ -52,17 +53,31 @@ export default function CommunityPage() {
     }
   };
 
-  const handleLike = async (postId: string) => {
+  const handleLike = async (post: any) => {
     if (!user) {
       toast.error('Please log in to like posts');
       return;
     }
+    const isLiked = post.likedBy?.includes(user.uid);
+    // Optimistic-like UI trick if needed, but Firestore snapshot does this for us.
     try {
-      await updateDoc(doc(db, 'posts', postId), {
-        likes: increment(1)
+      await updateDoc(doc(db, 'posts', post.id), {
+        likedBy: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid)
       });
     } catch (error) {
       console.error("Error liking post:", error);
+      toast.error("Failed to update like");
+    }
+  };
+
+  const handleDelete = async (postId: string) => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+    try {
+      await deleteDoc(doc(db, 'posts', postId));
+      toast.success('Post deleted successfully');
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      toast.error('Failed to delete post');
     }
   };
 
@@ -98,10 +113,14 @@ export default function CommunityPage() {
               value={newPost}
               onChange={(e) => setNewPost(e.target.value)}
               placeholder="What's on your mind? Looking for a study group or specific textbook?"
-              className="w-full bg-gray-50 rounded-xl p-4 border-none focus:ring-0 resize-none h-24 text-sm"
+              className="w-full bg-gray-50 rounded-xl p-4 border-none focus:ring-0 resize-none h-24 text-sm focus:outline-none"
               disabled={isSubmitting}
+              maxLength={500}
             />
-            <div className="flex justify-end mt-4">
+            <div className="flex items-center justify-between mt-4">
+              <span className={`text-xs font-semibold ${newPost.length >= 500 ? 'text-red-500' : 'text-gray-400'}`}>
+                {newPost.length}/500
+              </span>
               <button
                 type="submit"
                 disabled={!newPost.trim() || isSubmitting}
@@ -137,8 +156,8 @@ export default function CommunityPage() {
           <div key={post.id} className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 hover:border-gray-200 transition-colors group">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden border border-gray-50">
-                  <Users className="w-5 h-5 text-gray-400" />
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden border border-gray-200 shadow-sm text-gray-700 font-bold">
+                  {post.authorName ? post.authorName.charAt(0).toUpperCase() : 'U'}
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900">{post.authorName}</h3>
@@ -147,23 +166,34 @@ export default function CommunityPage() {
                   </p>
                 </div>
               </div>
-              {user && user.uid !== post.authorId && (
-                <button 
-                  onClick={() => setReportTarget({ id: post.id, type: 'post' })}
-                  className="text-gray-300 hover:text-red-500 transition-colors p-2 opacity-0 group-hover:opacity-100"
-                  title="Report Post"
-                >
-                  <AlertTriangle className="w-4 h-4" />
-                </button>
-              )}
+              <div className="flex items-center gap-2">
+                {user && user.uid === post.authorId && (
+                  <button 
+                    onClick={() => handleDelete(post.id)}
+                    className="text-gray-300 hover:text-red-500 transition-colors p-2 opacity-0 group-hover:opacity-100"
+                    title="Delete Post"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+                {user && user.uid !== post.authorId && (
+                  <button 
+                    onClick={() => setReportTarget({ id: post.id, type: 'post' })}
+                    className="text-gray-300 hover:text-red-500 transition-colors p-2 opacity-0 group-hover:opacity-100"
+                    title="Report Post"
+                  >
+                    <AlertTriangle className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
             </div>
             <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{post.content}</p>
             <div className="flex items-center gap-6 mt-6 pt-4 border-t border-gray-50">
               <button 
-                onClick={() => handleLike(post.id)}
+                onClick={() => handleLike(post)}
                 className="flex items-center gap-2 text-gray-400 hover:text-red-500 transition-colors text-sm font-semibold group/like"
               >
-                <Heart className={`w-4 h-4 group-active/like:scale-125 transition-transform ${post.likes > 0 ? 'fill-red-500 text-red-500' : ''}`} /> {post.likes || 0}
+                <Heart className={`w-4 h-4 group-active/like:scale-125 transition-transform ${(post.likedBy?.includes(user?.uid) || (post.likes > 0 && !post.likedBy)) ? 'fill-red-500 text-red-500' : ''}`} /> {post.likedBy !== undefined ? post.likedBy.length : (post.likes || 0)}
               </button>
               <button className="flex items-center gap-2 text-gray-400 hover:text-blue-500 transition-colors text-sm font-semibold">
                 <MessageSquare className="w-4 h-4" /> Reply

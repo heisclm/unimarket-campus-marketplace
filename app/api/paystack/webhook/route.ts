@@ -88,10 +88,20 @@ export async function POST(req: Request) {
           }
           
           // Update buyer total spent
+          const amountPaid = data.amount / 100;
+          const { useCoins } = metadata;
+          
           const buyerRef = adminDb.collection('users').doc(buyerId);
-          transaction.update(buyerRef, {
-            totalSpent: FieldValue.increment(totalAmount)
-          });
+          const updateData: any = {
+            totalSpent: FieldValue.increment(amountPaid),
+            totalCoinsEarned: FieldValue.increment(Math.floor(amountPaid))
+          };
+          if (useCoins && (buyerData.coins || 0) > 0) {
+            updateData.coins = Math.floor(amountPaid);
+          } else {
+            updateData.coins = FieldValue.increment(Math.floor(amountPaid));
+          }
+          transaction.update(buyerRef, updateData);
 
           for (const item of items) {
             // Create Order

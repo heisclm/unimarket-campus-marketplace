@@ -19,6 +19,7 @@ export default function CartPage() {
   const [success, setSuccess] = useState(false);
   const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
   const [paymentMethod, setPaymentMethod] = useState<'wallet' | 'paystack'>('paystack');
+  const [useCoins, setUseCoins] = useState(false);
   const [unavailableItems, setUnavailableItems] = useState<string[]>([]);
   const [isValidatingCart, setIsValidatingCart] = useState(true);
   const router = useRouter();
@@ -80,7 +81,8 @@ export default function CartPage() {
 
     const uniqueSellers = new Set(items.map(item => item.sellerId)).size;
     const deliveryFee = deliveryMethod === 'delivery' ? (uniqueSellers * 2.00) : 0;
-    const finalTotal = total + deliveryFee;
+    const coinDiscount = useCoins ? (userData?.coins || 0) * 0.005 : 0;
+    const finalTotal = Math.max(0, total + deliveryFee - coinDiscount);
 
     if (paymentMethod === 'wallet') {
       if ((userData?.walletBalance || 0) < finalTotal) {
@@ -99,7 +101,8 @@ export default function CartPage() {
           },
           body: JSON.stringify({
             items: items.map(item => ({ id: item.id, productId: item.productId, title: item.title, price: item.price, sellerId: item.sellerId })),
-            deliveryMethod
+            deliveryMethod,
+            useCoins
           })
         });
 
@@ -132,6 +135,7 @@ export default function CartPage() {
               type: 'cart_checkout',
               buyerId: user.uid,
               deliveryMethod,
+              useCoins,
               items: items.map(item => ({
                 id: item.id,
                 productId: item.productId,
@@ -301,9 +305,22 @@ export default function CartPage() {
               <span>Platform Fee</span>
               <span>Paid by seller</span>
             </div>
+
+            {userData && userData.coins > 0 && (
+              <div className="pt-4 border-t border-gray-100">
+                <label className="flex items-center gap-2 cursor-pointer bg-yellow-50 p-3 rounded-xl border border-yellow-100 hover:bg-yellow-100 transition-colors">
+                  <input type="checkbox" checked={useCoins} onChange={(e) => setUseCoins(e.target.checked)} className="w-4 h-4 accent-yellow-500 rounded" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-yellow-800">Use My Coins ({userData.coins})</span>
+                    <span className="text-xs text-yellow-600">-GH₵{(userData.coins * 0.005).toFixed(2)} discount</span>
+                  </div>
+                </label>
+              </div>
+            )}
+
             <div className="pt-6 border-t border-gray-100 flex justify-between font-bold text-2xl text-black">
               <span>Total</span>
-              <span>GH₵{(total + (deliveryMethod === 'delivery' ? new Set(items.map(i => i.sellerId)).size * 2 : 0)).toFixed(2)}</span>
+              <span>GH₵{Math.max(0, (total + (deliveryMethod === 'delivery' ? new Set(items.map(i => i.sellerId)).size * 2 : 0)) - (useCoins ? (userData?.coins || 0) * 0.005 : 0)).toFixed(2)}</span>
             </div>
           </div>
 
@@ -312,7 +329,7 @@ export default function CartPage() {
               <Wallet className="w-4 h-4 text-gray-400" />
               <span className="text-sm font-medium text-gray-600">Wallet Balance</span>
             </div>
-            <span className={`font-bold ${(userData?.walletBalance || 0) < (total + (deliveryMethod === 'delivery' ? new Set(items.map(i => i.sellerId)).size * 2 : 0)) ? 'text-red-500' : 'text-green-600'}`}>
+            <span className={`font-bold ${(userData?.walletBalance || 0) < Math.max(0, (total + (deliveryMethod === 'delivery' ? new Set(items.map(i => i.sellerId)).size * 2 : 0)) - (useCoins ? (userData?.coins || 0) * 0.005 : 0)) ? 'text-red-500' : 'text-green-600'}`}>
               GH₵{(userData?.walletBalance || 0).toFixed(2)}
             </span>
           </div>

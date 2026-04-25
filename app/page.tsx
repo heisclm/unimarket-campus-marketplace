@@ -43,8 +43,8 @@ export default function Home() {
   // Sort products by newest first
   const sortedProducts = [...products].sort((a, b) => getTime(b) - getTime(a));
 
-  // 1. Featured product (isFeatured or latest)
-  const featuredProduct = sortedProducts.find(p => p.isFeatured) || sortedProducts[0] || null;
+  // 1. Featured product (isSponsored, then isFeatured, then latest)
+  const featuredProduct = sortedProducts.find(p => p.isSponsored) || sortedProducts.find(p => p.isFeatured) || sortedProducts[0] || null;
   
   // Remove featured from remaining pool to avoid duplicates
   let remainingProducts = sortedProducts.filter(p => p.id !== featuredProduct?.id);
@@ -77,8 +77,8 @@ export default function Home() {
         <div className="col-span-1 md:col-span-2 lg:col-span-2 lg:row-span-2 bg-white rounded-[2rem] p-8 md:p-12 shadow-sm flex flex-col md:flex-row items-center justify-between min-h-[400px] gap-8">
           <div className="z-10 flex-1 w-full max-w-md">
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-sm font-medium text-gray-600 mb-6">
-              <span className="w-2 h-2 rounded-full bg-gray-400"></span>
-              {featuredProduct?.category === 'Electronics' ? 'Featured Item' : (featuredProduct?.category || 'Featured Item')}
+              <span className={`w-2 h-2 rounded-full ${featuredProduct?.isSponsored ? 'bg-orange-400' : 'bg-gray-400'}`}></span>
+              {featuredProduct?.isSponsored ? 'Sponsored Product' : (featuredProduct?.category || 'Featured Item')}
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-6 line-clamp-3">
               {loading ? (
@@ -90,7 +90,7 @@ export default function Home() {
             <div className="flex items-start gap-4 mb-8">
               <span className="text-4xl font-light text-gray-300">01</span>
               <div className="flex-1">
-                <h3 className="font-semibold text-lg">Featured Item</h3>
+                <h3 className="font-semibold text-lg">{featuredProduct?.isSponsored ? 'Ad' : 'Featured Item'}</h3>
                 {loading ? (
                   <div className="space-y-2 mt-2">
                     <div className="h-4 bg-gray-100 rounded animate-pulse w-full" />

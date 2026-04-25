@@ -13,6 +13,7 @@ export interface Product {
   type: 'fixed' | 'auction';
   isFeatured?: boolean;
   isPopular?: boolean;
+  isSponsored?: boolean;
   createdAt: any;
 }
 

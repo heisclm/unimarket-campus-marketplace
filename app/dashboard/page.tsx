@@ -6,7 +6,7 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, doc, getDoc, updateDoc, orderBy, onSnapshot, deleteDoc } from 'firebase/firestore';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { ShieldAlert, ShieldCheck, Package, DollarSign, Plus, LayoutDashboard, ShoppingBag, Truck, CheckCircle2, AlertCircle, History, MessageSquare, Clock, Trash2 } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, Package, DollarSign, Plus, LayoutDashboard, ShoppingBag, Truck, CheckCircle2, AlertCircle, History, MessageSquare, Clock, Trash2, Zap, Star } from 'lucide-react';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import { markOrderAsDelivered, confirmOrderReceipt, raiseOrderDispute } from '@/lib/escrow';
@@ -86,6 +86,7 @@ export default function DashboardPage() {
   const [orderToDispute, setOrderToDispute] = useState<string | null>(null);
   const [disputeReason, setDisputeReason] = useState('');
   const [productToDelete, setProductToDelete] = useState<any>(null);
+  const [productToPromote, setProductToPromote] = useState<any>(null);
 
   const handleDeleteProduct = async () => {
     if (!productToDelete) return;
@@ -101,6 +102,21 @@ export default function DashboardPage() {
     } catch (error) {
       toast.error('Failed to delete product');
       setProductToDelete(null);
+    }
+  };
+
+  const handlePromoteProduct = async () => {
+    if (!productToPromote) return;
+    try {
+      await updateDoc(doc(db, 'products', productToPromote.id), {
+        isSponsored: true,
+        sponsoredAt: new Date(),
+      });
+      toast.success('Product successfully promoted!');
+      setProductToPromote(null);
+    } catch (error) {
+      toast.error('Failed to promote product');
+      setProductToPromote(null);
     }
   };
 
@@ -229,26 +245,43 @@ export default function DashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3 text-gray-500 mb-2">
-            <Package className="w-5 h-5" /> Active Listings
-          </div>
-          <div className="text-3xl font-bold">{activeListings}</div>
-        </div>
-        {role !== 'vendor' && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 text-gray-500 mb-2">
-              <ShoppingBag className="w-5 h-5" /> Total Purchases
-            </div>
-            <div className="text-3xl font-bold">{purchases.length}</div>
-          </div>
-        )}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3 text-gray-500 mb-2">
-            <DollarSign className="w-5 h-5" /> Total Revenue
-          </div>
-          <div className="text-3xl font-bold">GH₵{totalRevenue.toFixed(2)}</div>
-        </div>
-      </div>
+                  <div className="flex items-center gap-3 text-gray-500 mb-2">
+                    <Package className="w-5 h-5" /> Active Listings
+                  </div>
+                  <div className="text-3xl font-bold">{activeListings}</div>
+                </div>
+                {role !== 'vendor' && (
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3 text-gray-500 mb-2">
+                      <ShoppingBag className="w-5 h-5" /> Total Purchases
+                    </div>
+                    <div className="text-3xl font-bold">{purchases.length}</div>
+                  </div>
+                )}
+                {role === 'vendor' && (
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3 text-gray-500 mb-2">
+                      <Zap className="w-5 h-5 text-[#d9ff00]" /> Promoted Listings
+                    </div>
+                    <div className="text-3xl font-bold">{products.filter(p => p.isSponsored).length}</div>
+                  </div>
+                )}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                  <div className="flex items-center gap-3 text-gray-500 mb-2">
+                    <DollarSign className="w-5 h-5" /> Total Revenue
+                  </div>
+                  <div className="text-3xl font-bold">GH₵{totalRevenue.toFixed(2)}</div>
+                </div>
+                {role !== 'vendor' && (
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-3 text-gray-500 mb-2">
+                      <Star className="w-5 h-5 text-yellow-500" /> My Coins
+                    </div>
+                    <div className="text-3xl font-bold">{userData?.coins || 0}</div>
+                    <p className="text-xs text-gray-400 mt-1">100 Coins = GH₵0.5</p>
+                  </div>
+                )}
+              </div>
 
       {/* Content Area */}
       <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm">
@@ -296,6 +329,14 @@ export default function DashboardPage() {
                         </td>
                         <td className="py-4 text-right">
                           <div className="flex items-center justify-end gap-3">
+                            {role === 'vendor' && product.status === 'active' && !product.isSponsored && (
+                              <button onClick={() => setProductToPromote(product)} className="text-sm font-semibold text-[#b8d900] hover:text-[#d9ff00] bg-black px-2 py-1 rounded-md transition-colors flex items-center gap-1">
+                                <Zap className="w-3 h-3" /> Promote
+                              </button>
+                            )}
+                            {product.isSponsored && (
+                              <span className="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-1 rounded-md">Promoted</span>
+                            )}
                             <Link href={`/products/${product.id}/edit`} className="text-sm font-semibold text-gray-500 hover:text-black transition-colors">Edit</Link>
                             <Link href={`/products/${product.id}`} className="text-sm font-semibold text-blue-600 hover:underline">View</Link>
                             <button onClick={() => setProductToDelete(product)} className="text-sm font-semibold text-gray-400 hover:text-red-500 transition-colors">
@@ -519,6 +560,39 @@ export default function DashboardPage() {
                 className="flex-1 bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition-colors"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Promote Modal */}
+      {productToPromote && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-xl">
+            <h3 className="text-2xl font-bold mb-4 flex items-center gap-2"><Zap className="w-6 h-6 text-[#d9ff00] bg-black rounded-md p-1"/> Promote Listing</h3>
+            <p className="text-gray-600 mb-6">
+              Promote <span className="font-bold text-black">{productToPromote.title}</span> to the homepage highlight section. 
+            </p>
+            <div className="bg-gray-50 border border-gray-100 p-4 rounded-xl mb-8 flex justify-between items-center">
+              <div>
+                 <p className="font-semibold text-gray-900">Featured Placement</p>
+                 <p className="text-xs text-gray-500">7 Days duration</p>
+              </div>
+              <div className="font-bold text-lg">GH₵ 50.00</div>
+            </div>
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setProductToPromote(null)}
+                className="flex-1 bg-gray-100 text-black px-6 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handlePromoteProduct}
+                className="flex-1 bg-black text-[#d9ff00] px-6 py-3 rounded-xl font-bold hover:bg-gray-900 transition-colors"
+              >
+                Pay & Promote
               </button>
             </div>
           </div>

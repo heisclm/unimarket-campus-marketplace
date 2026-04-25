@@ -74,6 +74,9 @@ export async function GET(req: Request) {
         const allRefs = [buyerRef, ...productRefs];
         const allSnaps = await transaction.getAll(...allRefs);
 
+        const buyerData = allSnaps[0].data() || {};
+        const { useCoins } = metadata;
+
         const productSnaps = allSnaps.slice(1);
         const productDataMap: Record<string, any> = {};
         for (let i = 0; i < productSnaps.length; i++) {
@@ -83,9 +86,18 @@ export async function GET(req: Request) {
           }
         }
         
-        transaction.update(buyerRef, {
-          totalSpent: FieldValue.increment(totalAmount)
-        });
+        const amountPaid = paystackData.amount / 100;
+
+        const updateData: any = {
+          totalSpent: FieldValue.increment(amountPaid),
+          totalCoinsEarned: FieldValue.increment(Math.floor(amountPaid))
+        };
+        if (useCoins && (buyerData.coins || 0) > 0) {
+          updateData.coins = Math.floor(amountPaid);
+        } else {
+          updateData.coins = FieldValue.increment(Math.floor(amountPaid));
+        }
+        transaction.update(buyerRef, updateData);
 
         for (const item of items) {
           const orderRef = adminDb.collection('orders').doc();
