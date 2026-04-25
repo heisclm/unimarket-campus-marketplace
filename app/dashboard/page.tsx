@@ -106,16 +106,27 @@ export default function DashboardPage() {
   };
 
   const handlePromoteProduct = async () => {
-    if (!productToPromote) return;
+    if (!productToPromote || !user) return;
     try {
-      await updateDoc(doc(db, 'products', productToPromote.id), {
-        isSponsored: true,
-        sponsoredAt: new Date(),
+      const idToken = await user.getIdToken();
+      const res = await fetch('/api/products/promote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ productId: productToPromote.id })
       });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to promote product');
+      }
+
       toast.success('Product successfully promoted!');
       setProductToPromote(null);
-    } catch (error) {
-      toast.error('Failed to promote product');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to promote product');
       setProductToPromote(null);
     }
   };

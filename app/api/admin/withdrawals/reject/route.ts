@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       await updateWalletWithLedger(transaction, {
         userId: withdrawalData.userId,
         amount: withdrawalData.amount,
-        type: 'refund',
+        type: 'deposit',
         description: `Withdrawal Rejected: ${reason}`
       });
 
