@@ -118,51 +118,59 @@ function ProductsContent() {
   return (
     <div className="space-y-8">
       {/* Header & Search */}
-      <div className="bg-white rounded-[2rem] p-8 shadow-sm">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Marketplace</h1>
-            <p className="text-gray-500">Discover items from students and vendors.</p>
+      <div className="bg-gray-900 text-white rounded-[2.5rem] p-8 md:p-12 shadow-xl relative overflow-hidden border border-gray-800">
+        <div className="absolute top-[-20%] right-[-10%] w-96 h-96 bg-[#d9ff00] rounded-full blur-[150px] opacity-20 pointer-events-none"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-blue-500 rounded-full blur-[150px] opacity-20 pointer-events-none"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+          <div className="max-w-xl">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-3 leading-tight">Marketplace</h1>
+            <p className="text-gray-400 font-medium text-lg">Discover handpicked items and live auctions from verified students on campus.</p>
           </div>
           
-          <form 
-            onSubmit={handleSearchSubmit}
-            className="flex-1 max-w-md w-full relative"
-          >
-            <button type="submit" className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-1">
-              <Search className="w-5 h-5 text-gray-400 hover:text-black transition-colors" />
-            </button>
-            <input 
-              type="text" 
-              placeholder="Search products..." 
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all"
-            />
-          </form>
-          
-          <Link href="/products/new" className="bg-[#d9ff00] text-black font-semibold px-6 py-3 rounded-full hover:bg-[#c4e600] transition-colors whitespace-nowrap">
-            + List Item
+          <Link href="/products/new" className="bg-[#d9ff00] text-black font-bold px-8 py-4 rounded-full hover:scale-105 active:scale-95 transition-transform whitespace-nowrap shadow-xl shadow-[#d9ff00]/20 flex items-center gap-2">
+            <span className="text-xl leading-none">+</span>
+            <span>List an Item</span>
           </Link>
         </div>
 
-        {/* Categories */}
-        <div className="flex items-center gap-3 mt-8 overflow-x-auto pb-2 scrollbar-hide">
-          <Filter className="w-5 h-5 text-gray-400 mr-2 flex-shrink-0" />
-          {categories.map(category => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                selectedCategory === category 
-                  ? 'bg-black text-white' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {category}
+        <div className="relative z-10 mt-10">
+          <form 
+            onSubmit={handleSearchSubmit}
+            className="w-full relative max-w-2xl"
+          >
+            <button type="submit" className="absolute left-5 top-1/2 -translate-y-1/2 z-10 p-1">
+              <Search className="w-6 h-6 text-gray-400 hover:text-white transition-colors" />
             </button>
-          ))}
+            <input 
+              type="text" 
+              placeholder="Search textbooks, electronics, appliances..." 
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              className="w-full pl-14 pr-6 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#d9ff00] transition-all text-white placeholder:text-gray-400 font-medium text-lg"
+            />
+          </form>
         </div>
+      </div>
+
+      {/* Categories */}
+      <div className="flex items-center gap-3 mt-8 overflow-x-auto pb-4 pt-2 px-1 scrollbar-hide">
+        <div className="p-2.5 bg-gray-100 rounded-xl mr-2">
+          <Filter className="w-5 h-5 text-gray-900 flex-shrink-0" />
+        </div>
+        {categories.map(category => (
+          <button
+            key={category}
+            onClick={() => setSelectedCategory(category)}
+            className={`px-6 py-3 rounded-2xl text-sm font-bold whitespace-nowrap transition-all duration-300 ${
+              selectedCategory === category 
+                ? 'bg-gray-900 text-[#d9ff00] shadow-md border-b-4 border-black' 
+                : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-900 hover:text-black hover:shadow-sm'
+            }`}
+          >
+            {category}
+          </button>
+        ))}
       </div>
 
       {/* Product Grid */}
