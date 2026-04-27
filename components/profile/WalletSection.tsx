@@ -153,8 +153,8 @@ export default function WalletSection() {
             <div className="space-y-1">
               <span className="text-xs font-bold text-white/50 uppercase tracking-widest">Available Balance</span>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-[#d9ff00]">GH₵</span>
-                <span className="text-5xl font-black tracking-tighter">
+                <span className="text-xl sm:text-2xl font-bold text-[#d9ff00]">GH₵</span>
+                <span className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter truncate max-w-full">
                   {(userData?.walletBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
@@ -203,22 +203,22 @@ export default function WalletSection() {
           transition={{ delay: 0.1 }}
           className="lg:col-span-3 bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100"
         >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
+          <div className="flex flex-wrap sm:flex-nowrap items-center justify-between mb-6 gap-4">
+            <div className="flex gap-2 bg-gray-100 p-1 rounded-xl w-full sm:w-auto overflow-x-auto shrink-0">
               <button 
                 onClick={() => setActiveAction('deposit')}
-                className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${activeAction === 'deposit' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap flex-1 sm:flex-none text-center ${activeAction === 'deposit' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 Deposit
               </button>
               <button 
                 onClick={() => setActiveAction('withdraw')}
-                className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${activeAction === 'withdraw' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap flex-1 sm:flex-none text-center ${activeAction === 'withdraw' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 Withdraw
               </button>
             </div>
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-full uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-full uppercase tracking-wider shrink-0 w-fit">
               <ShieldCheck className="w-3.5 h-3.5" /> Secure
             </div>
           </div>
@@ -242,21 +242,22 @@ export default function WalletSection() {
                 ))}
               </div>
 
-              {/* Custom Amount Input */}
-              <div className="relative group">
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
-                  <span className="text-sm font-black text-gray-400 group-focus-within:text-black transition-colors">GH₵</span>
+              <div className="relative group flex flex-col sm:block gap-3">
+                <div className="relative w-full">
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+                    <span className="text-sm font-black text-gray-400 group-focus-within:text-black transition-colors">GH₵</span>
+                  </div>
+                  <input 
+                    type="number" 
+                    placeholder="Enter custom amount" 
+                    value={depositAmount}
+                    onChange={(e) => {
+                      setDepositAmount(e.target.value);
+                      setActiveQuickAmount(null);
+                    }}
+                    className="w-full bg-gray-50 border-2 border-transparent rounded-2xl pl-16 pr-6 sm:pr-36 py-5 text-xl font-black placeholder:text-gray-300 placeholder:font-bold focus:outline-none focus:bg-white focus:border-black transition-all"
+                  />
                 </div>
-                <input 
-                  type="number" 
-                  placeholder="Enter custom amount" 
-                  value={depositAmount}
-                  onChange={(e) => {
-                    setDepositAmount(e.target.value);
-                    setActiveQuickAmount(null);
-                  }}
-                  className="w-full bg-gray-50 border-2 border-transparent rounded-2xl pl-16 pr-6 py-5 text-xl font-black placeholder:text-gray-300 placeholder:font-bold focus:outline-none focus:bg-white focus:border-black transition-all"
-                />
                 <AnimatePresence>
                   {depositAmount && (
                     <motion.button
@@ -265,7 +266,7 @@ export default function WalletSection() {
                       exit={{ opacity: 0, scale: 0.8 }}
                       onClick={handleDeposit}
                       disabled={isDepositing}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#d9ff00] text-black px-6 py-3 rounded-xl font-bold text-sm hover:bg-black hover:text-white transition-all flex items-center gap-2 shadow-xl shadow-black/5 disabled:opacity-50"
+                      className="sm:absolute sm:right-3 sm:top-1/2 sm:-translate-y-1/2 w-full sm:w-auto bg-[#d9ff00] text-black px-6 py-3 rounded-xl font-bold text-sm hover:bg-black hover:text-white transition-all flex items-center justify-center gap-2 shadow-xl shadow-black/5 disabled:opacity-50"
                     >
                       {isDepositing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                       Deposit
@@ -354,12 +355,12 @@ export default function WalletSection() {
                   <div className="flex items-center gap-4 min-w-0">
                     <div className={`w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-[1.5rem] flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-3 duration-300 ${
                       tx.type === 'deposit' || tx.type === 'escrow_release' ? 'bg-green-50 text-green-600' : 
-                      tx.type === 'escrow_hold' || tx.type === 'withdrawal' ? 'bg-blue-50 text-blue-600' : 
+                      tx.type === 'escrow_hold' || tx.type === 'withdrawal' || tx.type === 'ad_payment' || tx.type === 'fee' ? 'bg-blue-50 text-blue-600' : 
                       tx.type === 'escrow_refund' ? 'bg-purple-50 text-purple-600' :
                       'bg-gray-100 text-gray-600'
                     }`}>
                       {tx.type === 'deposit' || tx.type === 'escrow_release' || tx.type === 'escrow_refund' ? <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" /> : 
-                       tx.type === 'escrow_hold' || tx.type === 'withdrawal' ? <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6" /> : 
+                       tx.type === 'escrow_hold' || tx.type === 'withdrawal' || tx.type === 'ad_payment' || tx.type === 'fee' ? <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6" /> : 
                        <Clock className="w-5 h-5 sm:w-6 sm:h-6" />}
                     </div>
                     <div className="min-w-0">

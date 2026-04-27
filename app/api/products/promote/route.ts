@@ -49,8 +49,19 @@ export async function POST(req: NextRequest) {
         await updateWalletWithLedger(transaction, {
           userId,
           amount: -promotionCost,
-          type: 'withdrawal',
+          type: 'ad_payment',
           description: `Promoted Product: ${productId}`
+        });
+
+        // Record Public Transaction for wallet
+        const txRef = adminDb.collection('transactions').doc();
+        transaction.set(txRef, {
+          userId,
+          amount: promotionCost,
+          type: 'ad_payment',
+          status: 'completed',
+          description: `Promoted Product: ${productId}`,
+          createdAt: FieldValue.serverTimestamp(),
         });
       }
 
