@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { processAuctionEnd } from '@/lib/auction-end';
 
 export async function GET(req: NextRequest) {
   try {
@@ -29,59 +29,10 @@ export async function GET(req: NextRequest) {
 
     let count = 0;
 
-    // Process each auction in a transaction to ensure atomicity
     for (const doc of expiredAuctionsSnap.docs) {
       const productId = doc.id;
-      
       try {
-        await adminDb.runTransaction(async (transaction) => {
-          const productRef = adminDb!.collection('products').doc(productId);
-          const productSnap = await transaction.get(productRef);
-          
-          if (!productSnap.exists) return;
-          const productData = productSnap.data();
-          
-          if (productData?.status !== 'active') return; // Already processed
-
-          // Get the highest bid
-          const bidsQuery = adminDb!.collection('bids')
-            .where('auctionId', '==', productId)
-            .orderBy('amount', 'desc')
-            .limit(1);
-            
-          const bidsSnapshot = await transaction.get(bidsQuery);
-          
-          let winnerId = null;
-          let finalPrice = productData.price || 0;
-
-          if (!bidsSnapshot.empty) {
-            const topBid = bidsSnapshot.docs[0].data();
-            winnerId = topBid.bidderId;
-            finalPrice = topBid.amount;
-          }
-
-          // Update product status
-          transaction.update(productRef, {
-            status: 'ended',
-            winnerId: winnerId,
-            finalPrice: finalPrice,
-            updatedAt: FieldValue.serverTimestamp()
-          });
-
-          // Notify winner if there is one
-          if (winnerId) {
-            const notifRef = adminDb!.collection('notifications').doc();
-            transaction.set(notifRef, {
-              userId: winnerId,
-              title: 'Auction Won!',
-              message: `Congratulations! You won the auction for "${productData.title}" with a bid of GH₵${finalPrice.toFixed(2)}. Please proceed to checkout.`,
-              type: 'auction_won',
-              read: false,
-              link: `/checkout?product=${productId}`,
-              createdAt: FieldValue.serverTimestamp()
-            });
-          }
-        });
+        await processAuctionEnd(productId);
         count++;
       } catch (err) {
         console.error(`Failed to end auction ${productId}:`, err);

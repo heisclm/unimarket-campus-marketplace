@@ -38,7 +38,16 @@ export default function BiddingSection({ productId, productTitle, productImage, 
       const difference = new Date(auctionEndTime).getTime() - new Date().getTime();
       
       if (difference <= 0) {
-        setTimeLeft('Ended');
+        if (timeLeft !== 'Ended') {
+          setTimeLeft('Ended');
+          if (status === 'active') {
+            fetch('/api/auctions/end', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ productId })
+            }).catch(console.error);
+          }
+        }
         return;
       }
 
@@ -219,8 +228,10 @@ export default function BiddingSection({ productId, productTitle, productImage, 
           )}
           
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 flex items-center bg-white border border-gray-200 rounded-xl focus-within:ring-2 focus-within:ring-orange-500 transition-all shadow-sm">
-              <span className="pl-4 pr-1 text-gray-500 font-medium">GH₵</span>
+            <div className="flex-1 relative bg-white border border-gray-200 rounded-xl focus-within:ring-2 focus-within:ring-orange-500 transition-all shadow-sm overflow-hidden">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span className="text-gray-500 font-medium select-none">GH₵</span>
+              </div>
               <input 
                 type="number" 
                 step="0.01"
@@ -230,13 +241,13 @@ export default function BiddingSection({ productId, productTitle, productImage, 
                 placeholder={`Min: ${minNextBid.toFixed(2)}`}
                 required
                 disabled={timeLeft === 'Ended'}
-                className="w-full pr-4 py-4 bg-transparent outline-none font-bold text-lg disabled:opacity-50 placeholder:text-gray-400 placeholder:font-normal"
+                className="w-full pl-[3.25rem] pr-4 py-4 bg-transparent outline-none font-bold text-lg sm:text-xl disabled:opacity-50 placeholder:text-gray-400 placeholder:font-normal"
               />
             </div>
             <button 
               type="submit"
               disabled={isSubmitting || timeLeft === 'Ended'}
-              className="bg-orange-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-600 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 whitespace-nowrap"
+              className="bg-orange-500 text-white w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-600 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isSubmitting ? 'Placing...' : <><Gavel className="w-6 h-6" /> Place Bid</>}
             </button>
