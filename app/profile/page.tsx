@@ -360,7 +360,7 @@ export default function ProfilePage() {
               )}
               {role === 'vendor' && (
                 <Link 
-                  href="/vendor"
+                  href="/dashboard"
                   className="inline-flex items-center gap-2 px-8 py-3.5 bg-orange-500 text-white rounded-full text-sm font-black uppercase tracking-widest hover:bg-orange-600 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-orange-500/20"
                 >
                   <Store className="w-4 h-4" />

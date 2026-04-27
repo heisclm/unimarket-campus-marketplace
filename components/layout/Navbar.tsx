@@ -162,7 +162,7 @@ export default function Navbar() {
                 </Link>
               ) : (
                 role === 'vendor' && (
-                  <Link href="/vendor" className="text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors flex items-center gap-1.5">
+                  <Link href="/dashboard" className="text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors flex items-center gap-1.5">
                     <Store className="w-4 h-4" /> Vendor Dashboard
                   </Link>
                 )

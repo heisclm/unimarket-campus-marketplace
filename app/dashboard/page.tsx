@@ -87,6 +87,11 @@ export default function DashboardPage() {
   const [disputeReason, setDisputeReason] = useState('');
   const [productToDelete, setProductToDelete] = useState<any>(null);
   const [productToPromote, setProductToPromote] = useState<any>(null);
+  const [promoteDuration, setPromoteDuration] = useState<1 | 3 | 7>(3);
+
+  const calculatePromotionCost = (price: number, days: number) => {
+    return Math.max(10, Math.floor(price * 0.05 * days));
+  };
 
   const handleDeleteProduct = async () => {
     if (!productToDelete) return;
@@ -109,13 +114,25 @@ export default function DashboardPage() {
     if (!productToPromote || !user) return;
     try {
       const idToken = await user.getIdToken();
+      let payload: any = { productId: productToPromote.id };
+
+      // Vendors use value-based pricing with coins, standard users use flat fee
+      if (role === 'vendor') {
+        payload = {
+          ...payload,
+          duration: promoteDuration,
+          cost: calculatePromotionCost(productToPromote.price || 0, promoteDuration),
+          currency: 'coins'
+        }
+      }
+
       const res = await fetch('/api/products/promote', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${idToken}`
         },
-        body: JSON.stringify({ productId: productToPromote.id })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       
@@ -634,13 +651,41 @@ export default function DashboardPage() {
             <p className="text-gray-600 mb-6">
               Promote <span className="font-bold text-black">{productToPromote.title}</span> to the homepage highlight section. 
             </p>
+            
+            {role === 'vendor' && (
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Select Duration</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[1, 3, 7].map((days) => (
+                    <button
+                      key={days}
+                      onClick={() => setPromoteDuration(days as 1 | 3 | 7)}
+                      className={`py-2 rounded-xl text-sm font-bold border transition-colors ${
+                        promoteDuration === days 
+                          ? 'border-black bg-black text-[#d9ff00]' 
+                          : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      }`}
+                    >
+                      {days} Day{days > 1 ? 's' : ''}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="bg-gray-50 border border-gray-100 p-4 rounded-xl mb-8 flex justify-between items-center">
               <div>
                  <p className="font-semibold text-gray-900">Featured Placement</p>
-                 <p className="text-xs text-gray-500">7 Days duration</p>
+                 <p className="text-xs text-gray-500">{role === 'vendor' ? promoteDuration : 7} Days duration</p>
               </div>
-              <div className="font-bold text-lg">GH₵ 50.00</div>
+              <div className="text-right">
+                <div className="font-bold text-lg">
+                  {role === 'vendor' ? `${calculatePromotionCost(productToPromote.price || 0, promoteDuration)} Coins` : 'GH₵ 50.00'}
+                </div>
+                {role === 'vendor' && <div className="text-xs font-semibold text-orange-500">Value-based pricing</div>}
+              </div>
             </div>
+            
             <div className="flex gap-4">
               <button 
                 onClick={() => setProductToPromote(null)}
@@ -650,8 +695,9 @@ export default function DashboardPage() {
               </button>
               <button 
                 onClick={handlePromoteProduct}
-                className="flex-1 bg-black text-[#d9ff00] px-6 py-3 rounded-xl font-bold hover:bg-gray-900 transition-colors"
+                className="flex-1 bg-black text-[#d9ff00] px-6 py-3 rounded-xl font-bold hover:bg-gray-900 transition-colors flex items-center justify-center gap-2"
               >
+                <Zap className="w-5 h-5" />
                 Pay & Promote
               </button>
             </div>
