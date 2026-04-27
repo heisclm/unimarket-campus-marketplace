@@ -36,25 +36,30 @@ export default function AdminWithdrawals() {
     if (!withdrawalToApprove) return;
     setProcessingId(withdrawalToApprove.id);
     try {
-      // In a real system, you would call Paystack Transfer API here.
-      // For this project, we just mark it as approved.
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) throw new Error("Authentication required");
       
-      await updateDoc(doc(db, 'withdrawals', withdrawalToApprove.id), {
-        status: 'approved',
-        updatedAt: serverTimestamp()
+      const idToken = await user.getIdToken();
+      const response = await fetch('/api/admin/withdrawals/approve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ withdrawalId: withdrawalToApprove.id })
       });
 
-      // Update the corresponding transaction
-      const txQuery = query(collection(db, 'transactions'), 
-        // We don't have a direct link, but we can just add a new transaction or find the pending one.
-        // It's easier to just update the status of the withdrawal and let the user see it.
-      );
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to approve withdrawal');
+      }
 
       toast.success('Withdrawal approved successfully');
       setWithdrawalToApprove(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error approving withdrawal:', error);
-      toast.error('Failed to approve withdrawal');
+      toast.error(error.message || 'Failed to approve withdrawal');
       setWithdrawalToApprove(null);
     } finally {
       setProcessingId(null);
