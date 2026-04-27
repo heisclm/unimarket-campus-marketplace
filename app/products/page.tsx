@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { collection, query, getDocs, orderBy, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { isActiveProduct } from '@/lib/products';
 import PremiumImage from '@/components/ui/PremiumImage';
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
@@ -92,7 +93,7 @@ function ProductsContent() {
         const productsData = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
-        }));
+        })).filter((p: any) => isActiveProduct(p));
         setProducts(productsData);
       } catch (error) {
         console.error("Error fetching products:", error);
