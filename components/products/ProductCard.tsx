@@ -135,31 +135,31 @@ export default function ProductCard({ product }: { product: any }) {
           />
           
           {/* Badges */}
-          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1.5 sm:gap-2 z-10 pointer-events-none">
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-wrap gap-1 sm:gap-1.5 z-10 pointer-events-none max-w-[85%]">
             {product.isSponsored && (
-              <span className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg flex items-center gap-1 shadow-md border border-orange-400">
-                <Zap className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" /> Sponsored
+              <span className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[8px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md flex items-center gap-1 shadow-md border border-orange-400">
+                <Zap className="w-2 h-2 sm:w-2.5 sm:h-2.5 fill-current" /> <span className="hidden sm:inline">Sponsored</span><span className="sm:hidden">Ad</span>
               </span>
             )}
             {product.type === 'auction' && (
-              <span className="bg-red-500/90 backdrop-blur-sm text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg flex items-center gap-1 shadow-md border border-red-400/50">
+              <span className="bg-red-500/90 backdrop-blur-sm text-white text-[8px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md flex items-center gap-1 shadow-md border border-red-400/50">
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                LIVE AUCTION
+                <span className="hidden lg:inline">Live Auction</span><span className="lg:hidden">Auction</span>
               </span>
             )}
             {product.sellerIsVerified && (
-              <span className="bg-green-500 text-white text-[10px] sm:text-[10px] font-bold px-2 py-1 sm:px-2 sm:py-1.5 rounded-lg flex items-center gap-1 shadow-md">
-                <ShieldCheck className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> <span className="hidden sm:inline">Verified Seller</span><span className="sm:hidden">Verified</span>
+              <span className="bg-green-500 text-white text-[8px] sm:text-[10px] font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md flex items-center gap-0.5 sm:gap-1 shadow-md">
+                <ShieldCheck className="w-2 h-2 sm:w-2.5 sm:h-2.5" /> <span className="hidden lg:inline">Verified Seller</span><span className="lg:hidden">Verified</span>
               </span>
             )}
-            <span className="bg-white/90 backdrop-blur-md text-gray-900 text-[10px] sm:text-xs font-bold px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg shadow-sm line-clamp-1 max-w-[100px] border border-white/20">
-              {product.category}
-            </span>
           </div>
         </div>
         
         <div className="flex-1 flex flex-col px-1 relative z-10">
-          <h3 className="font-bold text-base sm:text-xl text-gray-900 line-clamp-1 sm:line-clamp-2 mb-1 sm:mb-3 leading-tight">{product.title}</h3>
+          <div className="flex items-center justify-between mb-1 sm:mb-1.5">
+            <span className="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-widest">{product.category}</span>
+          </div>
+          <h3 className="font-bold text-sm sm:text-base lg:text-lg text-gray-900 line-clamp-2 mb-1 sm:mb-2 leading-tight">{product.title}</h3>
           
           <div className="flex items-end justify-between mt-auto pt-3 sm:pt-4 sm:border-t border-gray-50">
             <div className="flex items-center gap-1 sm:gap-1.5 text-lg sm:text-2xl font-black tracking-tighter text-gray-900">
