@@ -37,7 +37,10 @@ export default function DashboardPage() {
     const unsubProducts = onSnapshot(
       query(collection(db, 'products'), where('sellerId', '==', user.uid)),
       (snapshot) => {
-        setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Sort client-side to avoid composite index requirement
+        data.sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        setProducts(data);
       }
     );
 
