@@ -330,8 +330,8 @@ function MessagesContent() {
   if (!user) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-0 md:px-6 lg:px-8 py-0 md:py-8 h-[100dvh] md:h-[calc(100vh-140px)] flex flex-col bg-white md:bg-transparent">
-      <div className="bg-white md:rounded-[2.5rem] md:shadow-xl shadow-black/5 md:border border-gray-100 text-gray-900 flex-1 grid grid-cols-1 md:flex overflow-hidden relative z-10 w-full mb-[80px] md:mb-0">
+    <div className="max-w-7xl mx-auto px-0 md:px-6 lg:px-8 py-0 md:py-8 flex flex-col bg-white md:bg-transparent md:h-[calc(100vh-140px)] min-h-[calc(100vh-200px)]">
+      <div className="bg-white md:rounded-[2.5rem] md:shadow-xl shadow-black/5 md:border border-gray-100 text-gray-900 flex-1 flex flex-col md:flex-row overflow-hidden relative z-10 w-full mb-[80px] md:mb-0">
         
         {/* Chat List (Left Pane) */}
         <div className={`w-full md:w-[400px] flex-shrink-0 border-r border-gray-100 flex flex-col bg-white overflow-hidden ${activeChatId ? 'hidden md:flex' : 'flex'}`}>
@@ -423,11 +423,11 @@ function MessagesContent() {
         </div>
 
         {/* Active Chat (Right Pane) */}
-        <div className={`flex-1 flex flex-col bg-[#fcfcfc] relative ${!activeChatId ? 'hidden md:flex' : 'flex'}`}>
+        <div className={`flex-1 flex flex-col bg-[#fcfcfc] ${!activeChatId ? 'hidden md:flex relative' : 'fixed inset-0 z-[100] h-[100dvh] md:static md:z-auto md:h-auto flex'}`}>
           {activeChatId && otherParticipant ? (
             <>
               {/* Chat Header */}
-              <div className="h-20 lg:h-24 px-4 sm:px-6 bg-white/90 backdrop-blur-xl border-b border-gray-100 flex items-center gap-4 flex-shrink-0 sticky top-0 z-20">
+              <div className="h-20 lg:h-24 px-4 sm:px-6 bg-white/90 backdrop-blur-xl border-b border-gray-100 flex items-center gap-4 flex-shrink-0 sticky top-0 z-20 pt-[env(safe-area-inset-top,0px)]">
                 <button 
                   onClick={() => setActiveChatId(null)}
                   className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors"
@@ -573,7 +573,7 @@ function MessagesContent() {
               </div>
 
               {/* Input Area / Review Area */}
-              <div className="p-4 sm:p-6 bg-white border-t border-gray-100 flex-shrink-0 z-10 relative mt-auto">
+              <div className="p-4 sm:p-6 bg-white border-t border-gray-100 flex-shrink-0 z-10 relative mt-auto pb-[max(1rem,env(safe-area-inset-bottom,1rem))]">
                 {activeOrder?.status === 'completed' ? (
                   <div className="bg-gray-50 rounded-[2rem] p-6 text-center shadow-inner border border-gray-100">
                     <CheckCircle className="w-10 h-10 text-green-500 mx-auto mb-3" />
