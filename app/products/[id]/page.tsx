@@ -457,7 +457,7 @@ export default function ProductDetailPage() {
                   <Heart className={`w-6 h-6 ${isFavorite ? 'fill-current' : ''}`} />
                 </button>
 
-                {user && (
+                {user && userData?.role !== 'vendor' && (
                   <Link
                     href={`/dashboard/messages?sellerId=${product.sellerId}&productId=${product.id}`}
                     className="w-full sm:w-auto bg-gray-100 text-gray-900 border border-gray-200 px-8 py-4 sm:py-0 rounded-full font-bold hover:bg-gray-200 transition-all shadow-sm flex items-center justify-center gap-2 hover:scale-105 active:scale-95"
