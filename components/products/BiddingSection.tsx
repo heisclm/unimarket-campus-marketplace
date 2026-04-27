@@ -219,8 +219,8 @@ export default function BiddingSection({ productId, productTitle, productImage, 
           )}
           
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">GH₵</span>
+            <div className="flex-1 flex items-center bg-white border border-gray-200 rounded-xl focus-within:ring-2 focus-within:ring-orange-500 transition-all shadow-sm">
+              <span className="pl-4 pr-1 text-gray-500 font-medium">GH₵</span>
               <input 
                 type="number" 
                 step="0.01"
@@ -230,7 +230,7 @@ export default function BiddingSection({ productId, productTitle, productImage, 
                 placeholder={`Min: ${minNextBid.toFixed(2)}`}
                 required
                 disabled={timeLeft === 'Ended'}
-                className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all font-bold text-lg disabled:opacity-50 disabled:bg-gray-100 placeholder:text-gray-400 placeholder:font-normal"
+                className="w-full pr-4 py-4 bg-transparent outline-none font-bold text-lg disabled:opacity-50 placeholder:text-gray-400 placeholder:font-normal"
               />
             </div>
             <button 
