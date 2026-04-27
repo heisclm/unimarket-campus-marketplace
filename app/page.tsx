@@ -211,21 +211,23 @@ export default function Home() {
         {/* Small Product Card (New Product 2) */}
         <Link 
           href={newGenProduct ? `/products/${newGenProduct.id}` : "/products"}
-          className="col-span-1 bg-[#f4f4f0] rounded-[2.5rem] p-8 relative overflow-hidden group cursor-pointer hover:bg-gray-100 transition-colors duration-500"
+          className="col-span-1 bg-[#f4f4f0] rounded-[2.5rem] pt-8 pl-8 relative overflow-hidden group cursor-pointer hover:bg-gray-100 transition-colors duration-500 flex flex-col min-h-[300px]"
         >
-          <div className="absolute top-6 right-6 z-10 bg-white p-2 rounded-full shadow-sm group-hover:bg-black group-hover:text-white transition-colors duration-300">
-            <ArrowUpRight className="w-4 h-4" />
+          <div className="flex justify-between items-start gap-4 pr-8 relative z-20">
+            <h3 className="font-bold text-xl line-clamp-2 text-gray-900 tracking-tight">
+              {newGenProduct?.title || 'New Arrivals'}
+            </h3>
+            <div className="bg-white p-2 rounded-full shadow-sm group-hover:bg-black group-hover:text-white transition-colors duration-300 flex-shrink-0">
+              <ArrowUpRight className="w-4 h-4" />
+            </div>
           </div>
-          <h3 className="font-bold text-xl relative z-10 line-clamp-2 pr-8 text-gray-900 tracking-tight">
-            {newGenProduct?.title || 'New Arrivals'}
-          </h3>
-          <div className="absolute right-[-15%] bottom-[-15%] w-[85%] h-[85%] z-0 drop-shadow-2xl">
+          <div className="relative flex-1 w-[90%] self-end mt-4 mb-[-10%] mr-[-10%] z-10 drop-shadow-2xl">
             <PremiumImage 
               src={newGenProduct?.previewImage || newGenProduct?.images?.[0] || ""} 
               fallbackSrc="https://picsum.photos/seed/earbuds/400/400"
               alt={newGenProduct?.title || "New Arrival"} 
               fill 
-              className="object-contain group-hover:scale-110 group-hover:-rotate-3 transition-all duration-700"
+              className="object-contain object-bottom group-hover:scale-110 group-hover:-rotate-3 transition-all duration-700"
               referrerPolicy="no-referrer"
               containerClassName="absolute inset-0"
             />
