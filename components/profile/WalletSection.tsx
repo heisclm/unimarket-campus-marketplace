@@ -152,9 +152,9 @@ export default function WalletSection() {
             
             <div className="space-y-1">
               <span className="text-xs font-bold text-white/50 uppercase tracking-widest">Available Balance</span>
-              <div className="flex items-baseline gap-2">
+              <div className="flex items-baseline gap-1 flex-wrap">
                 <span className="text-xl sm:text-2xl font-bold text-[#d9ff00]">GH₵</span>
-                <span className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter truncate max-w-full">
+                <span className="text-3xl sm:text-4xl font-black tracking-tighter break-all">
                   {(userData?.walletBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
