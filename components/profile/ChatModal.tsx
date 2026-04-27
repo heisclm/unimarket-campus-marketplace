@@ -44,9 +44,14 @@ export default function ChatModal({ order, onClose }: ChatModalProps) {
           
           // Fetch other user info
           const otherUserId = order.buyerId === user.uid ? order.sellerId : order.buyerId;
-          const userDocSnap = await getDoc(doc(db, 'users', otherUserId));
-          if (userDocSnap.exists()) {
-            setOtherUser(userDocSnap.data());
+          try {
+            const res = await fetch(`/api/users/${otherUserId}/public`);
+            if (res.ok) {
+              const data = await res.json();
+              setOtherUser(data);
+            }
+          } catch (err) {
+            console.error('Failed to fetch user:', err);
           }
         } else {
           toast.error('Chat not found for this order');

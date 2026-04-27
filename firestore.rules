@@ -135,7 +135,7 @@ service cloud.firestore {
     // Users Collection
     match /users/{userId} {
       allow list: if isAdmin();
-      allow get: if isAuthenticated();
+      allow get: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && 
                       hasRequiredFields(['uid', 'email', 'displayName', 'role', 'walletBalance', 'isVerified', 'createdAt']) &&
                       request.resource.data.role in ['student', 'vendor'] &&

@@ -14,9 +14,13 @@ export default function CheckoutSuccess({ items }: { items: any[] }) {
       for (const item of items) {
         if (!grouped[item.sellerId]) {
           try {
-            const sellerSnap = await getDoc(doc(db, 'users', item.sellerId));
-            const sellerName = sellerSnap.exists() ? sellerSnap.data()?.displayName || 'Seller' : 'Seller';
-            grouped[item.sellerId] = { sellerName, items: [] };
+            const res = await fetch(`/api/users/${item.sellerId}/public`);
+            if (res.ok) {
+              const sellerData = await res.json();
+              grouped[item.sellerId] = { sellerName: sellerData.displayName || 'Seller', items: [] };
+            } else {
+               grouped[item.sellerId] = { sellerName: 'Seller', items: [] };
+            }
           } catch (e) {
             grouped[item.sellerId] = { sellerName: 'Seller', items: [] };
           }

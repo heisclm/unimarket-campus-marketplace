@@ -78,11 +78,19 @@ function VerifyPaymentContent() {
     <div className="min-h-[60vh] flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-[2rem] p-8 shadow-sm text-center border border-gray-50">
         {status === 'loading' && (
-          <>
-            <Loader2 className="w-16 h-16 text-blue-500 animate-spin mx-auto mb-6" />
-            <h1 className="text-2xl font-bold mb-2">Verifying Payment</h1>
-            <p className="text-gray-500">{message}</p>
-          </>
+          <div className="animate-pulse flex flex-col items-center">
+             <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-6 flex items-center justify-center">
+               <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+             </div>
+             <div className="h-8 bg-gray-200 rounded-lg w-3/4 mb-4" />
+             <div className="h-4 bg-gray-200 rounded-lg w-1/2 mb-8" />
+             <div className="space-y-4 w-full text-left bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                <div className="h-4 bg-gray-200 rounded w-1/3" />
+                <div className="h-4 bg-gray-200 rounded w-full" />
+                <div className="h-4 bg-gray-200 rounded w-2/3" />
+             </div>
+             <div className="mt-8 h-12 bg-gray-200 rounded-full w-full" />
+          </div>
         )}
 
         {status === 'success' && (

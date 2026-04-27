@@ -137,8 +137,12 @@ export async function POST(req: NextRequest) {
         const orderRef = adminDb!.collection('orders').doc();
         orderIds.push(orderRef.id);
         
-        // Calculate the platform fee per item (2% for students, could be higher for vendors later)
-        const itemPlatformFee = item.price * item.quantity * 0.02;
+        const sellerData = sellerDataMap[item.sellerId];
+        const isVendor = sellerData?.role === 'vendor';
+        const feePercentage = isVendor ? 0.05 : 0.02; // 5% for vendors, 2% for students
+        
+        // Calculate the platform fee per item
+        const itemPlatformFee = item.price * item.quantity * feePercentage;
         // The delivery fee per item can just be attributed to the order if they chose delivery
         const itemDeliveryFee = 0; // simplistic: per seller, assuming 1 item per seller for now, or just record it cleanly. 
         totalPlatformFeeHeld += itemPlatformFee;
@@ -190,8 +194,6 @@ export async function POST(req: NextRequest) {
         const deterministicChatId = orderRef.id;
         const chatRef = adminDb!.collection('chats').doc(deterministicChatId);
         
-        const sellerData = sellerDataMap[item.sellerId] || {};
-
         // Use set with merge so it works whether the chat already exists (e.g. they discussed the product first) or not.
         transaction.set(chatRef, {
           participants: [buyerId, item.sellerId],
@@ -202,7 +204,7 @@ export async function POST(req: NextRequest) {
           productTitle: item.title,
           participantDetails: {
             [buyerId]: { name: buyerData.displayName || 'Buyer', photoURL: buyerData.photoURL || '', role: buyerData.role || 'student' },
-            [item.sellerId]: { name: sellerData.displayName || 'Seller', photoURL: sellerData.photoURL || '', role: sellerData.role || 'vendor' }
+            [item.sellerId]: { name: sellerData?.displayName || 'Seller', photoURL: sellerData?.photoURL || '', role: sellerData?.role || 'vendor' }
           },
           createdAt: FieldValue.serverTimestamp(),
           lastMessage: 'Order placed. Securely check delivery methods.',

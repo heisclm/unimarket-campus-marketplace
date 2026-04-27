@@ -1,83 +1,125 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 
-// Protect this route by requiring a CRON_SECRET token 
-// setup in platform environmental variables.
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const token = searchParams.get('token');
-    const cronSecret = process.env.CRON_SECRET;
-
-    // Validate if the bot is authorized
-    if (cronSecret && token !== cronSecret) {
+    // Verify cron secret to prevent unauthorized calls
+    const authHeader = req.headers.get('authorization');
+    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     if (!adminDb) {
-      return NextResponse.json({ error: 'Database not initialized' }, { status: 500 });
+      return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 
     // Orders stuck in 'delivered' for more than 48 hours
     const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
     const cutoffTime = new Date(Date.now() - FORTY_EIGHT_HOURS);
 
-    // Note: To use an inequality filter on updatedAt, we need an index.
-    // Ensure you deploy a composite index for: orders (status: ASC, updatedAt: ASC)
-    const stuckOrdersSnapshot = await adminDb.collection('orders')
+    const deliveredOrdersSnap = await adminDb.collection('orders')
       .where('status', '==', 'delivered')
       .where('updatedAt', '<=', cutoffTime)
-      .limit(100) // Process in batches so it does not exceed memory timeouts
       .get();
 
-    if (stuckOrdersSnapshot.empty) {
-      return NextResponse.json({ message: 'No stuck escrows found.', count: 0 }, { status: 200 });
+    if (deliveredOrdersSnap.empty) {
+      return NextResponse.json({ message: 'No orders to auto-release', count: 0 });
     }
 
-    let processedCount = 0;
+    let count = 0;
 
-    // We process each stuck escrow carefully
-    for (const orderDoc of stuckOrdersSnapshot.docs) {
-      const orderData = orderDoc.data();
-      const orderId = orderDoc.id;
+    // Process each order in a transaction to ensure ledger integrity
+    for (const doc of deliveredOrdersSnap.docs) {
+      const orderId = doc.id;
 
       try {
         await adminDb.runTransaction(async (transaction) => {
-          // Re-fetch within transaction specifically for atomicity
-          const lockedOrderDoc = await transaction.get(orderDoc.ref);
-          if (!lockedOrderDoc.exists) return;
-          
-          const data = lockedOrderDoc.data()!;
-          if (data.status !== 'delivered') return; // State changed during processing
-          
-          const amount = data.amount;
-          const sellerId = data.sellerId;
+          const orderRef = adminDb!.collection('orders').doc(orderId);
+          const orderSnap = await transaction.get(orderRef);
 
-          const sellerRef = adminDb.collection('users').doc(sellerId);
+          if (!orderSnap.exists) return;
+          const currentData = orderSnap.data();
+          
+          if (currentData?.status !== 'delivered') return; // State changed
+
+          const sellerId = currentData.sellerId;
+          const amount = currentData.amount;
+          const netAmount = currentData.netAmount || amount;
+
+          // --- ALL READS ---
+          const sellerRef = adminDb!.collection('users').doc(sellerId);
           const sellerSnap = await transaction.get(sellerRef);
           
-          let sellerBalance = 0;
+          let prevEarned = 0;
+          let userData: any = {};
+          let previousBalance = 0;
+          
           if (sellerSnap.exists) {
-            sellerBalance = sellerSnap.data()?.walletBalance || 0;
+            userData = sellerSnap.data() || {};
+            prevEarned = userData.totalEarned || 0;
+            previousBalance = userData.walletBalance || 0;
+          }
+          
+          const newEarned = prevEarned + netAmount;
+          
+          let bonusCoins = 0;
+          
+          // Base Cashback: 2 coins for every GH₵ earned
+          bonusCoins += Math.floor(netAmount * 2);
+          
+          // Velocity milestones
+          if (prevEarned < 500 && newEarned >= 500) {
+            bonusCoins += 1000;
+          } else if (prevEarned < 2000 && newEarned >= 2000) {
+            bonusCoins += 3000;
           }
 
-          // 1. Release Funds to Seller Wallet
-          const platformFee = amount * 0.05; // 5% fee assumption matching rest of system
-          const netAmount = amount - platformFee;
+          const newBalance = previousBalance + netAmount;
 
+          // --- ALL WRITES ---
+          // 1. Update Seller Wallet and totalEarned
           transaction.update(sellerRef, {
-            walletBalance: sellerBalance + netAmount,
-            totalEarned: (sellerSnap.data()?.totalEarned || 0) + netAmount
+            walletBalance: newBalance,
+            totalEarned: FieldValue.increment(netAmount),
+            coins: FieldValue.increment(bonusCoins),
+            updatedAt: FieldValue.serverTimestamp()
           });
 
-          // 2. Mark order as completely finished
-          transaction.update(orderDoc.ref, {
+          // 2. Ledger Entry for Escrow Release
+          const escrowLedgerRef = adminDb!.collection('wallet_ledger').doc();
+          transaction.set(escrowLedgerRef, {
+            userId: sellerId,
+            amount: netAmount,
+            type: 'escrow_release',
+            orderId: orderId,
+            previousBalance: previousBalance,
+            newBalance: previousBalance + netAmount,
+            description: `Auto Escrow release for order ${orderId}: ${currentData.productTitle}`,
+            createdAt: FieldValue.serverTimestamp()
+          });
+
+          // 3. Update Order Status
+          transaction.update(orderRef, {
             status: 'completed',
-            updatedAt: new Date()
+            updatedAt: FieldValue.serverTimestamp(),
+            autoReleased: true
           });
 
-          // 3. Mark the original transaction as completed via a reciprocal release log
-          const txRef = adminDb.collection('transactions').doc();
+          // 4. Notify the Seller that their funds cleared
+          const notifRef = adminDb!.collection('notifications').doc();
+          transaction.set(notifRef, {
+            userId: sellerId,
+            title: 'Escrow Auto-Released! 💰',
+            message: `The buyer did not confirm receipt in 48 hours. GH₵${netAmount.toFixed(2)} for ${currentData.productTitle} has been automatically added to your wallet!`,
+            type: 'wallet',
+            link: '/dashboard',
+            read: false,
+            createdAt: FieldValue.serverTimestamp()
+          });
+
+          // 5. Record Public Transaction
+          const txRef = adminDb!.collection('transactions').doc();
           transaction.set(txRef, {
             userId: sellerId,
             senderId: 'escrow',
@@ -86,37 +128,21 @@ export async function GET(req: Request) {
             amount: netAmount,
             type: 'escrow_release',
             status: 'completed',
-            isAutoRelease: true, 
-            createdAt: new Date(),
-          });
-
-          // 4. Create Notification for Seller
-          const notificationRef = adminDb.collection('notifications').doc();
-          transaction.set(notificationRef, {
-            userId: sellerId,
-            title: 'Escrow Auto-Released',
-            message: `Funds (GH₵${netAmount.toFixed(2)}) for your order have been automatically released.`,
-            type: 'system',
-            read: false,
-            link: `/dashboard`,
-            createdAt: new Date(),
+            createdAt: FieldValue.serverTimestamp()
           });
         });
-        
-        processedCount++;
+        count++;
       } catch (err) {
-        console.error(`Failed to process auto-release for order ${orderId}:`, err);
+        console.error(`Failed to auto-release order ${orderId}:`, err);
       }
     }
 
-    return NextResponse.json({ 
-      message: 'Escrow bot run complete', 
-      processed: processedCount,
-      targetCount: stuckOrdersSnapshot.size 
-    }, { status: 200 });
-
+    return NextResponse.json({ message: 'Successfully auto-released escrow funds', count });
   } catch (error: any) {
-    console.error('Escrow cron error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    console.error('Cron auto-release error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to auto-release escrow' },
+      { status: 500 }
+    );
   }
 }

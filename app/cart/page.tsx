@@ -204,7 +204,21 @@ export default function CartPage() {
           <button onClick={() => { clearCart(); toast.success('Cart cleared'); }} className="text-sm text-gray-400 hover:text-red-500 font-medium transition-colors">Clear Cart</button>
         </div>
         
-        {items.map((item) => {
+        {isValidatingCart ? (
+          Array.from({ length: Math.max(1, items.length) }).map((_, i) => (
+            <div key={i} className="bg-white rounded-[2rem] p-4 shadow-sm flex flex-col sm:flex-row sm:items-center gap-4 border border-gray-50 animate-pulse">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-200 rounded-2xl flex-shrink-0" />
+              <div className="flex-1 space-y-4 py-2 w-full">
+                <div className="h-6 bg-gray-200 rounded-lg w-3/4" />
+                <div className="h-4 bg-gray-200 rounded-lg w-1/2" />
+                <div className="flex justify-between items-center pt-2">
+                   <div className="h-6 bg-gray-200 rounded-lg w-1/4" />
+                   <div className="h-8 bg-gray-200 rounded-lg w-24" />
+                </div>
+              </div>
+            </div>
+          ))
+        ) : items.map((item) => {
           const isUnavailable = unavailableItems.includes(item.id);
           return (
             <div key={item.id} className={`bg-white rounded-[2rem] p-4 shadow-sm flex flex-col sm:flex-row sm:items-center gap-4 border ${isUnavailable ? 'border-red-200 bg-red-50/30' : 'border-gray-50 hover:border-gray-100'} transition-colors group relative`}>

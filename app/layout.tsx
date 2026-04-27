@@ -66,24 +66,30 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
+import { Analytics } from '@vercel/analytics/react';
+
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-[#f4f4f0] min-h-screen font-sans text-gray-900 antialiased overflow-x-hidden">
+      <body className="font-sans min-h-screen bg-[#f4f4f0] text-gray-900 overflow-x-hidden antialiased">
         <ErrorBoundary>
           <AuthProvider>
             <CartProvider>
               <AppWrapper>
-                <div className="flex flex-col min-h-screen">
+                <div className="flex flex-col h-[100dvh] overflow-hidden bg-[#f4f4f0]">
                   <Navbar />
-                  <SideNav />
-                  <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8 md:pl-32 lg:pl-8">
-                    <Suspense fallback={null}>
-                      {children}
-                    </Suspense>
-                  </main>
-                  <div className="hidden lg:block">
-                    <Footer />
+                  <div className="flex-1 flex overflow-hidden">
+                     <SideNav />
+                     <div className="flex-1 overflow-y-auto pb-20 md:pb-0 scroll-smooth">
+                        <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:pl-8">
+                          <Suspense fallback={null}>
+                            {children}
+                          </Suspense>
+                        </main>
+                        <div className="hidden lg:block">
+                          <Footer />
+                        </div>
+                     </div>
                   </div>
                   <BottomNav />
                 </div>
@@ -107,6 +113,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
             </CartProvider>
           </AuthProvider>
         </ErrorBoundary>
+        <Analytics />
       </body>
     </html>
   );

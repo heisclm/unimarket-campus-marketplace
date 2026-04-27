@@ -97,9 +97,10 @@ function MessagesContent() {
           } else {
             // Fetch product and seller info to build chat context
             const productSnap = await getDoc(doc(db, 'products', productId));
-            const sellerSnap = await getDoc(doc(db, 'users', sellerId));
+            const sellerRes = await fetch(`/api/users/${sellerId}/public`);
             
-            if (productSnap.exists() && sellerSnap.exists()) {
+            if (productSnap.exists() && sellerRes.ok) {
+              const sellerData = await sellerRes.json();
               await setDoc(chatRef, {
                 participants: [user.uid, sellerId],
                 buyerId: user.uid,
@@ -108,7 +109,7 @@ function MessagesContent() {
                 productTitle: productSnap.data().title,
                 participantDetails: {
                   [user.uid]: { name: userData.displayName || 'Buyer', photoURL: userData.photoURL || '', role: userData.role },
-                  [sellerId]: { name: sellerSnap.data().displayName || 'Seller', photoURL: sellerSnap.data().photoURL || '', role: sellerSnap.data().role }
+                  [sellerId]: { name: sellerData.displayName || 'Seller', photoURL: sellerData.photoURL || '', role: sellerData.role }
                 },
                 createdAt: serverTimestamp(),
                 lastMessage: 'Chat initiated',

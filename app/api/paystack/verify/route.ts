@@ -119,9 +119,12 @@ export async function GET(req: Request) {
 
         for (const item of items) {
           const requestedQuantity = item.quantity || 1;
+          const sellerData = sellerDataMap[item.sellerId];
+          const isVendor = sellerData?.role === 'vendor';
+          const feePercentage = isVendor ? 0.05 : 0.02;
           
           // Calculate the platform fee per item
-          const itemPlatformFee = item.price * requestedQuantity * 0.02;
+          const itemPlatformFee = item.price * requestedQuantity * feePercentage;
 
           // Create Order
           const orderRef = adminDb.collection('orders').doc();
@@ -185,8 +188,6 @@ export async function GET(req: Request) {
           const deterministicChatId = orderRef.id;
           const chatRef = adminDb.collection('chats').doc(deterministicChatId);
           
-          const sellerData = sellerDataMap[item.sellerId] || {};
-
           transaction.set(chatRef, {
             participants: [buyerId, item.sellerId],
             buyerId,
@@ -196,7 +197,7 @@ export async function GET(req: Request) {
             productTitle: item.title,
             participantDetails: {
               [buyerId]: { name: buyerData.displayName || 'Buyer', photoURL: buyerData.photoURL || '', role: buyerData.role || 'student' },
-              [item.sellerId]: { name: sellerData.displayName || 'Seller', photoURL: sellerData.photoURL || '', role: sellerData.role || 'vendor' }
+              [item.sellerId]: { name: sellerData?.displayName || 'Seller', photoURL: sellerData?.photoURL || '', role: sellerData?.role || 'vendor' }
             },
             createdAt: FieldValue.serverTimestamp(),
             lastMessage: 'Order placed. Start chatting with the seller!',
