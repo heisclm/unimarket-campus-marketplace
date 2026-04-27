@@ -190,17 +190,17 @@ export default function BiddingSection({ productId, productTitle, productImage, 
 
   return (
     <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mt-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
         <div>
-          <p className="text-sm text-gray-500 font-medium uppercase tracking-wider mb-1">Current Highest Bid</p>
-          <div className="text-3xl font-bold text-black flex items-center gap-2">
+          <p className="text-xs sm:text-sm text-gray-500 font-medium uppercase tracking-wider mb-1">Current Highest Bid</p>
+          <div className="text-4xl sm:text-3xl font-black text-black flex items-center gap-2 tracking-tight">
             GH₵{highestBid.toFixed(2)}
-            {bids.length > 0 && <TrendingUp className="w-5 h-5 text-green-500" />}
+            {bids.length > 0 && <TrendingUp className="w-6 h-6 sm:w-5 sm:h-5 text-green-500" />}
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-sm text-gray-500 font-medium uppercase tracking-wider mb-1">Time Left</p>
-          <div className="text-xl font-bold text-orange-600">{timeLeft || '...'}</div>
+        <div className="sm:text-right border-l-4 sm:border-l-0 border-orange-500 pl-3 sm:pl-0">
+          <p className="text-xs sm:text-sm text-gray-500 font-medium uppercase tracking-wider mb-1">Time Left</p>
+          <div className="text-2xl sm:text-xl font-bold text-orange-600">{timeLeft || '...'}</div>
           <p className="text-xs text-gray-400 mt-1">{bids.length} Bids</p>
         </div>
       </div>
@@ -218,7 +218,7 @@ export default function BiddingSection({ productId, productTitle, productImage, 
             </div>
           )}
           
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">GH₵</span>
               <input 
@@ -230,15 +230,15 @@ export default function BiddingSection({ productId, productTitle, productImage, 
                 placeholder={`Min: ${minNextBid.toFixed(2)}`}
                 required
                 disabled={timeLeft === 'Ended'}
-                className="w-full pl-8 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all font-medium disabled:opacity-50 disabled:bg-gray-100"
+                className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all font-bold text-lg disabled:opacity-50 disabled:bg-gray-100 placeholder:text-gray-400 placeholder:font-normal"
               />
             </div>
             <button 
               type="submit"
               disabled={isSubmitting || timeLeft === 'Ended'}
-              className="bg-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50 whitespace-nowrap"
+              className="bg-orange-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-orange-600 active:scale-95 transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 whitespace-nowrap"
             >
-              {isSubmitting ? 'Placing...' : <><Gavel className="w-5 h-5" /> Place Bid</>}
+              {isSubmitting ? 'Placing...' : <><Gavel className="w-6 h-6" /> Place Bid</>}
             </button>
           </div>
         </form>
