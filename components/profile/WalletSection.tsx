@@ -316,85 +316,78 @@ export default function WalletSection() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100"
+        className="bg-white rounded-[2.5rem] p-6 lg:p-10 shadow-sm border border-gray-100"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gray-50 rounded-2xl flex items-center justify-center">
-              <History className="w-5 h-5 text-gray-400" />
-            </div>
-            <div>
-              <h3 className="font-bold text-lg text-gray-900">Recent Activity</h3>
-              <p className="text-xs text-gray-400 font-medium">Your wallet transaction history</p>
-            </div>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 lg:mb-10">
+          <div>
+            <h3 className="font-black text-2xl lg:text-3xl tracking-tight text-gray-900 mb-2">Recent Activity</h3>
+            <p className="text-sm font-medium text-gray-500">Your latest wallet transactions and escrow holds.</p>
           </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full uppercase tracking-wider">
-              <ShieldCheck className="w-3.5 h-3.5" /> Escrow Protected
-            </div>
+          <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 bg-blue-50 px-4 py-2.5 rounded-full uppercase tracking-widest w-fit shrink-0">
+            <ShieldCheck className="w-4 h-4" /> Escrow Protected
           </div>
         </div>
         
-        <div className="space-y-3">
+        <div className="space-y-4">
           {loading ? (
             [1, 2, 3, 4].map(i => (
-              <div key={i} className="h-20 bg-gray-50 rounded-3xl animate-pulse"></div>
+              <div key={i} className="h-24 bg-gray-50/80 rounded-[2rem] animate-pulse"></div>
             ))
           ) : transactions.length === 0 ? (
-            <div className="text-center py-16 bg-gray-50/50 rounded-[2rem] border-2 border-dashed border-gray-100">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                <CreditCard className="w-8 h-8 text-gray-200" />
+            <div className="text-center py-20 px-4 bg-gray-50/50 rounded-[2.5rem] border-2 border-dashed border-gray-100 flex flex-col items-center justify-center">
+              <div className="w-20 h-20 bg-white rounded-[2rem] flex items-center justify-center mb-6 shadow-sm shadow-black/5 rotate-[-3deg] hover:rotate-0 transition-transform duration-300 border border-gray-50">
+                <Wallet className="w-8 h-8 text-gray-300" />
               </div>
-              <h4 className="font-bold text-gray-900 mb-1">No transactions yet</h4>
-              <p className="text-xs text-gray-400 max-w-[200px] mx-auto leading-relaxed">
-                Your recent transactions will appear here as you buy and sell.
+              <h4 className="font-black text-xl text-gray-900 mb-2 tracking-tight">No Transactions Yet</h4>
+              <p className="text-sm font-medium text-gray-500 max-w-[280px] leading-relaxed">
+                Your wallet is waiting for its first action. Deposit funds or make a sale to see activity here.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-3">
+            <div className="flex flex-col gap-3 lg:gap-4">
               {transactions.map((tx) => (
                 <motion.div 
                   layout
                   key={tx.id} 
-                  className="p-5 bg-white border border-gray-50 rounded-3xl flex items-center justify-between group hover:border-gray-200 hover:shadow-xl hover:shadow-black/5 transition-all"
+                  className="p-4 sm:p-6 bg-white border border-gray-100 rounded-[2rem] flex items-center justify-between gap-4 group hover:shadow-xl hover:shadow-black/5 hover:-translate-y-0.5 hover:border-gray-200 transition-all duration-300"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 ${
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className={`w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-[1.5rem] flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-3 duration-300 ${
                       tx.type === 'deposit' || tx.type === 'escrow_release' ? 'bg-green-50 text-green-600' : 
                       tx.type === 'escrow_hold' || tx.type === 'withdrawal' ? 'bg-blue-50 text-blue-600' : 
                       tx.type === 'escrow_refund' ? 'bg-purple-50 text-purple-600' :
-                      'bg-orange-50 text-orange-600'
+                      'bg-gray-100 text-gray-600'
                     }`}>
-                      {tx.type === 'deposit' || tx.type === 'escrow_release' || tx.type === 'escrow_refund' ? <TrendingUp className="w-5 h-5" /> : 
-                       tx.type === 'escrow_hold' || tx.type === 'withdrawal' ? <TrendingDown className="w-5 h-5" /> : 
-                       <Clock className="w-5 h-5" />}
+                      {tx.type === 'deposit' || tx.type === 'escrow_release' || tx.type === 'escrow_refund' ? <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" /> : 
+                       tx.type === 'escrow_hold' || tx.type === 'withdrawal' ? <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6" /> : 
+                       <Clock className="w-5 h-5 sm:w-6 sm:h-6" />}
                     </div>
-                    <div>
-                      <p className="font-bold text-sm text-gray-900 capitalize">{tx.type.replace(/_/g, ' ')}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
-                          {tx.createdAt?.toDate ? tx.createdAt.toDate().toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Pending'}
+                    <div className="min-w-0">
+                      <p className="font-bold text-base sm:text-lg text-gray-900 capitalize tracking-tight truncate">
+                        {tx.type.replace(/_/g, ' ')}
+                      </p>
+                      <div className="flex items-center gap-1.5 sm:gap-2 mt-1 sm:mt-1.5 flex-wrap">
+                        <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">
+                          {tx.createdAt?.toDate ? tx.createdAt.toDate().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Pending'}
                         </span>
-                        <span className="w-1 h-1 bg-gray-200 rounded-full"></span>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
+                        <span className="w-1 h-1 bg-gray-200 rounded-full shrink-0 hidden sm:block"></span>
+                        <span className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap bg-gray-50 sm:bg-transparent px-1.5 sm:px-0 py-0.5 sm:py-0 rounded-md">
                           {tx.createdAt?.toDate ? tx.createdAt.toDate().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : ''}
                         </span>
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className={`font-black text-base ${
-                      tx.type === 'deposit' || tx.type === 'escrow_release' || tx.type === 'escrow_refund' ? 'text-green-600' : 'text-red-600'
+                  <div className="text-right shrink-0">
+                    <p className={`font-black text-lg sm:text-2xl tracking-tighter flex items-center justify-end ${
+                      tx.type === 'deposit' || tx.type === 'escrow_release' || tx.type === 'escrow_refund' ? 'text-green-600' : 'text-gray-900'
                     }`}>
-                      {tx.type === 'deposit' || tx.type === 'escrow_release' || tx.type === 'escrow_refund' ? '+' : '-'}
-                      <span className="text-xs mr-0.5">GH₵</span>
+                      <span className="text-xs sm:text-sm font-bold mr-0.5 opacity-80 uppercase tracking-widest">{tx.type === 'deposit' || tx.type === 'escrow_release' || tx.type === 'escrow_refund' ? '+' : '-'}GH₵</span>
                       {tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </p>
-                    <div className="flex items-center justify-end gap-1 mt-0.5">
-                      {tx.status === 'completed' && <CheckCircle2 className="w-3 h-3 text-green-500" />}
-                      <span className={`text-[10px] font-bold uppercase tracking-widest ${
-                        tx.status === 'completed' ? 'text-green-500' : 'text-gray-400'
+                    <div className="flex items-center justify-end gap-1.5 mt-1 sm:mt-1.5">
+                      {tx.status === 'completed' ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> : <Clock className="w-3 h-3 text-orange-400" />}
+                      <span className={`text-[10px] sm:text-xs font-black uppercase tracking-widest ${
+                        tx.status === 'completed' ? 'text-green-500' : 'text-orange-400'
                       }`}>{tx.status}</span>
                     </div>
                   </div>
