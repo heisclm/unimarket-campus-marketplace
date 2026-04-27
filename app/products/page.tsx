@@ -191,7 +191,7 @@ function ProductsContent() {
             <Search className="w-10 h-10 text-gray-400 relative z-10 group-hover:text-black transition-colors duration-300" />
           </div>
           <h3 className="text-2xl md:text-3xl font-black tracking-tighter text-gray-900 mb-3">No deals found</h3>
-          <p className="text-gray-500 font-medium text-lg max-w-md mx-auto mb-8">We couldn't find any items matching your current filters. Try adjusting your search or explore other categories.</p>
+          <p className="text-gray-500 font-medium text-lg max-w-md mx-auto mb-8">We couldn&apos;t find any items matching your current filters. Try adjusting your search or explore other categories.</p>
           <button 
             onClick={() => { setInputValue(''); setSelectedCategory('All'); }}
             className="bg-black text-white px-8 py-4 rounded-full font-bold hover:scale-105 active:scale-95 transition-transform shadow-xl shadow-black/10"

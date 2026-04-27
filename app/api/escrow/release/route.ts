@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
       }
 
       const newBalance = previousBalance + netAmount;
-      const currentCoins = sellerData.coins || 0;
+      const currentCoins = userData.coins || 0;
       const newCoins = currentCoins + bonusCoins;
 
       // --- ALL WRITES ---
