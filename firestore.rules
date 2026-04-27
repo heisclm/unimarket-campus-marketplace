@@ -104,7 +104,7 @@ service cloud.firestore {
     function isAdmin() {
       return isAuthenticated() && 
         (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-         request.auth.token.email == "feraclem@gmail.com");
+         (request.auth.token.email == "feraclem@gmail.com" && request.auth.token.email_verified == true));
     }
 
     function isVerified() {
@@ -134,7 +134,8 @@ service cloud.firestore {
 
     // Users Collection
     match /users/{userId} {
-      allow read: if isAuthenticated();
+      allow list: if isAdmin();
+      allow get: if isAuthenticated();
       allow create: if isOwner(userId) && 
                       hasRequiredFields(['uid', 'email', 'displayName', 'role', 'walletBalance', 'isVerified', 'createdAt']) &&
                       request.resource.data.role in ['student', 'vendor'] &&
@@ -142,10 +143,10 @@ service cloud.firestore {
                       request.resource.data.isVerified == false;
       
       allow update: if isAdmin() || (isOwner(userId) && 
-                      // CRITICAL: Prevent sensitive field manipulation
-                      !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'uid', 'email', 'walletBalance', 'isVerified', 'createdAt']) &&
+                      // CRITICAL: Prevent sensitive field manipulation and adding random fields
+                      !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'uid', 'email', 'walletBalance', 'isVerified', 'createdAt', 'coins', 'totalEarned', 'isBanned']) &&
                       // Validate allowed fields
-                      (request.resource.data.displayName is string && request.resource.data.displayName.size() > 0) &&
+                      (request.resource.data.displayName is string && request.resource.data.displayName.size() > 0 && request.resource.data.displayName.size() < 100) &&
                       (request.resource.data.photoURL == null || request.resource.data.photoURL is string)
                     );
     }
@@ -162,8 +163,8 @@ service cloud.firestore {
         isAdmin() || 
         (request.auth.uid == resource.data.sellerId && 
          // CRITICAL: lock schema
-         hasOnlyAllowedFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt', 'sellerIsVerified', 'offersDelivery', 'deliveryFee', 'auctionEndTime']) &&
-         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['sellerId', 'createdAt', 'status']) &&
+         hasOnlyAllowedFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt', 'sellerIsVerified', 'offersDelivery', 'deliveryFee', 'auctionEndTime', 'isSponsored', 'sponsoredUntil']) &&
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['sellerId', 'createdAt', 'sellerIsVerified', 'type', 'isSponsored', 'sponsoredUntil']) &&
          // Seller can only update to 'sold' or 'ended' if it was 'active'
          (request.resource.data.status in ['sold', 'ended'] || request.resource.data.status == resource.data.status))
       );
@@ -221,8 +222,8 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (
         isAdmin() ||
         (
-          // Prevent modification of core order details
-          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['buyerId', 'sellerId', 'productId', 'amount', 'createdAt']) &&
+          // Prevent modification of core order details and ensure only valid fields are updated
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'disputeReason']) &&
           (
             // Seller can only mark as delivered
             (request.auth.uid == resource.data.sellerId && 
@@ -230,8 +231,9 @@ service cloud.firestore {
              resource.data.status == 'escrow_held') ||
             // Buyer can confirm receipt or dispute
             (request.auth.uid == resource.data.buyerId && 
-             (request.resource.data.status == 'completed' || request.resource.data.status == 'disputed') &&
-             (resource.data.status == 'delivered' || resource.data.status == 'escrow_held'))
+             request.resource.data.status == 'disputed' &&
+             (resource.data.status == 'delivered' || resource.data.status == 'escrow_held') &&
+             request.resource.data.disputeReason is string)
           )
         )
       );

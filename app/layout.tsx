@@ -14,18 +14,45 @@ import AppWrapper from '@/components/layout/AppWrapper';
 import { RouteLogger } from '@/components/common/RouteLogger';
 
 export const metadata: Metadata = {
-  title: 'UniMart - Campus Marketplace',
-  description: 'A modern, secure campus marketplace for students and vendors to buy, sell, and auction products with a vibrant community board.',
+  title: {
+    default: 'UniMart - The Campus Marketplace',
+    template: '%s | UniMart',
+  },
+  description: 'The ultimate, secure campus marketplace for students. Buy, sell, trade, and auction items safely with escrow protection.',
+  keywords: ['student marketplace', 'campus store', 'buy textbooks', 'student discounts', 'unimart'],
+  authors: [{ name: 'UniMart Team' }],
+  creator: 'UniMart',
+  metadataBase: new URL(process.env.APP_URL || 'https://unimart.local'),
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: '/',
+    title: 'UniMart - The Campus Marketplace',
+    description: 'The ultimate, secure campus marketplace for students. Buy, sell, trade, and auction items safely with escrow protection.',
+    siteName: 'UniMart',
+    images: [{
+      url: '/og-image.jpg', // You will need to add this asset
+      width: 1200,
+      height: 630,
+      alt: 'UniMart Preview',
+    }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'UniMart - The Campus Marketplace',
+    description: 'The ultimate, secure campus marketplace for students. Buy, sell, trade, and auction items safely.',
+    images: ['/og-image.jpg'],
+  },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'UniMart',
-    startupImage: [
-      '/icon.svg',
-    ],
+    startupImage: ['/icon.svg'],
   },
   icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
     apple: '/icon.svg',
   },
 };

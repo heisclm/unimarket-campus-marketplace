@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, getDocs, limit, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, getDocs, limit, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { X, Send, User, Clock, Check, CheckCheck, Loader2, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -44,9 +44,9 @@ export default function ChatModal({ order, onClose }: ChatModalProps) {
           
           // Fetch other user info
           const otherUserId = order.buyerId === user.uid ? order.sellerId : order.buyerId;
-          const userDoc = await getDocs(query(collection(db, 'users'), where('uid', '==', otherUserId), limit(1)));
-          if (!userDoc.empty) {
-            setOtherUser(userDoc.docs[0].data());
+          const userDocSnap = await getDoc(doc(db, 'users', otherUserId));
+          if (userDocSnap.exists()) {
+            setOtherUser(userDocSnap.data());
           }
         } else {
           toast.error('Chat not found for this order');
