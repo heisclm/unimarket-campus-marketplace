@@ -178,7 +178,7 @@ export default function ProfilePage() {
         </div>
         <h1 className="text-2xl font-bold mb-2 text-center">Welcome to UniMart</h1>
         <p className="text-gray-500 mb-8 text-center text-sm">
-          Join the university marketplace to buy, sell, and auction products.
+          Join the marketplace to buy, sell, and auction products.
         </p>
 
         {authError && <div className="w-full p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-xl">{authError}</div>}
@@ -202,7 +202,7 @@ export default function ProfilePage() {
             <Mail className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
             <input 
               type="email" 
-              placeholder="University Email" 
+              placeholder="Email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

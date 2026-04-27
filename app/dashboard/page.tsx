@@ -206,7 +206,7 @@ export default function DashboardPage() {
             <div>
               <h3 className="text-xl font-black text-gray-900 tracking-tight">ID Verification Required</h3>
               <p className="text-gray-600 font-medium mt-1.5 max-w-xl">
-                Verify your University ID or Vendor License to build trust with buyers and unlock higher selling limits.
+                Verify your ID to build trust with buyers and unlock higher selling limits.
               </p>
             </div>
           </div>

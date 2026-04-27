@@ -364,7 +364,7 @@ export default function Home() {
       <div className="space-y-10 pt-8">
         <div className="text-center max-w-2xl mx-auto space-y-3">
           <h2 className="text-3xl md:text-4xl font-black tracking-tighter text-gray-900">Why Use UniMart?</h2>
-          <p className="text-gray-500 font-medium">Built exclusively for verified students. Safe, fast, and local.</p>
+          <p className="text-gray-500 font-medium">Built for trusted trading. Safe, fast, and local.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500 group hover:-translate-y-2">
@@ -373,7 +373,7 @@ export default function Home() {
             </div>
             <h3 className="text-2xl font-bold mb-4 tracking-tight text-gray-900">Safe & Secure</h3>
             <p className="text-gray-500 text-sm leading-relaxed font-medium">
-              Verified university emails ensure you&apos;re only dealing with real students and trusted vendors on campus. No outsiders.
+              Verified accounts and robust ID checks ensure you&apos;re only dealing with real people and trusted vendors. No scammers.
             </p>
           </div>
           <div className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500 group hover:-translate-y-2">
@@ -382,7 +382,7 @@ export default function Home() {
             </div>
             <h3 className="text-2xl font-bold mb-4 tracking-tight text-gray-900">Fast Auctions</h3>
             <p className="text-gray-500 text-sm leading-relaxed font-medium">
-              Bid in real-time on textbooks, electronics, and more. Get the best campus deals before they&apos;re gone.
+              Bid in real-time on books, electronics, and more. Get the best deals before they&apos;re gone.
             </p>
           </div>
           <div className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500 group hover:-translate-y-2">
@@ -391,7 +391,7 @@ export default function Home() {
             </div>
             <h3 className="text-2xl font-bold mb-4 tracking-tight text-gray-900">Community First</h3>
             <p className="text-gray-500 text-sm leading-relaxed font-medium">
-              Join discussions, share notes, and connect with fellow students in our vibrant campus community.
+              Join discussions, share tips, and connect with fellow members in our vibrant community.
             </p>
           </div>
         </div>
@@ -408,21 +408,21 @@ export default function Home() {
                 <div className="w-14 h-14 rounded-full bg-gray-800 border border-gray-700 text-[#d9ff00] group-hover:bg-[#d9ff00] group-hover:text-black transition-colors duration-500 flex items-center justify-center font-black text-xl shrink-0 shadow-lg">1</div>
                 <div className="pt-2">
                   <h4 className="text-2xl font-bold mb-3 tracking-tight">Create your account</h4>
-                  <p className="text-gray-400 text-base leading-relaxed font-medium">Sign up safely with your university email to get verified and start exploring to see deals.</p>
+                  <p className="text-gray-400 text-base leading-relaxed font-medium">Sign up safely with your email to get verified and start exploring amazing deals.</p>
                 </div>
               </div>
               <div className="flex gap-6 relative z-10 group">
                 <div className="w-14 h-14 rounded-full bg-gray-800 border border-gray-700 text-[#d9ff00] group-hover:bg-[#d9ff00] group-hover:text-black transition-colors duration-500 flex items-center justify-center font-black text-xl shrink-0 shadow-lg">2</div>
                 <div className="pt-2">
                   <h4 className="text-2xl font-bold mb-3 tracking-tight">List or Browse</h4>
-                  <p className="text-gray-400 text-base leading-relaxed font-medium">Post items you no longer need or find exactly what you&apos;re looking for at student-friendly prices.</p>
+                  <p className="text-gray-400 text-base leading-relaxed font-medium">Post items you no longer need or find exactly what you&apos;re looking for at great prices.</p>
                 </div>
               </div>
               <div className="flex gap-6 relative z-10 group">
                 <div className="w-14 h-14 rounded-full bg-gray-800 border border-gray-700 text-[#d9ff00] group-hover:bg-[#d9ff00] group-hover:text-black transition-colors duration-500 flex items-center justify-center font-black text-xl shrink-0 shadow-lg">3</div>
                 <div className="pt-2">
                   <h4 className="text-2xl font-bold mb-3 tracking-tight">Secure Exchange</h4>
-                  <p className="text-gray-400 text-base leading-relaxed font-medium">Communicate easily, meet on campus, or use our secure payment system for a smooth transaction.</p>
+                  <p className="text-gray-400 text-base leading-relaxed font-medium">Communicate easily, meet locally, or use our secure payment system for a smooth transaction.</p>
                 </div>
               </div>
             </div>
@@ -441,13 +441,13 @@ export default function Home() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-[#d9ff00] blur-[100px] opacity-20 pointer-events-none"></div>
         <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white rounded-full text-sm font-bold shadow-sm border border-gray-100 uppercase tracking-widest text-gray-900 relative z-10">
           <ShoppingBag className="w-4 h-4 text-[#d9ff00]" />
-          Join 5,000+ Students
+          Join 5,000+ Users
         </div>
         <h2 className="text-5xl md:text-6xl font-black tracking-tighter leading-[1.05] text-gray-900 relative z-10">
-          Ready to declutter<br />your dorm?
+          Ready to declutter<br />your space?
         </h2>
         <p className="text-gray-500 text-lg md:text-xl font-medium max-w-2xl mx-auto relative z-10 leading-relaxed">
-          Turn your unused textbooks, clothes, and electronics into cash today. It only takes 2 minutes to list your first item.
+          Turn your unused items, clothes, and electronics into cash today. It only takes 2 minutes to list your first item.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8 relative z-10">
           <Link href="/products/new" className="bg-black text-[#d9ff00] px-10 py-5 rounded-full font-bold text-lg hover:scale-105 active:scale-95 transition-transform shadow-xl shadow-black/10">
