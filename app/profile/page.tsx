@@ -323,14 +323,15 @@ export default function ProfilePage() {
 
   // Fully logged in with role
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-8 px-4 sm:px-6 lg:px-8 py-8 md:py-12">
       {/* Profile Header */}
-      <div className="bg-white rounded-[2rem] p-6 md:p-12 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-gray-100 to-gray-50 z-0"></div>
+      <div className="bg-white rounded-[2.5rem] p-6 md:p-12 shadow-sm relative overflow-hidden border border-gray-100">
+        <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-br from-[#d9ff00]/20 via-transparent to-transparent z-0"></div>
+        <div className="absolute top-0 right-0 w-full h-40 bg-gradient-to-bl from-indigo-50 via-transparent to-transparent z-0"></div>
         
-        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 mt-12">
-          <div className="w-32 h-32 bg-white rounded-full p-2 shadow-sm">
-            <div className="w-full h-full rounded-full overflow-hidden relative bg-gray-200">
+        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-8 mt-16 md:mt-12">
+          <div className="w-32 h-32 md:w-40 md:h-40 bg-white rounded-[2rem] p-2 shadow-xl shadow-black/5 rotate-[-3deg] hover:rotate-0 transition-transform duration-300">
+            <div className="w-full h-full rounded-[1.5rem] overflow-hidden relative bg-gray-100 border border-gray-100">
               {user.photoURL ? (
                 <Image src={user.photoURL} alt={user.displayName || 'User'} fill className="object-cover" referrerPolicy="no-referrer" />
               ) : (
@@ -340,18 +341,18 @@ export default function ProfilePage() {
           </div>
           
           <div className="flex-1 text-center md:text-left pt-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-600 mb-3 capitalize">
-              {role === 'student' ? <GraduationCap className="w-3 h-3" /> : role === 'vendor' ? <Store className="w-3 h-3" /> : <UserIcon className="w-3 h-3" />}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gray-900 text-[#d9ff00] rounded-full text-[10px] font-black tracking-widest uppercase mb-4 shadow-sm">
+              {role === 'student' ? <GraduationCap className="w-3.5 h-3.5" /> : role === 'vendor' ? <Store className="w-3.5 h-3.5" /> : <UserIcon className="w-3.5 h-3.5" />}
               {role} Account
             </div>
-            <h1 className="text-3xl font-bold mb-1">{user.displayName || 'Anonymous User'}</h1>
-            <p className="text-gray-500 mb-6 break-all">{user.email}</p>
+            <h1 className="text-4xl md:text-5xl font-black mb-2 tracking-tight text-gray-900">{user.displayName || 'Anonymous User'}</h1>
+            <p className="text-gray-500 mb-8 break-all font-medium">{user.email}</p>
             
             <div className="flex flex-wrap justify-center md:justify-start gap-3">
               {role === 'student' && (
                 <Link 
                   href="/dashboard"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-black text-white rounded-full text-sm font-semibold hover:bg-gray-800 transition-colors"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-black text-[#d9ff00] rounded-full text-sm font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-black/10"
                 >
                   <LayoutDashboard className="w-4 h-4" />
                   My Dashboard
@@ -360,7 +361,7 @@ export default function ProfilePage() {
               {role === 'vendor' && (
                 <Link 
                   href="/vendor"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-orange-600 text-white rounded-full text-sm font-semibold hover:bg-orange-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-orange-500 text-white rounded-full text-sm font-black uppercase tracking-widest hover:bg-orange-600 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-orange-500/20"
                 >
                   <Store className="w-4 h-4" />
                   Vendor Dashboard
@@ -369,7 +370,7 @@ export default function ProfilePage() {
               {role === 'admin' && (
                 <Link 
                   href="/admin"
-                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-red-600 text-white rounded-full text-sm font-semibold hover:bg-red-700 transition-colors shadow-sm shadow-red-200"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-red-600 text-white rounded-full text-sm font-black uppercase tracking-widest hover:bg-red-700 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-red-600/20"
                 >
                   <ShieldCheck className="w-4 h-4" />
                   Admin Panel
@@ -377,7 +378,7 @@ export default function ProfilePage() {
               )}
               <button 
                 onClick={handleLogout}
-                className="inline-flex items-center gap-2 px-6 py-2.5 border-2 border-gray-200 rounded-full text-sm font-semibold hover:border-red-500 hover:text-red-500 transition-colors"
+                className="inline-flex items-center gap-2 px-8 py-3.5 bg-white border border-gray-200 text-gray-700 rounded-full text-sm font-black uppercase tracking-widest hover:border-black hover:text-black hover:bg-gray-50 active:scale-95 transition-all"
               >
                 <LogOut className="w-4 h-4" />
                 Sign Out
@@ -388,10 +389,10 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile Tabs */}
-      <div className="flex gap-2 bg-gray-100 p-1.5 rounded-2xl w-full md:w-fit mx-auto md:mx-0 overflow-x-auto no-scrollbar">
+      <div className="flex gap-2 bg-white/50 p-1.5 rounded-2xl w-full mx-auto overflow-x-auto no-scrollbar scroll-smooth snap-x border border-gray-100 shadow-sm backdrop-blur-md sticky top-4 z-40">
         <button 
           onClick={() => setActiveTab('profile')}
-          className={`whitespace-nowrap px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'profile' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          className={`snap-center whitespace-nowrap px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 flex-1 md:flex-none justify-center ${activeTab === 'profile' ? 'bg-black text-white shadow-xl shadow-black/10' : 'text-gray-500 hover:text-black hover:bg-gray-100/50'}`}
         >
           <UserIcon className="w-4 h-4 shrink-0" /> Profile
         </button>
@@ -399,21 +400,21 @@ export default function ProfilePage() {
           <>
             <button 
               onClick={() => setActiveTab('orders')}
-              className={`whitespace-nowrap px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'orders' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`snap-center whitespace-nowrap px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 flex-1 md:flex-none justify-center ${activeTab === 'orders' ? 'bg-black text-white shadow-xl shadow-black/10' : 'text-gray-500 hover:text-black hover:bg-gray-100/50'}`}
             >
               <Package className="w-4 h-4 shrink-0" /> Orders
             </button>
             <button 
               onClick={() => setActiveTab('wallet')}
-              className={`whitespace-nowrap px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'wallet' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`snap-center whitespace-nowrap px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 flex-1 md:flex-none justify-center ${activeTab === 'wallet' ? 'bg-black text-white shadow-xl shadow-black/10' : 'text-gray-500 hover:text-black hover:bg-gray-100/50'}`}
             >
               <Wallet className="w-4 h-4 shrink-0" /> Wallet
             </button>
             <button 
               onClick={() => setActiveTab('verification')}
-              className={`whitespace-nowrap px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'verification' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`snap-center whitespace-nowrap px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 flex-1 md:flex-none justify-center ${activeTab === 'verification' ? 'bg-black text-white shadow-xl shadow-black/10' : 'text-gray-500 hover:text-black hover:bg-gray-100/50'}`}
             >
-              <ShieldCheck className="w-4 h-4 shrink-0" /> Verification
+              <ShieldCheck className="w-4 h-4 shrink-0" /> Verify
             </button>
           </>
         )}
@@ -422,38 +423,53 @@ export default function ProfilePage() {
       {/* Tab Content */}
       <div className="min-h-[400px]">
         {activeTab === 'profile' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-50">
-              <h3 className="font-bold text-lg mb-6">Account Settings</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 block">Display Name</label>
-                  <p className="font-medium text-gray-900">{user.displayName || 'Not set'}</p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="bg-white rounded-[2.5rem] p-6 lg:p-10 shadow-sm border border-gray-100 lg:col-span-2">
+              <h3 className="font-black text-2xl tracking-tight mb-8">Account Details</h3>
+              <div className="space-y-6">
+                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100/50">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block">Display Name</label>
+                  <p className="font-bold text-lg text-gray-900 tracking-tight">{user.displayName || 'Not set'}</p>
                 </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 block">Email Address</label>
-                  <p className="font-medium text-gray-900">{user.email}</p>
+                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100/50">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block">Email Address</label>
+                  <p className="font-bold text-lg text-gray-900 tracking-tight">{user.email}</p>
                 </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 block">Member Since</label>
-                  <p className="font-medium text-gray-900">
-                    {userData?.createdAt?.toDate ? userData.createdAt.toDate().toLocaleDateString() : 'Recently'}
-                  </p>
+                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100/50 flex justify-between items-center">
+                  <div>
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block">Member Since</label>
+                    <p className="font-bold text-lg text-gray-900 tracking-tight">
+                      {userData?.createdAt?.toDate ? userData.createdAt.toDate().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'Recently'}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100">
+                    <History className="w-5 h-5 text-gray-400" />
+                  </div>
                 </div>
               </div>
             </div>
             
             {role !== 'admin' && (
-              <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-gray-50">
-                <h3 className="font-bold text-lg mb-6">Marketplace Activity</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-gray-50 rounded-2xl text-center">
-                    <p className="text-2xl font-bold">{statsLoading ? '...' : stats.purchases}</p>
-                    <p className="text-xs text-gray-500">Purchases</p>
+              <div className="bg-white rounded-[2.5rem] p-6 lg:p-10 shadow-sm border border-gray-100">
+                <h3 className="font-black text-2xl tracking-tight mb-8">Activity</h3>
+                <div className="flex flex-col gap-4">
+                  <div className="p-6 bg-[#d9ff00]/10 rounded-3xl border border-[#d9ff00]/20 flex items-center justify-between group">
+                    <div>
+                      <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Purchases</p>
+                      <p className="text-4xl font-black text-gray-900">{statsLoading ? '...' : stats.purchases}</p>
+                    </div>
+                    <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      <ShoppingBag className="w-6 h-6 text-gray-900" />
+                    </div>
                   </div>
-                  <div className="p-4 bg-gray-50 rounded-2xl text-center">
-                    <p className="text-2xl font-bold">{statsLoading ? '...' : stats.activeBids}</p>
-                    <p className="text-xs text-gray-500">Active Bids</p>
+                  <div className="p-6 bg-blue-50 rounded-3xl border border-blue-100 flex items-center justify-between group">
+                    <div>
+                      <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Active Bids</p>
+                      <p className="text-4xl font-black text-gray-900">{statsLoading ? '...' : stats.activeBids}</p>
+                    </div>
+                    <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      <Zap className="w-6 h-6 text-blue-500" />
+                    </div>
                   </div>
                 </div>
               </div>

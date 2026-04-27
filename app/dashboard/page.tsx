@@ -183,46 +183,48 @@ export default function DashboardPage() {
   const totalRevenue = sales.reduce((sum, s) => sum + Number(s.netAmount || s.amount || 0), 0);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 py-8">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold flex items-center gap-3">
-          <LayoutDashboard className="w-8 h-8 text-gray-400" /> 
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 py-8 md:py-12">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-6 relative z-10">
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight flex items-center gap-3 w-full sm:w-auto">
+          <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center shrink-0">
+            <LayoutDashboard className="w-6 h-6 text-gray-900" />
+          </div>
           {role === 'vendor' ? 'Vendor Dashboard' : 'My Dashboard'}
         </h1>
-        <Link href="/products/new" className="bg-[#d9ff00] text-black px-6 py-2.5 rounded-full font-semibold hover:bg-[#c4e600] transition-colors flex items-center gap-2">
+        <Link href="/products/new" className="w-full sm:w-auto bg-black text-[#d9ff00] px-8 py-3.5 rounded-full font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-xl shadow-black/10">
           <Plus className="w-5 h-5" /> New Listing
         </Link>
       </div>
 
       {/* Verification Banner */}
       {!userData?.isVerified ? (
-        <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div className="bg-orange-100 p-3 rounded-full text-orange-600 flex-shrink-0">
-              <ShieldAlert className="w-6 h-6" />
+        <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-[2rem] p-6 lg:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+          <div className="flex items-start md:items-center gap-4 lg:gap-6">
+            <div className="bg-white p-4 rounded-full text-orange-500 flex-shrink-0 shadow-sm border border-orange-100">
+              <ShieldAlert className="w-8 h-8" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-orange-900">ID Verification Required</h3>
-              <p className="text-orange-700 text-sm mt-1">
+              <h3 className="text-xl font-black text-gray-900 tracking-tight">ID Verification Required</h3>
+              <p className="text-gray-600 font-medium mt-1.5 max-w-xl">
                 Verify your University ID or Vendor License to build trust with buyers and unlock higher selling limits.
               </p>
             </div>
           </div>
           <Link 
             href="/profile?tab=verification"
-            className="bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-orange-700 transition-colors whitespace-nowrap w-full md:w-auto text-center"
+            className="bg-orange-500 text-white px-8 py-3.5 rounded-full font-black uppercase tracking-widest hover:bg-orange-600 hover:scale-105 active:scale-95 transition-all whitespace-nowrap w-full md:w-auto text-center shadow-lg shadow-orange-500/20"
           >
             Get Verified
           </Link>
         </div>
       ) : (
-        <div className="bg-green-50 border border-green-200 rounded-2xl p-6 flex items-center gap-4">
-          <div className="bg-green-100 p-3 rounded-full text-green-600 flex-shrink-0">
-            <ShieldCheck className="w-6 h-6" />
+        <div className="bg-green-50 border border-green-200 rounded-[2rem] p-6 lg:p-8 flex items-center gap-6 shadow-sm">
+          <div className="bg-white p-4 rounded-full text-green-500 flex-shrink-0 shadow-sm border border-green-100">
+            <ShieldCheck className="w-8 h-8" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-green-900">Account Verified</h3>
-            <p className="text-green-700 text-sm mt-1">
+            <h3 className="text-xl font-black text-gray-900 tracking-tight">Account Verified</h3>
+            <p className="text-gray-600 font-medium mt-1.5">
               Your identity has been verified. Buyers will see a trusted badge on your profile and listings.
             </p>
           </div>
@@ -230,84 +232,107 @@ export default function DashboardPage() {
       )}
 
       {/* View Switcher */}
-      <div className="flex bg-white p-1 rounded-2xl shadow-sm border border-gray-100 w-fit">
+      <div className="flex bg-gray-100/80 p-1.5 rounded-2xl shadow-inner w-full overflow-x-auto no-scrollbar scroll-smooth snap-x">
         <button 
           onClick={() => setActiveView('listings')}
-          className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${activeView === 'listings' ? 'bg-black text-white shadow-md' : 'text-gray-400 hover:text-black'}`}
+          className={`flex-1 sm:flex-none snap-center whitespace-nowrap px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300 ${activeView === 'listings' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black hover:bg-white/50'}`}
         >
           My Listings
         </button>
         {role !== 'vendor' && (
           <button 
             onClick={() => setActiveView('purchases')}
-            className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${activeView === 'purchases' ? 'bg-black text-white shadow-md' : 'text-gray-400 hover:text-black'}`}
+            className={`flex-1 sm:flex-none snap-center whitespace-nowrap px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300 ${activeView === 'purchases' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black hover:bg-white/50'}`}
           >
-            My Purchases
+            Purchases
           </button>
         )}
         <button 
           onClick={() => setActiveView('sales')}
-          className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${activeView === 'sales' ? 'bg-black text-white shadow-md' : 'text-gray-400 hover:text-black'}`}
+          className={`flex-1 sm:flex-none snap-center whitespace-nowrap px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300 ${activeView === 'sales' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black hover:bg-white/50'}`}
         >
           My Sales
         </button>
       </div>
 
       {/* Stats */}
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${role === 'vendor' ? '4' : '3'} gap-6`}>
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                  <div className="flex items-center gap-3 text-gray-500 mb-2">
-                    <Package className="w-5 h-5" /> Active Listings
-                  </div>
-                  <div className="text-3xl font-bold">{activeListings}</div>
-                </div>
-                {role !== 'vendor' && (
-                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <div className="flex items-center gap-3 text-gray-500 mb-2">
-                      <ShoppingBag className="w-5 h-5" /> Total Purchases
-                    </div>
-                    <div className="text-3xl font-bold">{purchases.length}</div>
-                  </div>
-                )}
-                {role === 'vendor' && (
-                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <div className="flex items-center gap-3 text-gray-500 mb-2">
-                      <Zap className="w-5 h-5 text-[#d9ff00]" /> Promoted Listings
-                    </div>
-                    <div className="text-3xl font-bold">{products.filter(p => p.isSponsored).length}</div>
-                  </div>
-                )}
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                  <div className="flex items-center gap-3 text-gray-500 mb-2">
-                    <DollarSign className="w-5 h-5" /> Total Revenue
-                  </div>
-                  <div className="text-3xl font-bold">GH₵{totalRevenue.toFixed(2)}</div>
-                </div>
-                {role !== 'vendor' && (
-                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <div className="flex items-center gap-3 text-gray-500 mb-2">
-                      <Star className="w-5 h-5 text-yellow-500" /> My Coins
-                    </div>
-                    <div className="text-3xl font-bold">{userData?.coins || 0}</div>
-                    <p className="text-xs text-gray-400 mt-1">100 Coins = GH₵0.5</p>
-                  </div>
-                )}
-                {role === 'vendor' && (
-                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                    <div className="flex items-center justify-between gap-3 text-gray-500 mb-2">
-                      <div className="flex items-center gap-3">
-                         <DollarSign className="w-5 h-5 text-green-500" /> Monthly Volume Bonus
-                      </div>
-                      <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">0.5% CashBack</span>
-                    </div>
-                    <div className="text-3xl font-bold text-green-600">+ GH₵{(totalRevenue * 0.005).toFixed(2)}</div>
-                    <p className="text-xs text-gray-400 mt-1">Automatically credited to your wallet 1st of every month</p>
-                  </div>
-                )}
+      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${role === 'vendor' ? '4' : '3'} gap-4 lg:gap-6`}>
+        <div className="bg-white rounded-[2rem] p-6 lg:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative overflow-hidden">
+          <div className="absolute -right-6 -top-6 w-24 h-24 bg-gray-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
+          <div className="relative z-10 flex items-center gap-3 text-gray-500 font-bold uppercase tracking-widest text-xs mb-4">
+            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center">
+              <Package className="w-5 h-5 text-gray-900" />
+            </div>
+            Active Listings
+          </div>
+          <div className="relative z-10 text-4xl lg:text-5xl font-black tracking-tighter text-gray-900">{activeListings}</div>
+        </div>
+        {role !== 'vendor' && (
+          <div className="bg-white rounded-[2rem] p-6 lg:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative overflow-hidden">
+            <div className="absolute -right-6 -top-6 w-24 h-24 bg-gray-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
+            <div className="relative z-10 flex items-center gap-3 text-gray-500 font-bold uppercase tracking-widest text-xs mb-4">
+              <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center">
+                <ShoppingBag className="w-5 h-5 text-gray-900" />
               </div>
+              Total Purchases
+            </div>
+            <div className="relative z-10 text-4xl lg:text-5xl font-black tracking-tighter text-gray-900">{purchases.length}</div>
+          </div>
+        )}
+        {role === 'vendor' && (
+          <div className="bg-white rounded-[2rem] p-6 lg:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative overflow-hidden">
+            <div className="absolute -right-6 -top-6 w-24 h-24 bg-[#d9ff00]/10 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
+            <div className="relative z-10 flex items-center gap-3 text-gray-500 font-bold uppercase tracking-widest text-xs mb-4">
+              <div className="w-10 h-10 rounded-full bg-[#d9ff00]/20 flex items-center justify-center">
+                <Zap className="w-5 h-5 text-orange-500" />
+              </div>
+              Promoted Listings
+            </div>
+            <div className="relative z-10 text-4xl lg:text-5xl font-black tracking-tighter text-gray-900">{products.filter(p => p.isSponsored).length}</div>
+          </div>
+        )}
+        <div className="bg-white rounded-[2rem] p-6 lg:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative overflow-hidden">
+          <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
+          <div className="relative z-10 flex items-center gap-3 text-gray-500 font-bold uppercase tracking-widest text-xs mb-4">
+            <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
+              <DollarSign className="w-5 h-5 text-green-600" />
+            </div>
+            Total Revenue
+          </div>
+          <div className="relative z-10 text-4xl lg:text-5xl font-black tracking-tighter text-gray-900"><span className="text-2xl text-gray-400 mr-1">GH₵</span>{totalRevenue.toFixed(2)}</div>
+        </div>
+        {role !== 'vendor' && (
+          <div className="bg-white rounded-[2rem] p-6 lg:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative overflow-hidden">
+            <div className="absolute -right-6 -top-6 w-24 h-24 bg-yellow-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
+            <div className="relative z-10 flex items-center gap-3 text-gray-500 font-bold uppercase tracking-widest text-xs mb-4">
+              <div className="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center">
+                <Star className="w-5 h-5 text-yellow-500" />
+              </div>
+              My Coins
+            </div>
+            <div className="relative z-10 text-4xl lg:text-5xl font-black tracking-tighter text-gray-900">{userData?.coins || 0}</div>
+            <p className="relative z-10 text-xs font-bold text-gray-400 mt-3 uppercase tracking-widest">100 Coins = GH₵0.5</p>
+          </div>
+        )}
+        {role === 'vendor' && (
+          <div className="bg-white rounded-[2rem] p-6 lg:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center justify-between gap-3 text-gray-500 font-bold uppercase tracking-widest text-xs mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-green-500" />
+                </div>
+                Volume Bonus
+              </div>
+              <span className="text-[10px] font-black text-green-700 bg-green-100 px-2 py-1 rounded-md">0.5% CashBack</span>
+            </div>
+            <div className="text-4xl lg:text-5xl font-black tracking-tighter text-green-600"><span className="text-2xl text-green-400 mr-1">+GH₵</span>{(totalRevenue * 0.005).toFixed(2)}</div>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mt-3 flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Automatically credited 1st of every month</p>
+          </div>
+        )}
+      </div>
 
       {/* Content Area */}
-      <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm">
+      <div className="bg-white rounded-[2.5rem] p-6 md:p-10 shadow-sm border border-gray-100">
         {activeView === 'listings' && (
           <>
             <h2 className="text-xl font-bold mb-6">Your Listings</h2>
