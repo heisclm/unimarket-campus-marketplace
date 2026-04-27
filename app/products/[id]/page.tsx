@@ -11,7 +11,7 @@ import { useCart } from '@/components/cart/CartProvider';
 import BiddingSection from '@/components/products/BiddingSection';
 import ReportModal from '@/components/shared/ReportModal';
 import ProductCard from '@/components/products/ProductCard';
-import { ShoppingBag, Gavel, ArrowLeft, Clock, ShieldCheck, User as UserIcon, AlertTriangle, Heart, Star } from 'lucide-react';
+import { ShoppingBag, Gavel, ArrowLeft, Clock, ShieldCheck, User as UserIcon, AlertTriangle, Heart, Star, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ProductDetailPage() {
@@ -152,21 +152,25 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-[2rem] p-8 shadow-sm min-h-[60vh] flex items-center justify-center">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="w-16 h-16 bg-gray-200 rounded-full mb-4"></div>
-          <p className="text-gray-400">Loading product details...</p>
+      <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 min-h-[60vh] flex flex-col items-center justify-center">
+        <div className="p-4 bg-gray-50 rounded-2xl shadow-sm border border-gray-100 mb-4">
+          <div className="w-8 h-8 rounded-full border-2 border-gray-200 border-t-[#d9ff00] animate-spin"></div>
         </div>
+        <p className="text-gray-500 font-bold tracking-tight animate-pulse uppercase text-sm">Loading Product details</p>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="bg-white rounded-[2rem] p-8 shadow-sm min-h-[60vh] flex flex-col items-center justify-center text-center">
-        <h1 className="text-3xl font-bold mb-2">Product Not Found</h1>
-        <p className="text-gray-500 mb-6">The product you are looking for does not exist or has been removed.</p>
-        <button onClick={() => router.push('/products')} className="bg-black text-white px-6 py-2 rounded-full font-medium">Back to Marketplace</button>
+      <div className="bg-white rounded-[2.5rem] p-16 shadow-sm border border-gray-100 min-h-[60vh] flex flex-col items-center justify-center text-center relative overflow-hidden group">
+        <div className="w-24 h-24 bg-gray-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-sm border border-gray-100 relative overflow-hidden">
+          <div className="absolute inset-0 bg-red-500/10 scale-0 group-hover:scale-100 transition-transform duration-500 rounded-full blur-xl"></div>
+          <AlertCircle className="w-10 h-10 text-red-400 relative z-10 group-hover:text-red-500 transition-colors duration-300" />
+        </div>
+        <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-gray-900 mb-3">Product Not Found</h1>
+        <p className="text-gray-500 font-medium text-lg mb-8 max-w-md mx-auto">The item you are looking for might have been sold, removed, or the link is broken.</p>
+        <button onClick={() => router.push('/products')} className="bg-black text-[#d9ff00] px-8 py-4 rounded-full font-bold hover:scale-105 active:scale-95 transition-transform shadow-xl shadow-black/10">Browse Marketplace</button>
       </div>
     );
   }
@@ -262,19 +266,22 @@ export default function ProductDetailPage() {
         {/* Right: Product Info */}
         <div className="flex flex-col">
           <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-2.5 py-1 rounded-md uppercase tracking-wider">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="bg-gray-100 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-sm">
                 {product.category}
               </span>
-              <span className={`text-xs font-semibold px-2.5 py-1 rounded-md uppercase tracking-wider ${product.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+              <span className={`text-xs font-bold px-3 py-1.5 rounded-lg uppercase tracking-widest shadow-sm ${product.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
                 {product.status}
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-4">{product.title}</h1>
-            <div className="text-4xl font-bold text-black mb-6">
-              GH₵{currentPrice.toFixed(2)}
+            <h1 className="text-4xl md:text-5xl font-black leading-tight tracking-tighter text-gray-900 mb-4">{product.title}</h1>
+            <div className="flex items-end gap-2 mb-6">
+              <span className="text-2xl font-bold text-gray-400 mb-1">GH₵</span>
+              <div className="text-5xl md:text-6xl font-black text-black tracking-tighter">
+                {currentPrice.toFixed(2)}
+              </div>
             </div>
-            <p className="text-gray-600 leading-relaxed whitespace-pre-wrap mb-6">
+            <p className="text-gray-500 font-medium text-lg leading-relaxed whitespace-pre-wrap mb-8">
               {product.description}
             </p>
 
@@ -385,66 +392,66 @@ export default function ProductDetailPage() {
                 {isOwner && (
                   <Link 
                     href={`/products/${product.id}/edit`}
-                    className="w-full bg-black text-white py-4 rounded-xl font-bold text-lg hover:bg-gray-800 transition-colors shadow-sm flex items-center justify-center gap-2"
+                    className="w-full bg-black text-[#d9ff00] py-4 rounded-full font-bold text-lg hover:scale-105 active:scale-95 transition-transform shadow-xl shadow-black/10 flex items-center justify-center gap-2"
                   >
                     Edit Listing
                   </Link>
                 )}
               </div>
             ) : isOwner ? (
-              <div className="flex flex-col gap-3">
-                <div className="bg-blue-50 text-blue-700 p-4 rounded-xl text-center font-medium">
+              <div className="flex flex-col gap-4">
+                <div className="bg-gray-50 text-gray-700 p-6 rounded-[1.5rem] text-center font-bold border border-gray-100">
                   This is your listing.
                 </div>
                 <Link 
                   href={`/products/${product.id}/edit`}
-                  className="w-full bg-black text-white py-4 rounded-xl font-bold text-lg hover:bg-gray-800 transition-colors shadow-sm flex items-center justify-center gap-2"
+                  className="w-full bg-black text-[#d9ff00] py-5 rounded-full font-bold text-lg hover:scale-105 active:scale-95 transition-transform shadow-xl shadow-black/10 flex items-center justify-center gap-2"
                 >
                   Edit Listing
                 </Link>
               </div>
             ) : product.status !== 'active' ? (
-              <div className="bg-gray-100 text-gray-500 p-4 rounded-xl text-center font-medium">
+              <div className="bg-gray-50 text-gray-500 p-6 rounded-[1.5rem] text-center font-bold border border-gray-100">
                 This item is no longer available.
               </div>
             ) : (
             <>
-              <div className="flex items-center gap-4 mb-5">
-                <span className="text-sm font-bold text-gray-900 uppercase tracking-wider">Quantity</span>
-                <div className="flex items-center bg-gray-50 rounded-xl p-1 border border-gray-200">
+              <div className="flex items-center gap-4 mb-6">
+                <span className="text-sm font-black text-gray-900 uppercase tracking-widest">Quantity</span>
+                <div className="flex items-center bg-gray-50 rounded-full p-1 border border-gray-200">
                   <button 
                     onClick={() => setSelectedQuantity(Math.max(1, selectedQuantity - 1))}
                     disabled={selectedQuantity <= 1}
-                    className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-black hover:bg-white rounded-lg transition-all disabled:opacity-50"
+                    className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-black hover:bg-white rounded-full transition-all disabled:opacity-50"
                   >
                     -
                   </button>
-                  <span className="w-12 text-center font-bold text-lg">{selectedQuantity}</span>
+                  <span className="w-12 text-center font-black text-lg">{selectedQuantity}</span>
                   <button 
                     onClick={() => setSelectedQuantity(Math.min(maxAllowedToAdd, selectedQuantity + 1))}
                     disabled={selectedQuantity >= maxAllowedToAdd}
-                    className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-black hover:bg-white rounded-lg transition-all disabled:opacity-50"
+                    className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-black hover:bg-white rounded-full transition-all disabled:opacity-50"
                   >
                     +
                   </button>
                 </div>
-                <span className="text-sm text-gray-500 font-medium">
+                <span className="text-sm text-gray-500 font-bold">
                   {maxAvailable} available {currentCartQty > 0 && `(${currentCartQty} in cart)`}
                 </span>
               </div>
             
-              <div className="flex flex-wrap sm:flex-nowrap gap-3 mb-4">
+              <div className="flex flex-wrap sm:flex-nowrap gap-3 mb-6">
                 <button 
                   onClick={handleAddToCart}
                   disabled={selectedQuantity > maxAllowedToAdd || userData?.role === 'vendor' || maxAllowedToAdd <= 0}
-                  className="flex-[2] bg-[#d9ff00] text-black py-4 px-4 rounded-xl font-bold text-base sm:text-lg hover:bg-[#c4e600] transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="flex-[2] bg-gray-900 text-[#d9ff00] py-4 px-4 rounded-full font-black text-base sm:text-lg hover:scale-105 active:scale-95 transition-transform shadow-xl shadow-black/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:scale-100 uppercase tracking-widest"
                 >
                   <ShoppingBag className="w-5 h-5 flex-shrink-0" /> {maxAllowedToAdd <= 0 ? 'Max Reached' : 'Add to Cart'}
                 </button>
                 
                 <button 
                   onClick={toggleFavorite}
-                  className={`flex-1 sm:flex-none sm:w-16 bg-white border ${isFavorite ? 'border-red-500 text-red-500' : 'border-gray-200 text-gray-500 hover:border-gray-300'} py-4 px-4 rounded-xl font-bold text-lg transition-colors shadow-sm flex items-center justify-center gap-2`}
+                  className={`flex-1 sm:flex-none sm:w-16 bg-white border ${isFavorite ? 'border-red-500 text-red-500' : 'border-gray-200 text-gray-500 hover:border-gray-900 hover:text-black'} py-4 px-4 rounded-full font-bold text-lg transition-all shadow-sm flex items-center justify-center gap-2 hover:scale-105 active:scale-95`}
                   aria-label={isFavorite ? "Remove from wishlist" : "Add to wishlist"}
                 >
                   <Heart className={`w-6 h-6 ${isFavorite ? 'fill-current' : ''}`} />
@@ -453,7 +460,7 @@ export default function ProductDetailPage() {
                 {user && (
                   <Link
                     href={`/dashboard/messages?sellerId=${product.sellerId}&productId=${product.id}`}
-                    className="w-full sm:w-auto bg-black text-white px-6 py-4 sm:py-0 rounded-xl font-bold hover:bg-gray-800 transition-colors shadow-sm flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto bg-gray-100 text-gray-900 border border-gray-200 px-8 py-4 sm:py-0 rounded-full font-bold hover:bg-gray-200 transition-all shadow-sm flex items-center justify-center gap-2 hover:scale-105 active:scale-95"
                   >
                     Message
                   </Link>
@@ -465,7 +472,7 @@ export default function ProductDetailPage() {
             {!isOwner && user && (
               <button 
                 onClick={() => setIsReportModalOpen(true)}
-                className="w-full mt-4 py-3 text-sm font-semibold text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors flex items-center justify-center gap-2"
+                className="w-full mt-2 py-3 text-sm font-bold text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors flex items-center justify-center gap-2"
               >
                 <AlertTriangle className="w-4 h-4" /> Report this listing
               </button>
