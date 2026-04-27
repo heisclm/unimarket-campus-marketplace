@@ -273,7 +273,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${role === 'vendor' ? '3' : '4'} gap-4 lg:gap-6`}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <div className="bg-white rounded-[2rem] p-6 lg:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative overflow-hidden">
           <div className="absolute -right-6 -top-6 w-24 h-24 bg-gray-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
           <div className="relative z-10 flex items-center gap-3 text-gray-500 font-bold uppercase tracking-widest text-xs mb-4">
@@ -318,19 +318,17 @@ export default function DashboardPage() {
           </div>
           <div className="relative z-10 text-4xl lg:text-5xl font-black tracking-tighter text-gray-900"><span className="text-2xl text-gray-400 mr-1">GH₵</span>{totalRevenue.toFixed(2)}</div>
         </div>
-        {role !== 'vendor' && (
-          <div className="bg-white rounded-[2rem] p-6 lg:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative overflow-hidden">
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-yellow-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
-            <div className="relative z-10 flex items-center gap-3 text-gray-500 font-bold uppercase tracking-widest text-xs mb-4">
-              <div className="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center">
-                <Star className="w-5 h-5 text-yellow-500" />
-              </div>
-              My Coins
+        <div className="bg-white rounded-[2rem] p-6 lg:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative overflow-hidden">
+          <div className="absolute -right-6 -top-6 w-24 h-24 bg-yellow-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
+          <div className="relative z-10 flex items-center gap-3 text-gray-500 font-bold uppercase tracking-widest text-xs mb-4">
+            <div className="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center">
+              <Star className="w-5 h-5 text-yellow-500" />
             </div>
-            <div className="relative z-10 text-4xl lg:text-5xl font-black tracking-tighter text-gray-900">{userData?.coins || 0}</div>
-            <p className="relative z-10 text-xs font-bold text-gray-400 mt-3 uppercase tracking-widest">100 Coins = GH₵0.5</p>
+            My Coins
           </div>
-        )}
+          <div className="relative z-10 text-4xl lg:text-5xl font-black tracking-tighter text-gray-900">{userData?.coins || 0}</div>
+          <p className="relative z-10 text-xs font-bold text-gray-400 mt-3 uppercase tracking-widest">100 Coins = GH₵0.5</p>
+        </div>
       </div>
 
       {/* Content Area */}
