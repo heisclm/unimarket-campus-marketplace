@@ -467,7 +467,7 @@ function MessagesContent() {
                     </span>
                   </div>
                   
-                  {user.uid === activeOrder.buyerId && activeOrder.status === 'escrow_held' && (
+                  {user.uid === activeOrder.buyerId && (activeOrder.status === 'escrow_held' || activeOrder.status === 'delivered') && (
                     <div className="flex flex-col sm:flex-row gap-2 mt-3">
                       <button 
                         onClick={() => handleEscrowAction(() => confirmOrderReceipt(activeOrder.id, user.uid))}
