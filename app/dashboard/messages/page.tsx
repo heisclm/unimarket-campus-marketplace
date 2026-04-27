@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, setDoc, limit, getDocs, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { confirmOrderReceipt, rejectOrderReceipt, respondToRejection } from '@/lib/escrow';
-import { Search, Send, User, ArrowLeft, Clock, ShoppingBag, MessageSquare, AlertTriangle, ShieldCheck, CheckCircle, XCircle, Star } from 'lucide-react';
+import { confirmOrderReceipt, rejectOrderReceipt, respondToRejection, markOrderAsDelivered } from '@/lib/escrow';
+import { Search, Send, User, ArrowLeft, Clock, ShoppingBag, MessageSquare, AlertTriangle, ShieldCheck, CheckCircle, XCircle, Star, Truck } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -483,6 +483,18 @@ function MessagesContent() {
                         className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl text-sm font-bold hover:bg-red-100 disabled:opacity-50"
                       >
                         <XCircle className="w-4 h-4" /> Reject & Return
+                      </button>
+                    </div>
+                  )}
+
+                  {user.uid === activeOrder.sellerId && activeOrder.status === 'escrow_held' && (
+                    <div className="flex flex-col sm:flex-row gap-2 mt-3">
+                      <button 
+                        onClick={() => handleEscrowAction(() => markOrderAsDelivered(activeOrder.id, user.uid))}
+                        disabled={isProcessingAction}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 disabled:opacity-50"
+                      >
+                        <Truck className="w-4 h-4" /> Mark as Delivered
                       </button>
                     </div>
                   )}
