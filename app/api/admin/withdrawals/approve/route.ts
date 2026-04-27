@@ -40,17 +40,11 @@ export async function POST(req: NextRequest) {
       const withdrawalData = withdrawalSnap.data();
       if (!withdrawalData) throw new Error('Withdrawal data is empty');
 
-      if (withdrawalData.status !== 'pending') {
+      if (withdrawalData.status !== 'pending' && withdrawalData.status !== 'approved') {
         throw new Error(`Cannot approve withdrawal with status: ${withdrawalData.status}`);
       }
 
-      // 1. Update Withdrawal Status
-      transaction.update(withdrawalRef, {
-        status: 'approved',
-        updatedAt: FieldValue.serverTimestamp()
-      });
-
-      // 2. Find and update the associated pending transaction for the user
+      // 1. Find the associated pending transaction for the user BEFORE performing any writes
       // Since transactions might not have withdrawalId stored historically, we search by userId and amount and pending
       let txRefToUpdate = null;
       
@@ -77,6 +71,13 @@ export async function POST(req: NextRequest) {
         }
       }
 
+      // 2. Update Withdrawal Status
+      transaction.update(withdrawalRef, {
+        status: 'approved',
+        updatedAt: FieldValue.serverTimestamp()
+      });
+
+      // 3. Update Transaction Status
       if (txRefToUpdate) {
         transaction.update(txRefToUpdate, {
           status: 'completed',

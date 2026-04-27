@@ -19,6 +19,9 @@ export default function AdminWithdrawals() {
   useEffect(() => {
     if (role !== 'admin') return;
 
+    // Fire-and-forget fix for any stranded transactions when admin visits the page
+    fetch('/api/admin/withdrawals/fix').catch(console.error);
+
     const q = query(collection(db, 'withdrawals'), orderBy('createdAt', 'desc'), limit(100));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setWithdrawals(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
