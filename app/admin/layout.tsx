@@ -7,7 +7,8 @@ import Link from 'next/link';
 import { 
   LayoutDashboard, Users, Package, AlertTriangle, 
   ShoppingBag, MessageSquare, ShieldAlert, LogOut, 
-  Menu, X, ChevronRight, Store, GraduationCap, ShieldCheck
+  Menu, X, ChevronRight, Store, GraduationCap, ShieldCheck,
+  Landmark
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -17,6 +18,7 @@ const navItems = [
   { name: 'Master Records', href: '/admin/students', icon: GraduationCap },
   { name: 'Verification', href: '/admin/verification', icon: ShieldCheck },
   { name: 'Product Catalog', href: '/admin/products', icon: Package },
+  { name: 'Withdrawals', href: '/admin/withdrawals', icon: Landmark },
   { name: 'Reports & Fraud', href: '/admin/reports', icon: AlertTriangle },
   { name: 'Order Monitoring', href: '/admin/orders', icon: ShoppingBag },
   { name: 'Community Mod', href: '/admin/community', icon: MessageSquare },

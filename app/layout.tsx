@@ -76,15 +76,15 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           <AuthProvider>
             <CartProvider>
               <AppWrapper>
-                <div className="flex flex-col fixed inset-0 overflow-hidden bg-[#f4f4f0] w-full h-[100dvh]">
+                <div className="flex flex-col min-h-screen bg-[#f4f4f0] w-full">
                   <Navbar />
-                  <div className="flex-1 flex overflow-hidden relative">
+                  <div className="flex-1 flex relative">
                      <SideNav />
                      <div 
                         id="main-scroll-container"
-                        className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth pb-safe md:pb-0 relative"
+                        className="flex-1 w-full pb-safe md:pb-0"
                      >
-                        <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:pl-28 lg:pl-8 pb-28 mb-10">
+                        <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:pl-28 lg:pl-8 pb-28 mb-10 min-h-[calc(100vh-160px)]">
                           <Suspense fallback={null}>
                             {children}
                           </Suspense>

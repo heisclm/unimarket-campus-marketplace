@@ -98,6 +98,10 @@ export default function AdminWithdrawals() {
     }
   };
 
+  const pendingAmount = withdrawals.filter(w => w.status === 'pending').reduce((sum, w) => sum + (w.amount || 0), 0);
+  const approvedAmount = withdrawals.filter(w => w.status === 'approved').reduce((sum, w) => sum + (w.amount || 0), 0);
+  const pendingCount = withdrawals.filter(w => w.status === 'pending').length;
+
   if (role !== 'admin') {
     return (
       <div className="max-w-2xl mx-auto bg-white rounded-[2rem] p-12 shadow-sm text-center mt-12">
@@ -110,14 +114,45 @@ export default function AdminWithdrawals() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 py-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Withdrawal Requests</h1>
           <p className="text-gray-500 mt-1">Manage vendor withdrawal requests.</p>
         </div>
-        <Link href="/admin" className="text-sm font-bold text-gray-500 hover:text-black transition-colors">
+        <Link href="/admin" className="text-sm font-bold text-gray-500 hover:text-black transition-colors bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
           &larr; Back to Dashboard
         </Link>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-start justify-between">
+          <div>
+            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Pending Amount</p>
+            <h3 className="text-3xl font-bold tracking-tight text-orange-500">GH₵{pendingAmount.toFixed(2)}</h3>
+            <p className="text-xs text-gray-400 mt-2">{pendingCount} requests waiting</p>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
+            <Clock className="w-6 h-6" />
+          </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-start justify-between">
+          <div>
+            <p className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Cleared</p>
+            <h3 className="text-3xl font-bold tracking-tight text-green-500">GH₵{approvedAmount.toFixed(2)}</h3>
+            <p className="text-xs text-gray-400 mt-2">Total amount approved</p>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center text-green-500">
+            <CheckCircle2 className="w-6 h-6" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-gray-900 to-black p-6 rounded-3xl shadow-md flex flex-col justify-between text-white border border-gray-800">
+           <div>
+             <h3 className="font-bold text-lg mb-1 flex items-center gap-2"><Coins className="w-5 h-5 text-[#d9ff00]" /> Fast Payouts</h3>
+             <p className="text-sm text-gray-400">Process withdrawals consistently to retain vendors on the platform.</p>
+           </div>
+        </div>
       </div>
 
       <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-50">

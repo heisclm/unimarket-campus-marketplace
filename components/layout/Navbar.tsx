@@ -80,7 +80,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="flex-shrink-0 z-50 w-full h-20 bg-[#f4f4f0]/90 backdrop-blur-lg border-b border-gray-200/50">
+      <nav className="sticky top-0 z-50 w-full h-20 bg-[#f4f4f0]/90 backdrop-blur-lg border-b border-gray-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex items-center justify-between h-full gap-4">
             
