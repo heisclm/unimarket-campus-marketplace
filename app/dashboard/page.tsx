@@ -273,7 +273,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${role === 'vendor' ? '4' : '3'} gap-4 lg:gap-6`}>
+      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-${role === 'vendor' ? '3' : '4'} gap-4 lg:gap-6`}>
         <div className="bg-white rounded-[2rem] p-6 lg:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group relative overflow-hidden">
           <div className="absolute -right-6 -top-6 w-24 h-24 bg-gray-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
           <div className="relative z-10 flex items-center gap-3 text-gray-500 font-bold uppercase tracking-widest text-xs mb-4">
@@ -329,21 +329,6 @@ export default function DashboardPage() {
             </div>
             <div className="relative z-10 text-4xl lg:text-5xl font-black tracking-tighter text-gray-900">{userData?.coins || 0}</div>
             <p className="relative z-10 text-xs font-bold text-gray-400 mt-3 uppercase tracking-widest">100 Coins = GH₵0.5</p>
-          </div>
-        )}
-        {role === 'vendor' && (
-          <div className="bg-white rounded-[2rem] p-6 lg:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center justify-between gap-3 text-gray-500 font-bold uppercase tracking-widest text-xs mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-green-500" />
-                </div>
-                Volume Bonus
-              </div>
-              <span className="text-[10px] font-black text-green-700 bg-green-100 px-2 py-1 rounded-md">0.5% CashBack</span>
-            </div>
-            <div className="text-4xl lg:text-5xl font-black tracking-tighter text-green-600"><span className="text-2xl text-green-400 mr-1">+GH₵</span>{(totalRevenue * 0.005).toFixed(2)}</div>
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mt-3 flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Automatically credited 1st of every month</p>
           </div>
         )}
       </div>

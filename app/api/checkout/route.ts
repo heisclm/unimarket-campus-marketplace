@@ -231,7 +231,7 @@ export async function POST(req: NextRequest) {
           title: 'New Order Received! 🎉',
           message: `Cha-ching! Someone just bought ${item.title}. The funds are safe in Escrow. Please prepare for shipment or pickup!`,
           type: 'order',
-          link: sellerRole === 'vendor' ? '/vendor' : '/dashboard?tab=sales',
+          link: '/dashboard',
           read: false,
           createdAt: FieldValue.serverTimestamp()
         });

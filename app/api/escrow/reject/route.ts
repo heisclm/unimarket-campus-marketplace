@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
           title: 'Order Cancelled (3 Strikes) ⚠️',
           message: `The order for ${orderData.productTitle} was rejected 3 times and has been automatically cancelled. Funds were refunded to the buyer.`,
           type: 'alert',
-          link: '/vendor',
+          link: '/dashboard',
           read: false,
           createdAt: FieldValue.serverTimestamp()
         });
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
           title: 'Order Rejected 🛑',
           message: `The buyer rejected the delivery of ${orderData.productTitle}. Action is required in your dashboard immediately.`,
           type: 'alert',
-          link: '/vendor',
+          link: '/dashboard',
           read: false,
           createdAt: FieldValue.serverTimestamp()
         });

@@ -141,7 +141,7 @@ export default function NotificationsPage() {
                 <div className="flex items-center gap-4 mt-3">
                   {notification.link && (
                     <Link 
-                      href={notification.link}
+                      href={notification.link.startsWith('/vendor') ? notification.link.replace('/vendor', '/dashboard') : notification.link}
                       onClick={() => markAsRead(notification.id)}
                       className="text-xs font-bold text-black flex items-center gap-1 hover:underline"
                     >
