@@ -5,7 +5,7 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, setDoc, limit, getDocs, increment } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { confirmOrderReceipt, rejectOrderReceipt, respondToRejection, markOrderAsDelivered } from '@/lib/escrow';
-import { Search, Send, User, ArrowLeft, Clock, ShoppingBag, MessageSquare, AlertTriangle, ShieldCheck, CheckCircle, XCircle, Star, Truck } from 'lucide-react';
+import { Search, Send, User, ArrowLeft, Clock, ShoppingBag, MessageSquare, AlertTriangle, ShieldCheck, CheckCircle, XCircle, Star, Truck, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -316,6 +316,27 @@ function MessagesContent() {
     }
   };
 
+  const handleDeleteChat = async (chatId: string) => {
+    if (!window.confirm("Are you sure you want to delete this chat? This cannot be undone.")) return;
+    
+    setIsProcessingAction(true);
+    try {
+      const chatRef = doc(db, 'chats', chatId);
+      const chatDoc = await getDoc(chatRef);
+      if(chatDoc.exists()) {
+        const data = chatDoc.data();
+        const newParticipants = (data.participants || []).filter((p: string) => p !== user?.uid);
+        await updateDoc(chatRef, { participants: newParticipants });
+        toast.success("Chat deleted");
+        setActiveChatId(null);
+      }
+    } catch (error: any) {
+      toast.error("Failed to delete chat: " + error.message);
+    } finally {
+      setIsProcessingAction(false);
+    }
+  };
+
   const filteredChats = chats.filter(chat => {
     const otherId = chat.participants.find(id => id !== user?.uid);
     const otherName = otherId ? chat.participantDetails?.[otherId]?.name?.toLowerCase() : '';
@@ -452,6 +473,16 @@ function MessagesContent() {
                   <Link href={`/products/${activeChat.productId}`} className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-black text-[#d9ff00] rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-black/10">
                     <ShoppingBag className="w-3.5 h-3.5" /> View Item
                   </Link>
+                )}
+                {activeChat?.isCompleted && (
+                  <button 
+                    onClick={() => handleDeleteChat(activeChat.id)}
+                    disabled={isProcessingAction}
+                    className="flex justify-center items-center w-10 h-10 ml-2 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                    title="Delete Chat"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
                 )}
               </div>
 

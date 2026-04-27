@@ -158,9 +158,10 @@ export default function NotificationsPage() {
                   )}
                   <button 
                     onClick={() => deleteNotification(notification.id)}
-                    className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors ml-auto opacity-0 group-hover:opacity-100"
+                    className="flex justify-center items-center w-8 h-8 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors ml-auto flex-shrink-0"
+                    title="Delete Notification"
                   >
-                    <Trash2 className="w-3 h-3" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
