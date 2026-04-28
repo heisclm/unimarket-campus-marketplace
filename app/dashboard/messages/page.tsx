@@ -352,8 +352,8 @@ function MessagesContent() {
   if (!user) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-0 md:px-6 lg:px-8 py-0 md:py-8 flex flex-col bg-white md:bg-transparent h-[calc(100dvh-65px)] md:h-[calc(100vh-140px)]">
-      <div className={`bg-white md:rounded-[2.5rem] md:shadow-xl shadow-black/5 md:border border-gray-100 text-gray-900 flex-1 flex flex-col md:flex-row overflow-hidden relative ${activeChatId ? 'z-[60] md:z-10' : 'z-10'} w-full`}>
+    <div className="fixed inset-0 pt-[80px] pb-[65px] md:static md:pt-0 md:pb-0 md:py-8 max-w-7xl mx-auto md:px-6 lg:px-8 flex flex-col bg-white md:bg-transparent md:h-[calc(100vh-140px)] w-full z-40 md:z-0">
+      <div className={`bg-white md:rounded-[2.5rem] md:shadow-xl shadow-black/5 md:border border-gray-100 text-gray-900 flex-1 flex flex-col md:flex-row overflow-hidden relative ${activeChatId ? 'z-[60] md:z-10' : 'z-10'} w-full h-full`}>
         
         {/* Chat List (Left Pane) */}
         <div className={`w-full md:w-[400px] flex-shrink-0 border-r border-gray-100 flex flex-col bg-white overflow-hidden h-full ${activeChatId ? 'hidden md:flex' : 'flex'}`}>
