@@ -7,6 +7,7 @@ import SideNav from '@/components/layout/SideNav';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { CartProvider } from '@/components/cart/CartProvider';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import PWAInstallPrompt from '@/components/common/PWAInstallPrompt';
 import { Toaster } from 'react-hot-toast';
 import { Suspense } from 'react';
 
@@ -48,12 +49,12 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'UniMart',
-    startupImage: ['/icon.svg'],
+    startupImage: ['/icon-512.png'],
   },
   icons: {
     icon: '/icon.svg',
     shortcut: '/icon.svg',
-    apple: '/icon.svg',
+    apple: '/icon-192.png',
   },
 };
 
@@ -112,6 +113,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
                 <Suspense fallback={null}>
                   <RouteLogger />
                 </Suspense>
+                <PWAInstallPrompt />
               </AppWrapper>
             </CartProvider>
           </AuthProvider>
