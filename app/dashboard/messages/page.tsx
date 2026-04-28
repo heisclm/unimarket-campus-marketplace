@@ -352,12 +352,12 @@ function MessagesContent() {
   if (!user) return null;
 
   return (
-    <div className="fixed inset-0 pt-[80px] pb-[65px] md:static md:pt-0 md:pb-0 md:py-8 max-w-7xl mx-auto md:px-6 lg:px-8 flex flex-col bg-white md:bg-transparent md:h-[calc(100vh-140px)] w-full z-40 md:z-0">
-      <div className={`bg-white md:rounded-[2.5rem] md:shadow-xl shadow-black/5 md:border border-gray-100 text-gray-900 flex-1 flex flex-col md:flex-row overflow-hidden relative ${activeChatId ? 'z-[60] md:z-10' : 'z-10'} w-full h-full`}>
+    <div className="max-w-7xl mx-auto px-0 md:px-6 lg:px-8 -mt-8 md:mt-0 -mx-4 sm:-mx-6 md:mx-0 -mb-[160px] md:-mb-10 flex flex-col bg-white md:bg-transparent h-[calc(100dvh-130px)] md:h-[calc(100vh-140px)]">
+      <div className={`bg-white md:rounded-[2.5rem] md:shadow-xl shadow-black/5 md:border border-gray-100 text-gray-900 flex-1 flex flex-col md:flex-row overflow-hidden relative ${activeChatId ? 'z-[60] md:z-10' : 'z-10'} w-full`}>
         
         {/* Chat List (Left Pane) */}
         <div className={`w-full md:w-[400px] flex-shrink-0 border-r border-gray-100 flex flex-col bg-white overflow-hidden h-full ${activeChatId ? 'hidden md:flex' : 'flex'}`}>
-          <div className="p-4 sm:p-5 sm:pb-3 border-b border-gray-100 flex flex-col flex-shrink-0 gap-4 z-10 relative">
+          <div className="p-4 sm:p-5 sm:pb-3 border-b border-gray-100 flex flex-col flex-shrink-0 gap-4 z-20 sticky top-0 bg-white">
             <h1 className="text-3xl font-black tracking-tighter text-gray-900">Messages</h1>
             <div className="flex bg-gray-100/80 p-1.5 rounded-[1.2rem]">
               <button
@@ -387,7 +387,7 @@ function MessagesContent() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto pb-[85px] md:pb-0">
+          <div className="flex-1 overflow-y-auto pb-[130px] md:pb-0">
             {filteredChats.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
                 <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
