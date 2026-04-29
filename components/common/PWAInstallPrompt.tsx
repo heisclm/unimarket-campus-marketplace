@@ -55,16 +55,10 @@ export default function PWAInstallPrompt() {
       }
     };
 
-    const customShowHandler = () => {
-      setIsVisible(true);
-    };
-
     window.addEventListener('beforeinstallprompt', handler);
-    window.addEventListener('show-install-prompt', customShowHandler);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
-      window.removeEventListener('show-install-prompt', customShowHandler);
     };
   }, []);
 
@@ -75,12 +69,7 @@ export default function PWAInstallPrompt() {
       return;
     }
 
-    if (!deferredPrompt) {
-      // Fallback for iframe/preview or browsers that don't support the programmatic prompt
-      alert("To install this app, click the 'Install' icon (a monitor with a down arrow) in your browser's address bar, or use the 'Add to Home Screen' option in your browser menu. If you are previewing inside a frame, you must first open the app in a new tab.");
-      setIsVisible(false);
-      return;
-    }
+    if (!deferredPrompt) return;
     
     // Show the install prompt
     deferredPrompt.prompt();

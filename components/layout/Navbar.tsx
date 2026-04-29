@@ -154,16 +154,6 @@ export default function Navbar() {
                   <Link href="/community" className="text-sm font-semibold text-gray-600 hover:text-black transition-colors flex items-center gap-1.5">
                     <Users className="w-4 h-4" /> Community
                   </Link>
-                  {/* PWA Install Trigger button, to give explicit intent */}
-                  <button 
-                    onClick={() => {
-                      // We dispatch a custom event that our PWAInstallPrompt will listen to
-                      window.dispatchEvent(new CustomEvent('show-install-prompt'));
-                    }}
-                    className="text-sm font-bold text-gray-600 hover:text-black transition-colors flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full"
-                  >
-                    Install App
-                  </button>
                 </>
               )}
               {role === 'admin' ? (
