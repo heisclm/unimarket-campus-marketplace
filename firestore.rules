@@ -157,15 +157,15 @@ service cloud.firestore {
       allow create: if isAuthenticated() && 
                       request.resource.data.sellerId == request.auth.uid &&
                       request.resource.data.status in ['active', 'pending'] &&
-                      hasOnlyAllowedFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt', 'sellerIsVerified', 'offersDelivery', 'deliveryFee', 'auctionEndTime']) &&
+                      hasOnlyAllowedFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt', 'sellerIsVerified', 'offersDelivery', 'deliveryFee', 'auctionEndTime', 'sellerName', 'sellerPhotoURL', 'hasVariations', 'quantity', 'variants']) &&
                       hasRequiredFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt']);
       allow update: if isAuthenticated() && (
         isAdmin() || 
         (request.auth.uid == resource.data.sellerId && 
          // CRITICAL: lock schema
-         hasOnlyAllowedFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt', 'sellerIsVerified', 'offersDelivery', 'deliveryFee', 'auctionEndTime', 'isSponsored', 'sponsoredUntil']) &&
-         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['sellerId', 'createdAt', 'sellerIsVerified', 'type', 'isSponsored', 'sponsoredUntil']) &&
-         // Seller can only update to 'sold' or 'ended' if it was 'active'
+         hasOnlyAllowedFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt', 'sellerIsVerified', 'offersDelivery', 'deliveryFee', 'auctionEndTime', 'isSponsored', 'sponsoredUntil', 'sellerName', 'sellerPhotoURL', 'hasVariations', 'quantity', 'variants']) &&
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['sellerId', 'createdAt', 'category', 'sellerIsVerified', 'type', 'isSponsored', 'sponsoredUntil', 'hasVariations', 'variants']) &&
+         // Seller can only update to 'sold' or 'ended' if it was 'active', or update details
          (request.resource.data.status in ['sold', 'ended'] || request.resource.data.status == resource.data.status))
       );
       allow delete: if isAuthenticated() && (request.auth.uid == resource.data.sellerId || isAdmin());
