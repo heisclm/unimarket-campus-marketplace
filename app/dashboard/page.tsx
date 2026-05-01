@@ -343,54 +343,56 @@ export default function DashboardPage() {
               <div className="text-center py-12 text-gray-500">You haven&apos;t listed any products yet.</div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[600px]">
+                <table className="w-full text-left border-collapse min-w-[800px]">
                   <thead>
-                    <tr className="border-b border-gray-100 text-gray-500 text-sm">
-                      <th className="pb-4 font-medium">Product</th>
-                      <th className="pb-4 font-medium">Type</th>
-                      <th className="pb-4 font-medium">Price</th>
-                      <th className="pb-4 font-medium">Status</th>
-                      <th className="pb-4 font-medium text-right">Action</th>
+                    <tr className="border-b border-gray-100 text-gray-400 text-xs uppercase tracking-widest">
+                      <th className="pb-4 font-black px-4">Product</th>
+                      <th className="pb-4 font-black px-4">Type</th>
+                      <th className="pb-4 font-black px-4">Price</th>
+                      <th className="pb-4 font-black px-4">Status</th>
+                      <th className="pb-4 font-black text-right px-4">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {products.map(product => (
-                      <tr key={product.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                        <td className="py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-gray-100 rounded-lg relative overflow-hidden flex-shrink-0">
+                      <tr key={product.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                        <td className="py-5 px-4 w-1/3">
+                          <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 bg-gray-100 rounded-xl relative overflow-hidden flex-shrink-0 border border-gray-200/50">
                               {product.previewImage || product.images?.[0] ? (
                                 <Image src={product.previewImage || product.images[0]} alt={product.title} fill className="object-cover" referrerPolicy="no-referrer" />
                               ) : (
                                 <Package className="w-6 h-6 text-gray-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                               )}
                             </div>
-                            <span className="font-semibold line-clamp-1">{product.title}</span>
+                            <span className="font-bold text-gray-900 line-clamp-2 leading-snug pr-4">{product.title}</span>
                           </div>
                         </td>
-                        <td className="py-4 capitalize text-gray-600">{product.type}</td>
-                        <td className="py-4 font-medium">GH₵{Number(product.price).toFixed(2)}</td>
-                        <td className="py-4">
-                          <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
-                            product.status === 'active' ? 'bg-green-100 text-green-700' : 
+                        <td className="py-5 px-4 capitalize text-gray-500 font-semibold text-sm whitespace-nowrap">{product.type}</td>
+                        <td className="py-5 px-4 font-black text-gray-900 whitespace-nowrap">GH₵{Number(product.price).toFixed(2)}</td>
+                        <td className="py-5 px-4 whitespace-nowrap">
+                          <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                            product.status === 'active' ? 'bg-[#d9ff00]/20 text-[#8ca300]' : 
                             product.status === 'sold' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
                           }`}>
                             {product.status}
                           </span>
                         </td>
-                        <td className="py-4 text-right">
-                          <div className="flex items-center justify-end gap-3">
+                        <td className="py-5 px-4 text-right">
+                          <div className="flex items-center justify-end gap-3 lg:gap-4">
                             {product.status === 'active' && !product.isSponsored && (
-                              <button onClick={() => setProductToPromote(product)} className="text-sm font-semibold text-[#b8d900] hover:text-[#d9ff00] bg-black px-2 py-1 rounded-md transition-colors flex items-center gap-1">
-                                <Zap className="w-3 h-3" /> Promote
+                              <button onClick={() => setProductToPromote(product)} className="text-[10px] lg:text-xs font-black uppercase tracking-widest text-[#b8d900] hover:text-[#d9ff00] bg-black px-3 py-2 rounded-lg transition-colors flex items-center gap-1">
+                                <Zap className="w-3 h-3 lg:w-4 lg:h-4" /> Promote
                               </button>
                             )}
                             {product.isSponsored && (
-                              <span className="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-1 rounded-md">Promoted</span>
+                              <span className="text-[10px] lg:text-xs font-black uppercase tracking-widest text-orange-500 bg-orange-50 px-3 py-2 rounded-lg flex items-center gap-1">
+                                <Zap className="w-3 h-3 lg:w-4 lg:h-4" /> Promoted
+                              </span>
                             )}
-                            <Link href={`/products/${product.id}/edit`} className="text-sm font-semibold text-gray-500 hover:text-black transition-colors">Edit</Link>
-                            <Link href={`/products/${product.id}`} className="text-sm font-semibold text-blue-600 hover:underline">View</Link>
-                            <button onClick={() => setProductToDelete(product)} className="text-sm font-semibold text-gray-400 hover:text-red-500 transition-colors">
+                            <Link href={`/products/${product.id}/edit`} className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors">Edit</Link>
+                            <Link href={`/products/${product.id}`} className="text-xs font-bold uppercase tracking-widest text-blue-500 hover:text-blue-700 transition-colors">View</Link>
+                            <button onClick={() => setProductToDelete(product)} className="text-gray-300 hover:text-red-500 transition-colors flex items-center justify-center p-2 hover:bg-red-50 rounded-lg">
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>

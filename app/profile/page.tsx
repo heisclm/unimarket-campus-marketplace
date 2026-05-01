@@ -424,7 +424,7 @@ export default function ProfilePage() {
       <div className="min-h-[400px]">
         {activeTab === 'profile' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-            <div className="bg-white rounded-[2.5rem] p-6 lg:p-10 shadow-sm border border-gray-100 lg:col-span-2">
+            <div className={`bg-white rounded-[2.5rem] p-6 lg:p-10 shadow-sm border border-gray-100 ${role === 'student' ? 'lg:col-span-2' : 'lg:col-span-3'}`}>
               <h3 className="font-black text-2xl tracking-tight mb-8">Account Details</h3>
               <div className="space-y-6">
                 <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100/50">
@@ -449,7 +449,7 @@ export default function ProfilePage() {
               </div>
             </div>
             
-            {role !== 'admin' && (
+            {role === 'student' && (
               <div className="bg-white rounded-[2.5rem] p-6 lg:p-10 shadow-sm border border-gray-100">
                 <h3 className="font-black text-2xl tracking-tight mb-8">Activity</h3>
                 <div className="flex flex-col gap-4">
