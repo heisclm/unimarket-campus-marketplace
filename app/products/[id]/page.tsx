@@ -365,17 +365,17 @@ export default function ProductDetailPage() {
 
           {/* Actions */}
           <div className="mt-auto pt-6 border-t border-gray-100">
-            {userData?.role === 'vendor' && !isOwner && (
+            {(userData?.role === 'vendor' || userData?.role === 'admin') && !isOwner && (
               <div className="bg-red-50 border border-red-100 rounded-2xl p-4 mb-6 flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5" />
                 <div>
-                  <p className="text-sm font-bold text-red-800">Vendor Restriction</p>
-                  <p className="text-xs text-red-700 mt-0.5">Vendor accounts are restricted to selling only. You cannot purchase or bid on items.</p>
+                  <p className="text-sm font-bold text-red-800">{userData?.role === 'admin' ? 'Admin Restriction' : 'Vendor Restriction'}</p>
+                  <p className="text-xs text-red-700 mt-0.5">{userData?.role === 'admin' ? 'Admin accounts are restricted to platform management. You cannot purchase or bid on items.' : 'Vendor accounts are restricted to selling only. You cannot purchase or bid on items.'}</p>
                 </div>
               </div>
             )}
 
-            {!userData?.isVerified && !isOwner && user && userData?.role !== 'vendor' && (
+            {!userData?.isVerified && !isOwner && user && userData?.role !== 'vendor' && userData?.role !== 'admin' && (
               <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-6 flex items-start gap-3">
                 <ShieldCheck className="w-5 h-5 text-orange-500 mt-0.5" />
                 <div>
@@ -388,7 +388,7 @@ export default function ProductDetailPage() {
 
             {product.type === 'auction' ? (
               <div className="flex flex-col gap-3">
-                <div className={(!userData?.isVerified || userData?.role === 'vendor') && !isOwner ? 'opacity-50 pointer-events-none' : ''}>
+                <div className={(!userData?.isVerified || userData?.role === 'vendor' || userData?.role === 'admin') && !isOwner ? 'opacity-50 pointer-events-none' : ''}>
                   <BiddingSection 
                     productId={product.id} 
                     productTitle={product.title}
@@ -454,7 +454,7 @@ export default function ProductDetailPage() {
               <div className="flex flex-wrap sm:flex-nowrap gap-3 mb-6">
                 <button 
                   onClick={handleAddToCart}
-                  disabled={selectedQuantity > maxAllowedToAdd || userData?.role === 'vendor' || maxAllowedToAdd <= 0}
+                  disabled={selectedQuantity > maxAllowedToAdd || userData?.role === 'vendor' || userData?.role === 'admin' || maxAllowedToAdd <= 0}
                   className="flex-[2] bg-gray-900 text-[#d9ff00] py-4 px-4 rounded-full font-black text-base sm:text-lg hover:scale-105 active:scale-95 transition-transform shadow-xl shadow-black/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:scale-100 uppercase tracking-widest"
                 >
                   <ShoppingBag className="w-5 h-5 flex-shrink-0" /> {maxAllowedToAdd <= 0 ? 'Max Reached' : 'Add to Cart'}

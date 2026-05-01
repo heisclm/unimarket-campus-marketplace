@@ -26,6 +26,15 @@ export async function POST(req: NextRequest) {
 
     // 3. Execute Secure Transaction
     const result = await adminDb.runTransaction(async (transaction) => {
+      // Prevent admins from buying
+      const checkUserRef = adminDb!.collection('users').doc(buyerId);
+      const checkUserSnap = await transaction.get(checkUserRef);
+      if (!checkUserSnap.exists) throw new Error('User not found');
+      const checkUserData = checkUserSnap.data();
+      if (checkUserData?.role === 'admin') {
+        throw new Error('Admins are restricted from making purchases');
+      }
+
       // Fetch all products to verify prices and availability
       const productRefs = items.map(item => adminDb!.collection('products').doc(item.productId || item.id));
       const productSnaps = await transaction.getAll(...productRefs);

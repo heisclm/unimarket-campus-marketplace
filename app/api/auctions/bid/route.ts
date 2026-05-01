@@ -58,6 +58,15 @@ export async function POST(req: NextRequest) {
         throw new Error('You cannot bid on your own auction');
       }
 
+      // Prevent admins from bidding
+      const userRef = adminDb.collection('users').doc(bidderId);
+      const userSnap = await transaction.get(userRef);
+      if (!userSnap.exists) throw new Error('User not found');
+      const userData = userSnap.data();
+      if (userData?.role === 'admin') {
+        throw new Error('Admins are restricted from participating in auctions');
+      }
+
       // Get Current Highest Bid
       // Proper query: auctionId == productId ORDER BY amount DESC
       // Requires composite index: auctionId (ASC), amount (DESC)

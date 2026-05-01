@@ -112,32 +112,34 @@ export default function AdminOverview() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {statCards.map((stat, i) => (
           <motion.div 
             key={stat.label}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-50 hover:shadow-md transition-all group"
+            className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] shadow-sm border border-gray-50 hover:shadow-md transition-all group flex flex-col justify-between"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`p-3 rounded-2xl bg-${stat.color}-50 text-${stat.color}-500 group-hover:scale-110 transition-transform`}>
-                <stat.icon className="w-6 h-6" />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+              <div className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl bg-${stat.color}-50 text-${stat.color}-500 group-hover:scale-110 transition-transform`}>
+                <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <span className="text-xs font-bold text-green-500 bg-green-50 px-2 py-1 rounded-lg flex items-center gap-1">
+              <span className="text-[10px] sm:text-xs font-bold text-green-500 bg-green-50 px-2 py-1 rounded-lg flex items-center gap-1">
                 <TrendingUp className="w-3 h-3" /> {stat.trend}
               </span>
             </div>
-            <p className="text-gray-400 text-sm font-medium">{stat.label}</p>
-            <h3 className="text-2xl font-bold mt-1">{stat.value}</h3>
+            <div>
+              <p className="text-gray-400 text-xs sm:text-sm font-medium">{stat.label}</p>
+              <h3 className="text-base sm:text-xl md:text-2xl font-black mt-1 truncate" title={String(stat.value)}>{stat.value}</h3>
+            </div>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Recent Activity */}
-        <div className="lg:col-span-2 bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-50">
+        <div className="lg:col-span-2 bg-white rounded-3xl lg:rounded-[2.5rem] p-6 sm:p-8 shadow-sm border border-gray-50">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-xl font-bold">Recent Activity</h3>
             <button className="text-sm font-bold text-gray-400 hover:text-black transition-colors">View All</button>

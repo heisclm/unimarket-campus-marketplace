@@ -154,7 +154,7 @@ service cloud.firestore {
     // Products Collection
     match /products/{productId} {
       allow read: if true;
-      allow create: if isAuthenticated() && 
+      allow create: if isAuthenticated() && !isAdmin() &&
                       request.resource.data.sellerId == request.auth.uid &&
                       request.resource.data.status in ['active', 'pending'] &&
                       hasOnlyAllowedFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt', 'sellerIsVerified', 'offersDelivery', 'deliveryFee', 'auctionEndTime', 'sellerName', 'sellerPhotoURL', 'hasVariations', 'quantity', 'variants']) &&

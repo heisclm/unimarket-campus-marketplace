@@ -87,8 +87,8 @@ export default function CartPage() {
       return;
     }
 
-    if (userData?.role === 'vendor') {
-      toast.error('Vendors are not allowed to purchase items.');
+    if (userData?.role === 'vendor' || userData?.role === 'admin') {
+      toast.error(userData?.role === 'admin' ? 'Admins are not allowed to purchase items.' : 'Vendors are not allowed to purchase items.');
       return;
     }
 

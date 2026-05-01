@@ -58,6 +58,21 @@ export default function NewProductPage() {
     );
   }
 
+  if (role === 'admin') {
+    return (
+      <div className="bg-white rounded-[2rem] p-8 shadow-sm min-h-[60vh] flex items-center justify-center text-center">
+        <div className="max-w-md">
+          <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <ShieldCheck className="w-10 h-10" />
+          </div>
+          <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
+          <p className="text-gray-500 mb-6">Admins are restricted from selling products. Please use your admin panel to manage the platform.</p>
+          <button onClick={() => router.push('/admin')} className="bg-black text-white px-8 py-3 rounded-xl font-bold hover:bg-gray-800 transition-all">Go to Admin Panel</button>
+        </div>
+      </div>
+    );
+  }
+
   if (!userData?.isVerified) {
     return (
       <div className="bg-white rounded-[2rem] p-8 shadow-sm min-h-[60vh] flex items-center justify-center text-center">
