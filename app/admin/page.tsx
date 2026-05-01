@@ -131,7 +131,7 @@ export default function AdminOverview() {
             </div>
             <div>
               <p className="text-gray-400 text-xs sm:text-sm font-medium">{stat.label}</p>
-              <h3 className="text-base sm:text-xl md:text-2xl font-black mt-1 truncate" title={String(stat.value)}>{stat.value}</h3>
+              <h3 className="text-base sm:text-xl lg:text-lg xl:text-2xl font-black mt-1 break-words" title={String(stat.value)}>{stat.value}</h3>
             </div>
           </motion.div>
         ))}
