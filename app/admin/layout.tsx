@@ -21,6 +21,8 @@ const navItems = [
   { name: 'Withdrawals', href: '/admin/withdrawals', icon: Landmark },
   { name: 'Reports & Fraud', href: '/admin/reports', icon: AlertTriangle },
   { name: 'Order Monitoring', href: '/admin/orders', icon: ShoppingBag },
+  { name: 'Sales Report', href: '/admin/sales-report', icon: ShoppingBag },
+  { name: 'Audit Logs', href: '/admin/audit-logs', icon: ShieldAlert },
   { name: 'Community Mod', href: '/admin/community', icon: MessageSquare },
 ];
 

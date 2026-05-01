@@ -222,11 +222,11 @@ export default function AdminOverview() {
                 <ShieldCheck className="w-6 h-6 mx-auto mb-2 text-blue-500" />
                 <span className="text-xs font-bold text-gray-600">Escrow Management</span>
               </button>
-              <button className="p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all text-center">
+              <button onClick={() => router.push('/admin/sales-report')} className="p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all text-center">
                 <ShoppingBag className="w-6 h-6 mx-auto mb-2 text-green-500" />
                 <span className="text-xs font-bold text-gray-600">Sales Report</span>
               </button>
-              <button className="p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all text-center">
+              <button onClick={() => router.push('/admin/audit-logs')} className="p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all text-center">
                 <Package className="w-6 h-6 mx-auto mb-2 text-orange-500" />
                 <span className="text-xs font-bold text-gray-600">Audit Logs</span>
               </button>
