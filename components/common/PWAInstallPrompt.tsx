@@ -27,7 +27,9 @@ export default function PWAInstallPrompt() {
       || (window.navigator as any).standalone 
       || document.referrer.includes('android-app://');
     
-    setIsStandalone(standsAlone);
+    setTimeout(() => {
+      setIsStandalone(standsAlone);
+    }, 0);
 
     if (standsAlone) {
       return; // Already installed
@@ -38,7 +40,9 @@ export default function PWAInstallPrompt() {
     // iOS detection
     const userAgent = window.navigator.userAgent.toLowerCase();
     const isIOSDevice = /iphone|ipad|ipod/.test(userAgent);
-    setIsIos(isIOSDevice);
+    setTimeout(() => {
+      setIsIos(isIOSDevice);
+    }, 0);
 
     if (!hasDismissed) {
       // Show immediately on all platforms since we want the users to see it

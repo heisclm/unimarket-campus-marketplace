@@ -172,6 +172,8 @@ export default function NewProductPage() {
         description,
         price: parseFloat(price),
         sellerId: user.uid,
+        sellerName: user.displayName || 'Anonymous User',
+        sellerPhotoURL: user.photoURL || '',
         sellerIsVerified: true,
         category,
         hasVariations,

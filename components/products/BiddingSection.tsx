@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp, writeBatch, doc, increment, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/components/auth/AuthProvider';
@@ -31,6 +31,8 @@ export default function BiddingSection({ productId, productTitle, productImage, 
   const [error, setError] = useState('');
   const [timeLeft, setTimeLeft] = useState<string>('');
 
+  const endedFiredRef = useRef(false);
+
   useEffect(() => {
     if (!auctionEndTime || status !== 'active') return;
 
@@ -38,14 +40,15 @@ export default function BiddingSection({ productId, productTitle, productImage, 
       const difference = new Date(auctionEndTime).getTime() - new Date().getTime();
       
       if (difference <= 0) {
-        if (timeLeft !== 'Ended') {
+        if (!endedFiredRef.current) {
+          endedFiredRef.current = true;
           setTimeLeft('Ended');
           if (status === 'active') {
-            fetch('/api/auctions/end', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ productId })
-            }).catch(console.error);
+             fetch('/api/auctions/end', {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({ productId })
+             }).catch(console.error);
           }
         }
         return;
@@ -67,7 +70,7 @@ export default function BiddingSection({ productId, productTitle, productImage, 
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, [auctionEndTime, status]);
+  }, [auctionEndTime, status, productId]);
 
   useEffect(() => {
     // Proper query: auctionId == productId ORDER BY amount DESC

@@ -89,10 +89,21 @@ export default function ProductDetailPage() {
           
           // Fetch seller info
           if (productData.sellerId) {
-            const sellerRef = doc(db, 'users', productData.sellerId);
-            const sellerSnap = await getDoc(sellerRef);
-            if (sellerSnap.exists()) {
-              setSeller(sellerSnap.data());
+            // Use denormalized data as default fallback
+            setSeller({
+              displayName: productData.sellerName || 'Anonymous User',
+              photoURL: productData.sellerPhotoURL || '',
+              isVerified: productData.sellerIsVerified
+            });
+
+            try {
+              const res = await fetch(`/api/users/${productData.sellerId}/public`);
+              if (res.ok) {
+                const publicData = await res.json();
+                setSeller({ ...publicData, ...productData.sellerName ? { displayName: productData.sellerName } : {} });
+              }
+            } catch (err) {
+              console.warn("Could not fetch public seller profile:", err);
             }
 
             // Fetch seller ratings
