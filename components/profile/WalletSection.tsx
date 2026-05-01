@@ -201,29 +201,45 @@ export default function WalletSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="lg:col-span-3 bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100"
+          className="lg:col-span-3 bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 relative overflow-hidden"
         >
-          <div className="flex flex-wrap sm:flex-nowrap items-center justify-between mb-6 gap-4">
-            <div className="flex gap-2 bg-gray-100 p-1 rounded-xl w-full sm:w-auto overflow-x-auto shrink-0">
-              <button 
-                onClick={() => setActiveAction('deposit')}
-                className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap flex-1 sm:flex-none text-center ${activeAction === 'deposit' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-              >
-                Deposit
-              </button>
-              <button 
-                onClick={() => setActiveAction('withdraw')}
-                className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap flex-1 sm:flex-none text-center ${activeAction === 'withdraw' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-              >
-                Withdraw
-              </button>
+          {!userData?.isVerified && (
+            <div className="absolute inset-0 z-20 backdrop-blur-md bg-white/70 flex flex-col items-center justify-center p-8 text-center">
+              <div className="w-16 h-16 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mb-4 shadow-sm shadow-black/5">
+                <ShieldCheck className="w-8 h-8" />
+              </div>
+              <h3 className="font-black text-xl text-gray-900 mb-2">Verification Required</h3>
+              <p className="text-sm font-medium text-gray-600 mb-6 max-w-[280px]">
+                To maintain a secure marketplace, we require all users to complete identity verification before depositing or withdrawing funds.
+              </p>
+              <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                Go to the Verify tab to get started
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-full uppercase tracking-wider shrink-0 w-fit">
-              <ShieldCheck className="w-3.5 h-3.5" /> Secure
-            </div>
-          </div>
+          )}
 
-          {activeAction === 'deposit' ? (
+          <div className={!userData?.isVerified ? 'opacity-30 pointer-events-none' : ''}>
+            <div className="flex flex-wrap sm:flex-nowrap items-center justify-between mb-6 gap-4">
+              <div className="flex gap-2 bg-gray-100 p-1 rounded-xl w-full sm:w-auto overflow-x-auto shrink-0">
+                <button 
+                  onClick={() => setActiveAction('deposit')}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap flex-1 sm:flex-none text-center ${activeAction === 'deposit' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  Deposit
+                </button>
+                <button 
+                  onClick={() => setActiveAction('withdraw')}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap flex-1 sm:flex-none text-center ${activeAction === 'withdraw' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  Withdraw
+                </button>
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-full uppercase tracking-wider shrink-0 w-fit">
+                <ShieldCheck className="w-3.5 h-3.5" /> Secure
+              </div>
+            </div>
+
+            {activeAction === 'deposit' ? (
             <div className="space-y-6">
               {/* Quick Select Grid */}
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -309,6 +325,7 @@ export default function WalletSection() {
               </button>
             </div>
           )}
+          </div>
         </motion.div>
       </div>
 
