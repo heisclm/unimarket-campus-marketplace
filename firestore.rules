@@ -182,7 +182,7 @@ service cloud.firestore {
     match /notifications/{notificationId} {
       allow read: if isOwner(resource.data.userId);
       allow create: if isAuthenticated(); // System or other users can create notifications
-      allow update: if isOwner(resource.data.userId) && hasOnlyAllowedFields(['read']);
+      allow update: if isOwner(resource.data.userId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
       allow delete: if isOwner(resource.data.userId);
     }
 
