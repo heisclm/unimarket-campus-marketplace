@@ -54,15 +54,15 @@ export default function BottomNav() {
   if (pathname.startsWith('/admin')) return null;
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-gray-100 z-50 pb-[env(safe-area-inset-bottom)]">
-      <div className="px-6 py-3 flex items-center justify-between">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-200 z-50 overflow-visible">
+      <div className="px-6 pt-2 pb-[max(env(safe-area-inset-bottom),10px)] flex items-center justify-between">
       {navItems.map((item) => {
         const isActive = pathname === item.href;
         
         if (item.primary) {
           return (
-            <Link key={item.name} href={item.href} className="relative -top-6">
-              <div className="w-14 h-14 bg-black text-[#d9ff00] rounded-full flex items-center justify-center shadow-lg shadow-black/20 border-4 border-[#f4f4f0]">
+            <Link key={item.name} href={item.href} className="relative -top-5">
+              <div className="w-14 h-14 bg-black text-[#d9ff00] rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.12)] border-[5px] border-[#f4f4f0] transition-transform active:scale-95">
                 <item.icon className="w-7 h-7" />
               </div>
             </Link>
