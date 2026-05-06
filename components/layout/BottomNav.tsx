@@ -54,7 +54,8 @@ export default function BottomNav() {
   if (pathname.startsWith('/admin')) return null;
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-gray-100 px-6 py-3 z-50 flex items-center justify-between pb-safe">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-gray-100 z-50 pb-[env(safe-area-inset-bottom)]">
+      <div className="px-6 py-3 flex items-center justify-between">
       {navItems.map((item) => {
         const isActive = pathname === item.href;
         
@@ -92,6 +93,7 @@ export default function BottomNav() {
           </Link>
         );
       })}
+      </div>
     </nav>
   );
 }
