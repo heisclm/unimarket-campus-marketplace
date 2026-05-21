@@ -1,60 +1,89 @@
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { storage } from './firebase';
+// Note: Firebase Storage is replaced by Cloudinary.
+// We keep the API signature (file, path/folder) so we don't have to change 
+// all the components that are calling 'uploadImage'.
 
 export const uploadImage = async (
   file: File,
-  path: string,
+  path: string, // Used as Cloudinary folder
   onProgress?: (progress: number) => void
 ): Promise<string> => {
   try {
-    const storageRef = ref(storage, path);
-    const metadata = {
-      contentType: file.type,
-    };
-    
-    // Set initial progress
     if (onProgress) onProgress(10);
-    
-    // Create a timeout promise (15 seconds)
-    // Firebase Storage uploads often hang indefinitely if CORS is not configured on the bucket.
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
-        reject(new Error("Upload timed out. This is usually caused by missing CORS configuration on your Firebase Storage bucket."));
-      }, 15000);
+
+    // 1. Get upload signature from our backend
+    // `path` from Firebase was typically like "products/123", we can just use the first part as a folder.
+    const folder = path.split('/')[0] || 'uploads';
+    const sigResponse = await fetch('/api/upload/signature', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ folder }),
     });
 
-    // Use uploadBytes for faster, more reliable uploads for small files (< 2MB)
-    const uploadPromise = uploadBytes(storageRef, file, metadata);
+    if (!sigResponse.ok) {
+      throw new Error('Failed to fetch Cloudinary signature');
+    }
+
+    const sigData = await sigResponse.json();
     
-    // Race the upload against the timeout
-    const snapshot = await Promise.race([uploadPromise, timeoutPromise]) as any;
+    if (onProgress) onProgress(30);
+
+    // 2. Upload to Cloudinary using FormData
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('api_key', sigData.apiKey);
+    formData.append('timestamp', sigData.timestamp.toString());
+    formData.append('signature', sigData.signature);
+    if (sigData.folder) {
+      formData.append('folder', sigData.folder);
+    }
+
+    // Use XMLHttpRequest if we want exact progress, but default fetch is okay for simplicity
+    // For large uploads, consider XHR to use `onProgress` correctly.
+    // We'll stick to a simple fetch for now and mock the middle progress.
     
     if (onProgress) onProgress(50);
-    
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    
+
+    const uploadResponse = await fetch(
+      `https://api.cloudinary.com/v1_1/${sigData.cloudName}/image/upload`,
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+
+    if (!uploadResponse.ok) {
+      throw new Error('Cloudinary upload failed');
+    }
+
+    const uploadData = await uploadResponse.json();
+
     if (onProgress) onProgress(100);
-    
-    return downloadURL;
+
+    // Return the secure URL from Cloudinary
+    return uploadData.secure_url;
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error('Error uploading image to Cloudinary:', error);
     throw error;
   }
 };
 
 export const deleteImage = async (url: string) => {
   try {
-    // Extract path from URL
-    // Firebase Storage URLs look like: https://firebasestorage.googleapis.com/v0/b/BUCKET/o/PATH?alt=media...
-    const decodedUrl = decodeURIComponent(url);
-    const pathStart = decodedUrl.indexOf('/o/') + 3;
-    const pathEnd = decodedUrl.indexOf('?alt=media');
+    // Cloudinary images normally are deleted securely from backend using Admin API.
+    // If you need client-side deletion, you would trigger a server side API endpoint here,
+    // passing the public ID of the image (extracted from the URL).
+    // For now, we will create a placeholder API call if you set one up later:
     
-    if (pathStart > 2 && pathEnd > pathStart) {
-      const path = decodedUrl.substring(pathStart, pathEnd);
-      const storageRef = ref(storage, path);
-      await deleteObject(storageRef);
-    }
+    /* 
+    const publicId = extractPublicIdFromCloudinaryUrl(url);
+    await fetch('/api/upload/delete', {
+       method: 'POST', body: JSON.stringify({ publicId })
+    });
+    */
+    
+    console.log('Skipping client-side delete of Cloudinary url:', url);
   } catch (error) {
     console.error('Error deleting image:', error);
   }
