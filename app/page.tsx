@@ -84,7 +84,7 @@ export default function Home() {
   const activeAuctions = sortedProducts.filter(p => p.type === 'auction').slice(0, 4);
 
   return (
-    <div className="space-y-32 pb-24">
+    <div className="space-y-32 pb-12">
       {/* Bento Grid Hero */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 auto-rows-auto">
         
@@ -121,7 +121,7 @@ export default function Home() {
             </div>
             
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-              <Link href={featuredProduct ? `/products/${featuredProduct.id}` : "/products"} className="inline-flex items-center gap-3 bg-[#d9ff00] text-black font-bold px-8 py-4 rounded-full hover:bg-[#c4e600] transition-transform active:scale-95 shadow-lg shadow-[#d9ff00]/20">
+              <Link href={featuredProduct ? `/products/${featuredProduct.id}` : "/products"} className="inline-flex items-center gap-3 bg-[#d9ff00] text-black font-bold px-8 py-4 rounded-full hover:bg-[#c4e600] active:scale-[0.98] transition-transform shadow-lg shadow-[#d9ff00]/20">
                 {featuredProduct ? 'View Details' : 'View All Products'}
                 <span className="bg-black text-[#d9ff00] p-1.5 rounded-full">
                   <ArrowUpRight className="w-4 h-4" />
@@ -428,7 +428,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <Link href="/profile" className="inline-flex items-center gap-2 bg-white text-black font-bold px-8 py-4 rounded-full mt-12 hover:scale-105 active:scale-95 transition-transform shadow-xl shadow-white/10 text-lg">
+            <Link href="/profile" className="inline-flex items-center gap-2 bg-white text-black font-bold px-8 py-4 rounded-full mt-12 hover:scale-105 active:scale-[0.98] transition-transform shadow-xl shadow-white/10 text-lg">
               Get Started Now <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
@@ -452,10 +452,10 @@ export default function Home() {
           Turn your unused items, clothes, and electronics into cash today. It only takes 2 minutes to list your first item.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8 relative z-10">
-          <Link href="/products/new" className="bg-black text-[#d9ff00] px-10 py-5 rounded-full font-bold text-lg hover:scale-105 active:scale-95 transition-transform shadow-xl shadow-black/10">
+          <Link href="/products/new" className="bg-black text-[#d9ff00] px-10 py-5 rounded-full font-bold text-lg hover:scale-105 active:scale-[0.98] transition-transform shadow-xl shadow-black/10">
             Start Selling Now
           </Link>
-          <Link href="/products" className="bg-white text-black border border-gray-200 px-10 py-5 rounded-full font-bold text-lg hover:bg-gray-50 hover:scale-105 active:scale-95 transition-transform shadow-sm">
+          <Link href="/products" className="bg-white text-black border border-gray-200 px-10 py-5 rounded-full font-bold text-lg hover:bg-gray-50 hover:scale-105 active:scale-[0.98] transition-transform shadow-sm">
             Browse Marketplace
           </Link>
         </div>

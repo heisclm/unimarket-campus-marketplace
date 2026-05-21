@@ -188,7 +188,7 @@ export default function CartPage() {
         </div>
         <h1 className="text-3xl font-bold mb-4 tracking-tight">Your cart is empty</h1>
         <p className="text-gray-500 mb-8">Looks like you haven&apos;t added anything to your cart yet.</p>
-        <Link href="/products" className="inline-block bg-[#d9ff00] text-black px-8 py-3 rounded-full font-bold hover:bg-[#c4e600] transition-all hover:scale-105 active:scale-95 shadow-lg">
+        <Link href="/products" className="inline-block bg-[#d9ff00] text-black px-8 py-3 rounded-full font-bold hover:bg-[#c4e600] transition-all hover:scale-105 active:scale-[0.98] shadow-lg">
           Browse Marketplace
         </Link>
       </div>
@@ -276,7 +276,7 @@ export default function CartPage() {
 
                 <button 
                   onClick={() => handleRemove(item.id)}
-                  className="p-2 sm:p-3 text-red-400 hover:text-red-600 hover:bg-red-50 bg-red-50/50 sm:bg-transparent rounded-xl transition-all active:scale-90"
+                  className="p-2 sm:p-3 text-red-400 hover:text-red-600 hover:bg-red-50 bg-red-50/50 sm:bg-transparent rounded-xl transition-all active:scale-[0.98]"
                   title="Remove from cart"
                 >
                   <Trash2 className="w-5 h-5" />
@@ -361,7 +361,7 @@ export default function CartPage() {
           <button 
             onClick={handleCheckout}
             disabled={isCheckingOut || isValidatingCart || unavailableItems.length > 0}
-            className="w-full bg-black text-white py-4 rounded-2xl font-bold text-lg hover:bg-gray-800 transition-all hover:scale-[1.02] active:scale-95 shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-black text-white py-4 rounded-2xl font-bold text-lg hover:bg-gray-800 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isCheckingOut ? 'Processing...' : isValidatingCart ? 'Checking Cart...' : 'Checkout Securely'} <ArrowRight className="w-5 h-5" />
           </button>

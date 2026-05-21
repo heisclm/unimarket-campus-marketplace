@@ -129,7 +129,7 @@ function ProductsContent() {
             <p className="text-gray-400 font-medium text-lg">Discover handpicked items and live auctions from verified students on campus.</p>
           </div>
           
-          <Link href="/products/new" className="bg-[#d9ff00] text-black font-bold px-8 py-4 rounded-full hover:scale-105 active:scale-95 transition-transform whitespace-nowrap shadow-xl shadow-[#d9ff00]/20 flex items-center gap-2">
+          <Link href="/products/new" className="bg-[#d9ff00] text-black font-bold px-8 py-4 rounded-full hover:scale-105 active:scale-[0.98] transition-transform whitespace-nowrap shadow-xl shadow-[#d9ff00]/20 flex items-center gap-2">
             <span className="text-xl leading-none">+</span>
             <span>List an Item</span>
           </Link>
@@ -195,7 +195,7 @@ function ProductsContent() {
           <p className="text-gray-500 font-medium text-lg max-w-md mx-auto mb-8">We couldn&apos;t find any items matching your current filters. Try adjusting your search or explore other categories.</p>
           <button 
             onClick={() => { setInputValue(''); setSelectedCategory('All'); }}
-            className="bg-black text-white px-8 py-4 rounded-full font-bold hover:scale-105 active:scale-95 transition-transform shadow-xl shadow-black/10"
+            className="bg-black text-white px-8 py-4 rounded-full font-bold hover:scale-105 active:scale-[0.98] transition-transform shadow-xl shadow-black/10"
           >
             Clear All Filters
           </button>

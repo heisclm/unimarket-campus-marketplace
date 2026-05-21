@@ -2,7 +2,6 @@ import type {Metadata, Viewport} from 'next';
 import './globals.css'; // Global styles
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import BottomNav from '@/components/layout/BottomNav';
 import SideNav from '@/components/layout/SideNav';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { CartProvider } from '@/components/cart/CartProvider';
@@ -62,9 +61,6 @@ export const viewport: Viewport = {
   themeColor: '#f4f4f0',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  viewportFit: 'cover',
 };
 
 import { Analytics } from '@vercel/analytics/react';
@@ -83,19 +79,18 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
                      <SideNav />
                      <div 
                         id="main-scroll-container"
-                        className="flex-1 w-full pb-safe md:pb-0"
+                        className="flex-1 w-full flex flex-col"
                      >
-                        <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:pl-28 lg:pl-8 pb-28 mb-10 min-h-[calc(100vh-160px)]">
+                        <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:pl-28 lg:pl-8 flex-1">
                           <Suspense fallback={null}>
                             {children}
                           </Suspense>
                         </main>
-                        <div className="hidden lg:block lg:pl-8">
+                        <div className="w-full lg:pl-8">
                           <Footer />
                         </div>
                      </div>
                   </div>
-                  <BottomNav />
                 </div>
                 <Toaster 
                   position="bottom-right"
