@@ -15,18 +15,32 @@ export interface Product {
   isPopular?: boolean;
   isSponsored?: boolean;
   createdAt: any;
+  sponsoredUntil?: any;
   auctionEndTime?: any;
 }
 
 export function isActiveProduct(p: Product): boolean {
   if (p.status !== 'active') return false;
+  
   if (p.type === 'auction' && p.auctionEndTime) {
     const endMillis = p.auctionEndTime?.toMillis ? p.auctionEndTime.toMillis() : 0;
     if (endMillis > 0 && endMillis <= Date.now()) {
       return false; // Auction has ended
     }
   }
+  
   return true;
+}
+
+export function sanitizeProduct(p: Product): Product {
+  const sanitized = { ...p };
+  if (sanitized.isSponsored && sanitized.sponsoredUntil) {
+    const sponsoredUntilMillis = sanitized.sponsoredUntil.toMillis ? sanitized.sponsoredUntil.toMillis() : new Date(sanitized.sponsoredUntil).getTime();
+    if (sponsoredUntilMillis && sponsoredUntilMillis <= Date.now()) {
+      sanitized.isSponsored = false;
+    }
+  }
+  return sanitized;
 }
 
 export function subscribeToFeaturedProduct(callback: (product: Product | null) => void) {
@@ -36,7 +50,7 @@ export function subscribeToFeaturedProduct(callback: (product: Product | null) =
   );
 
   return onSnapshot(q, (snapshot) => {
-    let products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)).filter(isActiveProduct);
+    let products = snapshot.docs.map(doc => sanitizeProduct({ id: doc.id, ...doc.data() } as Product)).filter(isActiveProduct);
     
     // Try to find a featured product
     const featured = products.find(p => p.isFeatured);
@@ -65,7 +79,7 @@ export function subscribeToPopularProducts(callback: (products: Product[]) => vo
   );
 
   return onSnapshot(q, (snapshot) => {
-    let products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)).filter(isActiveProduct);
+    let products = snapshot.docs.map(doc => sanitizeProduct({ id: doc.id, ...doc.data() } as Product)).filter(isActiveProduct);
     products = products.filter(p => p.isPopular).slice(0, maxLimit);
     callback(products);
   }, (error) => {
@@ -80,7 +94,7 @@ export function subscribeToNewProducts(callback: (products: Product[]) => void, 
   );
 
   return onSnapshot(q, (snapshot) => {
-    let products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)).filter(isActiveProduct);
+    let products = snapshot.docs.map(doc => sanitizeProduct({ id: doc.id, ...doc.data() } as Product)).filter(isActiveProduct);
     products = products.sort((a, b) => {
       const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
       const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
@@ -99,7 +113,7 @@ export function subscribeToMoreProducts(callback: (products: Product[]) => void,
   );
 
   return onSnapshot(q, (snapshot) => {
-    let products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)).filter(isActiveProduct);
+    let products = snapshot.docs.map(doc => sanitizeProduct({ id: doc.id, ...doc.data() } as Product)).filter(isActiveProduct);
     products = products.sort((a, b) => {
       const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
       const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
@@ -118,7 +132,7 @@ export function subscribeToActiveAuctions(callback: (products: Product[]) => voi
   );
 
   return onSnapshot(q, (snapshot) => {
-    let products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)).filter(isActiveProduct);
+    let products = snapshot.docs.map(doc => sanitizeProduct({ id: doc.id, ...doc.data() } as Product)).filter(isActiveProduct);
     products = products.filter(p => p.type === 'auction')
       .sort((a, b) => {
         const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
@@ -139,7 +153,7 @@ export function subscribeToAllActiveProducts(callback: (products: Product[]) => 
   );
 
   return onSnapshot(q, (snapshot) => {
-    const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)).filter(isActiveProduct);
+    const products = snapshot.docs.map(doc => sanitizeProduct({ id: doc.id, ...doc.data() } as Product)).filter(isActiveProduct);
     callback(products);
   }, (error) => {
     handleFirestoreError(error, OperationType.GET, 'products');

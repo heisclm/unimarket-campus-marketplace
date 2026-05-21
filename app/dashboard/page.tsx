@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, doc, getDoc, updateDoc, orderBy, onSnapshot, deleteDoc } from 'firebase/firestore';
+import { sanitizeProduct } from '@/lib/products';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ShieldAlert, ShieldCheck, Package, DollarSign, Plus, LayoutDashboard, ShoppingBag, Truck, CheckCircle2, AlertCircle, History, MessageSquare, Clock, Trash2, Zap, Star } from 'lucide-react';
@@ -37,7 +38,7 @@ export default function DashboardPage() {
     const unsubProducts = onSnapshot(
       query(collection(db, 'products'), where('sellerId', '==', user.uid)),
       (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const data = snapshot.docs.map(doc => sanitizeProduct({ id: doc.id, ...doc.data() } as any));
         // Sort client-side to avoid composite index requirement
         data.sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         setProducts(data);

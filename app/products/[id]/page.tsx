@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { doc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { sanitizeProduct } from '@/lib/products';
 import { useParams, useRouter } from 'next/navigation';
 import PremiumImage from '@/components/ui/PremiumImage';
 import Link from 'next/link';
@@ -77,7 +78,7 @@ export default function ProductDetailPage() {
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
-          const productData = { id: docSnap.id, ...docSnap.data() } as any;
+          const productData = sanitizeProduct({ id: docSnap.id, ...docSnap.data() } as any);
           setProduct(productData);
           
           if (productData.previewImage && productData.images) {
@@ -134,7 +135,7 @@ export default function ProductDetailPage() {
               const relatedItems: any[] = [];
               relatedSnap.forEach(doc => {
                 if (doc.id !== productData.id) {
-                  relatedItems.push({ id: doc.id, ...doc.data() });
+                  relatedItems.push(sanitizeProduct({ id: doc.id, ...doc.data() } as any));
                 }
               });
               
