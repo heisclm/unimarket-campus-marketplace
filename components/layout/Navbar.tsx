@@ -67,10 +67,7 @@ export default function Navbar() {
 
   // Close mobile menu on route change
   useEffect(() => {
-    // Only set if it's already true, to avoid unnecessary state updates
-    if (isMobileMenuOpen) {
-      setTimeout(() => setIsMobileMenuOpen(false), 0);
-    }
+    setIsMobileMenuOpen(false);
   }, [pathname]);
 
   // Lock body scroll when mobile menu is open
@@ -153,6 +150,18 @@ export default function Navbar() {
                     Community
                   </Link>
                 </>
+              )}
+              {role === 'admin' && (
+                <Link href="/admin" className="text-sm font-bold text-red-600 flex items-center gap-2 bg-red-50 hover:bg-red-100 px-3.5 py-1.5 rounded-full transition-colors">
+                  <ShieldAlert className="w-4 h-4" />
+                  Admin Panel
+                </Link>
+              )}
+              {role === 'vendor' && (
+                <Link href="/dashboard" className="text-sm font-bold text-orange-600 flex items-center gap-2 bg-orange-50 hover:bg-orange-100 px-3.5 py-1.5 rounded-full transition-colors">
+                  <Store className="w-4 h-4" />
+                  Vendor Dashboard
+                </Link>
               )}
             </div>
 
