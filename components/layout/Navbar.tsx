@@ -67,6 +67,7 @@ export default function Navbar() {
 
   // Close mobile menu on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
@@ -163,6 +164,12 @@ export default function Navbar() {
                   Vendor Dashboard
                 </Link>
               )}
+              {role === 'student' && (
+                <Link href="/dashboard" className="text-sm font-bold text-blue-600 flex items-center gap-2 bg-blue-50 hover:bg-blue-100 px-3.5 py-1.5 rounded-full transition-colors">
+                  <LayoutDashboard className="w-4 h-4" />
+                  Student Dashboard
+                </Link>
+              )}
             </div>
 
             {/* Right Actions */}
@@ -178,6 +185,13 @@ export default function Navbar() {
 
               {role !== 'admin' && (
                 <>
+                  {/* Messages */}
+                  {(role === 'vendor' || role === 'student') && (
+                    <Link href="/dashboard/messages" className="hidden lg:flex relative p-2 text-gray-600 hover:text-black transition-colors">
+                      <MessageSquare className="w-5 h-5 md:w-6 md:h-6" />
+                    </Link>
+                  )}
+                  
                   {/* Cart */}
                   {role !== 'vendor' && (
                     <Link href="/cart" className="relative p-2 text-gray-600 hover:text-black transition-colors">
