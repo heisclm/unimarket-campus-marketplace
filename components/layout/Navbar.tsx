@@ -67,7 +67,10 @@ export default function Navbar() {
 
   // Close mobile menu on route change
   useEffect(() => {
-    setIsMobileMenuOpen(false);
+    // Only set if it's already true, to avoid unnecessary state updates
+    if (isMobileMenuOpen) {
+      setTimeout(() => setIsMobileMenuOpen(false), 0);
+    }
   }, [pathname]);
 
   // Lock body scroll when mobile menu is open

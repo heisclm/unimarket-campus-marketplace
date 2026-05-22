@@ -54,7 +54,9 @@ export const uploadImage = async (
     );
 
     if (!uploadResponse.ok) {
-      throw new Error('Cloudinary upload failed');
+      const errorText = await uploadResponse.text();
+      console.error('Cloudinary upload error:', errorText);
+      throw new Error(`Cloudinary upload failed: ${errorText}`);
     }
 
     const uploadData = await uploadResponse.json();
