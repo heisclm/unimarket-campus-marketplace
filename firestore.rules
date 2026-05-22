@@ -162,9 +162,8 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (
         isAdmin() || 
         (request.auth.uid == resource.data.sellerId && 
-         // CRITICAL: lock schema
-         hasOnlyAllowedFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt', 'sellerIsVerified', 'offersDelivery', 'deliveryFee', 'auctionEndTime', 'isSponsored', 'sponsoredUntil', 'sellerName', 'sellerPhotoURL', 'hasVariations', 'quantity', 'variants']) &&
-         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['sellerId', 'createdAt', 'category', 'sellerIsVerified', 'type', 'isSponsored', 'sponsoredUntil', 'hasVariations', 'variants']) &&
+         // CRITICAL: lock schema to allowed mutable fields
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'description', 'price', 'category', 'status', 'images', 'previewImage', 'offersDelivery', 'deliveryFee']) &&
          // Seller can only update to 'sold' or 'ended' if it was 'active', or update details
          (request.resource.data.status in ['sold', 'ended'] || request.resource.data.status == resource.data.status))
       );
