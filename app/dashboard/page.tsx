@@ -253,26 +253,26 @@ export default function DashboardPage() {
       )}
 
       {/* View Switcher */}
-      <div className="flex bg-gray-100/80 p-1.5 rounded-2xl shadow-inner w-full overflow-x-auto no-scrollbar scroll-smooth snap-x">
+      <div className={`grid ${role === 'vendor' ? 'grid-cols-2' : 'grid-cols-3'} md:flex md:flex-wrap lg:flex-nowrap gap-2 bg-gray-100/80 p-1.5 rounded-2xl shadow-inner w-full`}>
         <button 
           onClick={() => setActiveView('listings')}
-          className={`flex-1 sm:flex-none snap-center whitespace-nowrap px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300 ${activeView === 'listings' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black hover:bg-white/50'}`}
+          className={`whitespace-nowrap px-3 md:px-8 py-3 rounded-xl text-[10px] md:text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-1.5 md:gap-2 justify-center ${activeView === 'listings' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black hover:bg-white/50'}`}
         >
-          My Listings
+          <Package className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" /> <span className="truncate">My Listings</span>
         </button>
         {role !== 'vendor' && (
           <button 
             onClick={() => setActiveView('purchases')}
-            className={`flex-1 sm:flex-none snap-center whitespace-nowrap px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300 ${activeView === 'purchases' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black hover:bg-white/50'}`}
+            className={`whitespace-nowrap px-3 md:px-8 py-3 rounded-xl text-[10px] md:text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-1.5 md:gap-2 justify-center ${activeView === 'purchases' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black hover:bg-white/50'}`}
           >
-            Purchases
+            <ShoppingBag className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" /> <span className="truncate">Purchases</span>
           </button>
         )}
         <button 
           onClick={() => setActiveView('sales')}
-          className={`flex-1 sm:flex-none snap-center whitespace-nowrap px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300 ${activeView === 'sales' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black hover:bg-white/50'}`}
+          className={`whitespace-nowrap px-3 md:px-8 py-3 rounded-xl text-[10px] md:text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-1.5 md:gap-2 justify-center ${activeView === 'sales' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black hover:bg-white/50'}`}
         >
-          My Sales
+          <History className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" /> <span className="truncate">My Sales</span>
         </button>
       </div>
 
