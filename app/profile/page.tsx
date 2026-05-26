@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useAuth, UserRole } from '@/components/auth/AuthProvider';
-import { loginWithGoogle, logout, signInWithEmail, signUpWithEmail, resetPassword, db } from '@/lib/firebase';
+import { loginWithGoogle, logout, signInWithEmail, signUpWithEmail, resetPassword, db, resendVerification } from '@/lib/firebase';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { LogIn, LogOut, User as UserIcon, Store, GraduationCap, Mail, Lock, Eye, EyeOff, Wallet, ShieldCheck, History, Package, LayoutDashboard, ShoppingBag, Zap } from 'lucide-react';
 import dynamicImport from 'next/dynamic';
@@ -64,7 +64,9 @@ export default function ProfilePage() {
           throw new Error("Full Name is required for sign up.");
         }
         await signUpWithEmail(email, password, fullName);
-        toast.success('Account created successfully!');
+        toast.success('Account created successfully! A verification email has been sent. Please check your inbox and verify your email.', { duration: 6000 });
+        setAuthMessage('Account created successfully! We sent a verification email to ' + email + '. Verify your email then sign in.');
+        setIsSignUp(false); // Switch to sign-in view so they can sign in after verifying
       } else {
         const loggedInUser = await signInWithEmail(email, password);
         toast.success('Welcome back!');
@@ -422,6 +424,33 @@ export default function ProfilePage() {
 
       {/* Tab Content */}
       <div className="min-h-[400px]">
+        {user && !user.emailVerified && (
+          <div className="bg-amber-50 border border-amber-200 rounded-[2rem] p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 text-left">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center shrink-0">
+                <Mail className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-950">Verify Your Email Address</h4>
+                <p className="text-sm text-gray-600 mt-0.5">We sent a verification link to <span className="font-semibold text-gray-800">{user.email}</span>. Please verify your email to unlock full marketplace permissions.</p>
+              </div>
+            </div>
+            <button
+              onClick={async () => {
+                try {
+                  await resendVerification();
+                  toast.success('Verification email resent successfully! Check your inbox.');
+                } catch (err: any) {
+                  toast.error(err.message || 'Failed to resend email');
+                }
+              }}
+              className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors shrink-0"
+            >
+              Resend Link
+            </button>
+          </div>
+        )}
+
         {activeTab === 'profile' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             <div className={`bg-white rounded-[2.5rem] p-6 lg:p-10 shadow-sm border border-gray-100 ${role === 'student' ? 'lg:col-span-2' : 'lg:col-span-3'}`}>

@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
-    const { fullName, studentId, idCardImage } = await req.json();
+    const { fullName, studentId, idCardImage, selfieImage, faceScore, isMatch } = await req.json();
 
     if (!fullName || !studentId) {
       return NextResponse.json({ error: 'Full Name and Student ID are required' }, { status: 400 });
@@ -59,8 +59,12 @@ export async function POST(req: NextRequest) {
       fullName: masterData?.fullName,
       studentId: studentId,
       idCardImage: idCardImage || null, // Optional for Phase 1 if just matching dataset, but good for admin audit
+      selfieImage: selfieImage || null,
+      faceScore: faceScore || null,
+      faceMatchScore: faceScore || null,
+      isMatch: isMatch || null,
       status: 'pending',
-      autoMatch: true,
+      autoMatch: isMatch || false,
       createdAt: new Date(),
       updatedAt: new Date()
     };

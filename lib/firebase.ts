@@ -8,7 +8,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
-  updateProfile
+  updateProfile,
+  sendEmailVerification
 } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
@@ -60,9 +61,23 @@ export const signUpWithEmail = async (email: string, pass: string, fullName: str
   try {
     const result = await createUserWithEmailAndPassword(auth, email, pass);
     await updateProfile(result.user, { displayName: fullName });
+    await sendEmailVerification(result.user);
     return result.user;
   } catch (error) {
     console.error("Error signing up with email", error);
+    throw error;
+  }
+};
+
+export const resendVerification = async () => {
+  try {
+    if (auth.currentUser) {
+      await sendEmailVerification(auth.currentUser);
+    } else {
+      throw new Error("No user is currently logged in.");
+    }
+  } catch (error) {
+    console.error("Error sending verification email", error);
     throw error;
   }
 };

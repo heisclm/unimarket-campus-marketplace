@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
-    const { fullName, idType, idNumber, idCardImage } = await req.json();
+    const { fullName, idType, idNumber, idCardImage, selfieImage, faceScore, isMatch } = await req.json();
 
     if (!fullName || !idType || !idNumber || !idCardImage) {
       return NextResponse.json({ error: 'All fields including ID image are required for vendors' }, { status: 400 });
@@ -60,8 +60,12 @@ export async function POST(req: NextRequest) {
       idType: idType,
       idNumber: idNumber.trim(),
       idCardImage: idCardImage,
+      selfieImage: selfieImage || null,
+      faceScore: faceScore || null,
+      faceMatchScore: faceScore || null,
+      isMatch: isMatch || null,
       status: 'pending',
-      autoMatch: false, // Vendors always require manual review
+      autoMatch: isMatch || false,
       createdAt: new Date(),
       updatedAt: new Date()
     };
