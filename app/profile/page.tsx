@@ -391,32 +391,32 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile Tabs */}
-      <div className="flex gap-2 bg-white/50 p-1.5 rounded-2xl w-full mx-auto overflow-x-auto no-scrollbar scroll-smooth snap-x border border-gray-100 shadow-sm backdrop-blur-md sticky top-4 z-40">
+      <div className={`grid ${role === 'admin' ? 'grid-cols-1' : 'grid-cols-2'} md:flex md:flex-wrap lg:flex-nowrap gap-2 bg-white/50 p-1.5 rounded-2xl w-full mx-auto border border-gray-100 shadow-sm backdrop-blur-md sticky top-4 z-40`}>
         <button 
           onClick={() => setActiveTab('profile')}
-          className={`snap-center whitespace-nowrap px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 flex-1 md:flex-none justify-center ${activeTab === 'profile' ? 'bg-black text-white shadow-xl shadow-black/10' : 'text-gray-500 hover:text-black hover:bg-gray-100/50'}`}
+          className={`whitespace-nowrap px-4 md:px-8 py-3 rounded-xl text-[10px] md:text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 justify-center ${activeTab === 'profile' ? 'bg-black text-white shadow-xl shadow-black/10' : 'text-gray-500 hover:text-black hover:bg-gray-100/50'}`}
         >
-          <UserIcon className="w-4 h-4 shrink-0" /> Profile
+          <UserIcon className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" /> Profile
         </button>
         {role !== 'admin' && (
           <>
             <button 
               onClick={() => setActiveTab('orders')}
-              className={`snap-center whitespace-nowrap px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 flex-1 md:flex-none justify-center ${activeTab === 'orders' ? 'bg-black text-white shadow-xl shadow-black/10' : 'text-gray-500 hover:text-black hover:bg-gray-100/50'}`}
+              className={`whitespace-nowrap px-4 md:px-8 py-3 rounded-xl text-[10px] md:text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 justify-center ${activeTab === 'orders' ? 'bg-black text-white shadow-xl shadow-black/10' : 'text-gray-500 hover:text-black hover:bg-gray-100/50'}`}
             >
-              <Package className="w-4 h-4 shrink-0" /> Orders
+              <Package className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" /> Orders
             </button>
             <button 
               onClick={() => setActiveTab('wallet')}
-              className={`snap-center whitespace-nowrap px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 flex-1 md:flex-none justify-center ${activeTab === 'wallet' ? 'bg-black text-white shadow-xl shadow-black/10' : 'text-gray-500 hover:text-black hover:bg-gray-100/50'}`}
+              className={`whitespace-nowrap px-4 md:px-8 py-3 rounded-xl text-[10px] md:text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 justify-center ${activeTab === 'wallet' ? 'bg-black text-white shadow-xl shadow-black/10' : 'text-gray-500 hover:text-black hover:bg-gray-100/50'}`}
             >
-              <Wallet className="w-4 h-4 shrink-0" /> Wallet
+              <Wallet className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" /> Wallet
             </button>
             <button 
               onClick={() => setActiveTab('verification')}
-              className={`snap-center whitespace-nowrap px-8 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 flex-1 md:flex-none justify-center ${activeTab === 'verification' ? 'bg-black text-white shadow-xl shadow-black/10' : 'text-gray-500 hover:text-black hover:bg-gray-100/50'}`}
+              className={`whitespace-nowrap px-4 md:px-8 py-3 rounded-xl text-[10px] md:text-sm font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 justify-center ${activeTab === 'verification' ? 'bg-black text-white shadow-xl shadow-black/10' : 'text-gray-500 hover:text-black hover:bg-gray-100/50'}`}
             >
-              <ShieldCheck className="w-4 h-4 shrink-0" /> Verify
+              <ShieldCheck className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" /> Verify
             </button>
           </>
         )}
