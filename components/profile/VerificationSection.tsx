@@ -7,6 +7,62 @@ import { useAuth } from '@/components/auth/AuthProvider';
 import { ShieldCheck, Upload, Camera, CheckCircle2, AlertCircle, Loader2, User, FileText, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
+import { uploadImage } from '@/lib/storage';
+
+// Helper function to compress images using Canvas
+const compressImage = (dataUrl: string, maxDim = 900, quality = 0.7): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image();
+    img.crossOrigin = "anonymous";
+    img.src = dataUrl;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+
+      // Maintain aspect ratio
+      if (width > height) {
+        if (width > maxDim) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        }
+      } else {
+        if (height > maxDim) {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(dataUrl);
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, width, height);
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+      resolve(compressedDataUrl);
+    };
+    img.onerror = (err) => {
+      reject(err);
+    };
+  });
+};
+
+// Convert base64 DataURL back to File for Cloudinary upload
+const base64ToFile = (dataUrl: string, filename: string): File => {
+  const parts = dataUrl.split(';base64,');
+  const mime = parts[0].split(':')[1];
+  const bstr = atob(parts[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+};
 
 export default function VerificationSection() {
   const { user, userData, refreshUserData } = useAuth();
@@ -77,9 +133,22 @@ export default function VerificationSection() {
     }
 
     const reader = new FileReader();
-    reader.onload = () => {
-      if (type === 'id') setIdCardImage(reader.result as string);
-      else setSelfieImage(reader.result as string);
+    reader.onload = async () => {
+      try {
+        const rawBase64 = reader.result as string;
+        toast.loading("Optimizing image size...", { id: 'optimizing' });
+        const compressedBase64 = await compressImage(rawBase64, 900, 0.7);
+        toast.dismiss('optimizing');
+        
+        if (type === 'id') setIdCardImage(compressedBase64);
+        else setSelfieImage(compressedBase64);
+      } catch (err) {
+        console.error("Compression error:", err);
+        toast.dismiss('optimizing');
+        // Fallback to original base64 if compression fails
+        if (type === 'id') setIdCardImage(reader.result as string);
+        else setSelfieImage(reader.result as string);
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -139,7 +208,7 @@ export default function VerificationSection() {
     try {
       const idToken = await user.getIdToken();
       
-      // 1. Call face similarity comparison API
+      // 1. Call face similarity comparison API using base64 for fast, private processing
       let similarityScore = 0;
       let matched = false;
 
@@ -175,7 +244,35 @@ export default function VerificationSection() {
         toast.success("Face comparison server fallback. Proceeding with review.", { id: 'verify', duration: 4500 });
       }
 
-      // 2. Submit formal registration request
+      // 2. Upload both compressed photos to Cloudinary to bypass Firestore size limits
+      toast.loading("Uploading documents to highly secure storage...", { id: 'verify' });
+      
+      let finalIdCardUrl = idCardImage;
+      let finalSelfieUrl = selfieImage;
+
+      if (idCardImage.startsWith('data:')) {
+        try {
+          const idFile = base64ToFile(idCardImage, `id_${user.uid}.jpg`);
+          finalIdCardUrl = await uploadImage(idFile, `verifications/${user.uid}/id`);
+        } catch (uploadErr) {
+          console.error("ID card upload error:", uploadErr);
+          throw new Error("Could not upload ID Card image. Please check your upload credentials.");
+        }
+      }
+
+      if (selfieImage.startsWith('data:')) {
+        try {
+          const selfieFile = base64ToFile(selfieImage, `selfie_${user.uid}.jpg`);
+          finalSelfieUrl = await uploadImage(selfieFile, `verifications/${user.uid}/selfie`);
+        } catch (uploadErr) {
+          console.error("Selfie upload error:", uploadErr);
+          throw new Error("Could not upload selfie scan. Please try again.");
+        }
+      }
+
+      toast.loading("Submitting verification profile...", { id: 'verify' });
+
+      // 3. Submit formal registration request using Cloudinary URLs
       if (userData?.role === 'student') {
         const response = await fetch('/api/verify/student', {
           method: 'POST',
@@ -186,8 +283,8 @@ export default function VerificationSection() {
           body: JSON.stringify({
             fullName,
             studentId: idNumber.trim(),
-            idCardImage,
-            selfieImage,
+            idCardImage: finalIdCardUrl,
+            selfieImage: finalSelfieUrl,
             faceScore: similarityScore,
             isMatch: matched
           })
@@ -199,7 +296,7 @@ export default function VerificationSection() {
           throw new Error(result.error || 'Verification failed');
         }
 
-        toast.success("Student verification details submitted successfully!");
+        toast.success("Student verification details submitted successfully!", { id: 'verify' });
       } else if (userData?.role === 'vendor') {
         const response = await fetch('/api/verify/vendor', {
           method: 'POST',
@@ -211,8 +308,8 @@ export default function VerificationSection() {
             fullName,
             idType,
             idNumber: idNumber.trim(),
-            idCardImage,
-            selfieImage,
+            idCardImage: finalIdCardUrl,
+            selfieImage: finalSelfieUrl,
             faceScore: similarityScore,
             isMatch: matched
           })
@@ -224,11 +321,11 @@ export default function VerificationSection() {
           throw new Error(result.error || 'Verification failed');
         }
 
-        toast.success("Vendor verification request standard submitted. Awaiting admin review.");
+        toast.success("Vendor verification request standard submitted. Awaiting admin review.", { id: 'verify' });
       }
     } catch (error: any) {
       console.error("Verification error:", error);
-      toast.error(error.message || "Verification failed. Please try again.");
+      toast.error(error.message || "Verification failed. Please try again.", { id: 'verify' });
     } finally {
       setIsSubmitting(false);
     }
