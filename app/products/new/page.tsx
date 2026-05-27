@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { uploadImage } from '@/lib/storage';
 import { useRouter } from 'next/navigation';
-import { Package, DollarSign, Image as ImageIcon, AlignLeft, Tag, ShieldCheck, X, UploadCloud, Plus, Trash2, Layers } from 'lucide-react';
+import { Package, DollarSign, Image as ImageIcon, AlignLeft, Tag, ShieldCheck, X, UploadCloud, Plus, Trash2, Layers, GraduationCap } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 
@@ -19,6 +19,7 @@ export default function NewProductPage() {
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('Electronics');
   const [type, setType] = useState('fixed');
+  const [campus, setCampus] = useState('all');
   const [hasVariations, setHasVariations] = useState(false);
   const [quantity, setQuantity] = useState('1');
   const [variants, setVariants] = useState([{ id: 1, name: '', quantity: '1', price: '' }]);
@@ -31,6 +32,14 @@ export default function NewProductPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (userData?.school) {
+      setTimeout(() => {
+        setCampus(userData.school);
+      }, 0);
+    }
+  }, [userData]);
 
   const categories = ['Academic Materials', 'Hostel Essentials', 'Food', 'Electronics', 'Books', 'Clothing', 'Services', 'Other'];
 
@@ -191,6 +200,7 @@ export default function NewProductPage() {
         sellerPhotoURL: user.photoURL || '',
         sellerIsVerified: true,
         category,
+        campus,
         hasVariations,
         quantity: totalQuantity,
         variants: finalVariants,
@@ -274,8 +284,8 @@ export default function NewProductPage() {
           </div>
         </div>
 
-        {/* Price, Category & Delivery */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+        {/* Price, Category & Campus Scope */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Price (GH₵)</label>
             <div className="relative">
@@ -305,6 +315,25 @@ export default function NewProductPage() {
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Target Campus</label>
+            <div className="relative">
+              <GraduationCap className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <select 
+                value={campus}
+                onChange={(e) => setCampus(e.target.value)}
+                className="w-full pl-12 pr-8 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all appearance-none cursor-pointer font-semibold text-gray-700"
+              >
+                <option value="all">🌐 All Ghana Campuses</option>
+                <option value="UENR">🎓 UENR Only</option>
+                <option value="CUG">🏫 CUG Only</option>
+                <option value="STU">🏛️ STU Only</option>
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-xs">
+                ▼
+              </div>
             </div>
           </div>
         </div>

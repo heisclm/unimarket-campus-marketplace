@@ -15,13 +15,24 @@ import {
   subscribeToActiveAuctions,
   Product 
 } from "@/lib/products";
-import { Gavel } from "lucide-react";
+import { Gavel, GraduationCap } from "lucide-react";
+import { useAuth } from '@/components/auth/AuthProvider';
 
 export default function Home() {
+  const { userData } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>(['Academic Materials', 'Hostel Essentials', 'Food', 'Tech', 'Furniture', 'Clothing']);
   const [loading, setLoading] = useState(true);
   const [heroIndex, setHeroIndex] = useState(0);
+  const [selectedCampus, setSelectedCampus] = useState<'all' | 'UENR' | 'CUG' | 'STU'>('all');
+
+  useEffect(() => {
+    if (userData?.school) {
+      setTimeout(() => {
+        setSelectedCampus(userData.school as any);
+      }, 0);
+    }
+  }, [userData]);
 
   useEffect(() => {
     const unsubAll = subscribeToAllActiveProducts((fetchedProducts) => {
@@ -41,8 +52,14 @@ export default function Home() {
   // Helper to get time
   const getTime = (p: Product) => p.createdAt?.toMillis ? p.createdAt.toMillis() : 0;
 
+  // Filter products by selected campus
+  const campusFilteredProducts = products.filter(p => {
+    if (selectedCampus === 'all') return true;
+    return p.campus === selectedCampus || p.campus === 'all' || !p.campus;
+  });
+
   // Sort products by newest first
-  const sortedProducts = [...products].sort((a, b) => getTime(b) - getTime(a));
+  const sortedProducts = [...campusFilteredProducts].sort((a, b) => getTime(b) - getTime(a));
 
   // 1. Featured product pool (isSponsored first, then isFeatured, then latest 3)
   const sponsoredProducts = sortedProducts.filter(p => p.isSponsored);
@@ -84,7 +101,66 @@ export default function Home() {
   const activeAuctions = sortedProducts.filter(p => p.type === 'auction').slice(0, 4);
 
   return (
-    <div className="space-y-32 pb-12">
+    <div className="space-y-16 pb-12">
+      {/* Campus Selector Switcher Pills */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white/80 backdrop-blur-md p-4 rounded-3xl border border-gray-100 shadow-sm mt-2">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-[#d9ff00]/15 text-gray-900 rounded-full flex items-center justify-center border border-[#d9ff00]/20">
+            <GraduationCap className="w-5 h-5 text-gray-800" />
+          </div>
+          <div className="text-left">
+            <h4 className="font-extrabold text-sm text-gray-950 tracking-tight">Campus Marketplace Portals</h4>
+            <p className="text-[11px] text-gray-500 font-semibold">Surf products from Sunyani higher institutions</p>
+          </div>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setSelectedCampus('all')}
+            className={`px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer ${
+              selectedCampus === 'all'
+                ? 'bg-black text-white shadow-lg shadow-black/10'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold border border-gray-200/50'
+            }`}
+          >
+            🌐 All Ghana Campuses
+          </button>
+          
+          <button
+            onClick={() => setSelectedCampus('CUG')}
+            className={`px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer flex items-center gap-1.5 ${
+              selectedCampus === 'CUG'
+                ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/10'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold border border-gray-200/50'
+            }`}
+          >
+            <span>🏫</span> CUG {userData?.school === 'CUG' && <span className="text-[9px] bg-white/25 px-1.5 py-0.5 rounded-full font-black">Primary</span>}
+          </button>
+
+          <button
+            onClick={() => setSelectedCampus('UENR')}
+            className={`px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer flex items-center gap-1.5 ${
+              selectedCampus === 'UENR'
+                ? 'bg-[#d9ff00] text-black shadow-lg shadow-[#d9ff00]/10'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold border border-gray-200/50'
+            }`}
+          >
+            <span>🎓</span> UENR {userData?.school === 'UENR' && <span className="text-[9px] bg-black/10 px-1.5 py-0.5 rounded-full font-black">Primary</span>}
+          </button>
+
+          <button
+            onClick={() => setSelectedCampus('STU')}
+            className={`px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer flex items-center gap-1.5 ${
+              selectedCampus === 'STU'
+                ? 'bg-[#8A2BE2] text-white shadow-lg shadow-[#8A2BE2]/10'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold border border-gray-200/50'
+            }`}
+          >
+            <span>🏛️</span> STU {userData?.school === 'STU' && <span className="text-[9px] bg-white/25 px-1.5 py-0.5 rounded-full font-black">Primary</span>}
+          </button>
+        </div>
+      </div>
+
       {/* Bento Grid Hero */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 auto-rows-auto">
         

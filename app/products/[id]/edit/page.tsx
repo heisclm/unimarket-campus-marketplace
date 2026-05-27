@@ -6,7 +6,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { uploadImage } from '@/lib/storage';
 import { useRouter, useParams } from 'next/navigation';
-import { Package, Tag, ShieldCheck, X, UploadCloud, AlignLeft } from 'lucide-react';
+import { Package, Tag, ShieldCheck, X, UploadCloud, AlignLeft, GraduationCap } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 
@@ -20,6 +20,7 @@ export default function EditProductPage() {
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('Electronics');
   const [type, setType] = useState('fixed');
+  const [campus, setCampus] = useState('all');
   const [auctionDuration, setAuctionDuration] = useState('24');
   const [customAuctionDate, setCustomAuctionDate] = useState('');
   
@@ -64,6 +65,7 @@ export default function EditProductPage() {
           setPrice(data.price?.toString() || '');
           setCategory(data.category || 'Electronics');
           setType(data.type || 'fixed');
+          setCampus(data.campus || 'all');
           
           const images = data.images || [];
           setExistingImages(images);
@@ -215,6 +217,7 @@ export default function EditProductPage() {
         category,
         images: finalImages,
         previewImage: finalPreviewImage,
+        campus,
       });
 
       toast.success('Listing updated successfully!');
@@ -255,8 +258,8 @@ export default function EditProductPage() {
           </div>
         </div>
 
-        {/* Price & Category */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Price, Category & Campus Scope */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Price (GH₵)</label>
             <div className="relative">
@@ -285,6 +288,25 @@ export default function EditProductPage() {
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Target Campus</label>
+            <div className="relative">
+              <GraduationCap className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <select 
+                value={campus}
+                onChange={(e) => setCampus(e.target.value)}
+                className="w-full pl-12 pr-8 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all appearance-none cursor-pointer font-semibold text-gray-700"
+              >
+                <option value="all">🌐 All Ghana Campuses</option>
+                <option value="UENR">🎓 UENR Only</option>
+                <option value="CUG">🏫 CUG Only</option>
+                <option value="STU">🏛️ STU Only</option>
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-xs">
+                ▼
+              </div>
             </div>
           </div>
         </div>

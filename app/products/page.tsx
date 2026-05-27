@@ -7,8 +7,9 @@ import { isActiveProduct, sanitizeProduct } from '@/lib/products';
 import PremiumImage from '@/components/ui/PremiumImage';
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { Search, Filter, Clock, Tag, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Search, Filter, Clock, Tag, ShieldCheck, AlertCircle, GraduationCap } from 'lucide-react';
 import ProductCard from '@/components/products/ProductCard';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 import { motion } from 'motion/react';
 
@@ -17,6 +18,7 @@ import { Suspense } from 'react';
 export const dynamic = 'force-dynamic';
 
 function ProductsContent() {
+  const { userData } = useAuth();
   const searchParams = useSearchParams();
   const urlSearch = searchParams.get('search');
   
@@ -25,9 +27,18 @@ function ProductsContent() {
   const [inputValue, setInputValue] = useState(urlSearch || '');
   const [searchTerm, setSearchTerm] = useState(urlSearch || '');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCampus, setSelectedCampus] = useState<'all' | 'UENR' | 'CUG' | 'STU'>('all');
 
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    if (userData?.school) {
+      setTimeout(() => {
+        setSelectedCampus(userData.school as any);
+      }, 0);
+    }
+  }, [userData]);
 
   useEffect(() => {
     setInputValue(urlSearch || '');
@@ -109,7 +120,8 @@ function ProductsContent() {
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
+    const matchesCampus = selectedCampus === 'all' || product.campus === selectedCampus || product.campus === 'all' || !product.campus;
+    return matchesSearch && matchesCampus;
   }).sort((a, b) => {
     if (a.isSponsored && !b.isSponsored) return -1;
     if (!a.isSponsored && b.isSponsored) return 1;
@@ -151,6 +163,65 @@ function ProductsContent() {
               className="w-full pl-14 pr-6 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#d9ff00] transition-all text-white placeholder:text-gray-400 font-medium text-lg"
             />
           </form>
+        </div>
+      </div>
+
+      {/* Campus Selector Switcher Pills */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white/80 backdrop-blur-md p-4 rounded-3xl border border-gray-100 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-[#d9ff00]/15 text-gray-900 rounded-full flex items-center justify-center border border-[#d9ff00]/20">
+            <GraduationCap className="w-5 h-5 text-gray-800" />
+          </div>
+          <div className="text-left">
+            <h4 className="font-extrabold text-sm text-gray-950 tracking-tight">Active Portal Filter</h4>
+            <p className="text-[11px] text-gray-500 font-semibold">Filtering deals by location</p>
+          </div>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setSelectedCampus('all')}
+            className={`px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer ${
+              selectedCampus === 'all'
+                ? 'bg-black text-white shadow-lg shadow-black/10'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold border border-gray-200/50'
+            }`}
+          >
+            🌐 All Ghana Campuses
+          </button>
+          
+          <button
+            onClick={() => setSelectedCampus('CUG')}
+            className={`px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer flex items-center gap-1.5 ${
+              selectedCampus === 'CUG'
+                ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/10'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold border border-gray-200/50'
+            }`}
+          >
+            <span>🏫</span> CUG {userData?.school === 'CUG' && <span className="text-[9px] bg-white/25 px-1.5 py-0.5 rounded-full font-black">Primary</span>}
+          </button>
+
+          <button
+            onClick={() => setSelectedCampus('UENR')}
+            className={`px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer flex items-center gap-1.5 ${
+              selectedCampus === 'UENR'
+                ? 'bg-[#d9ff00] text-black shadow-lg shadow-[#d9ff00]/10'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold border border-gray-200/50'
+            }`}
+          >
+            <span>🎓</span> UENR {userData?.school === 'UENR' && <span className="text-[9px] bg-black/10 px-1.5 py-0.5 rounded-full font-black">Primary</span>}
+          </button>
+
+          <button
+            onClick={() => setSelectedCampus('STU')}
+            className={`px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all duration-200 active:scale-95 cursor-pointer flex items-center gap-1.5 ${
+              selectedCampus === 'STU'
+                ? 'bg-[#8A2BE2] text-white shadow-lg shadow-[#8A2BE2]/10'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold border border-gray-200/50'
+            }`}
+          >
+            <span>🏛️</span> STU {userData?.school === 'STU' && <span className="text-[9px] bg-white/25 px-1.5 py-0.5 rounded-full font-black">Primary</span>}
+          </button>
         </div>
       </div>
 

@@ -557,10 +557,12 @@ export default function VerificationSection() {
                 />
               </div>
             ) : (
-              <div className="w-80 h-80 rounded-[2rem] border-2 border-dashed border-gray-200 bg-gray-50 flex flex-col items-center justify-center text-gray-400 shadow-sm">
-                <Camera className="w-12 h-12 mb-3" />
-                <p className="font-bold text-sm">No Face Captured Yet</p>
-                <p className="text-xs mt-1 text-gray-400 px-6 text-center">Use your camera or select a local photo below</p>
+              <div className="w-80 h-80 rounded-[2rem] border-2 border-dashed border-gray-200 bg-gray-50 flex flex-col items-center justify-center text-gray-400 shadow-sm p-6">
+                <Camera className="w-12 h-12 mb-3 text-black" />
+                <p className="font-bold text-sm text-gray-800">No Face Captured Yet</p>
+                <p className="text-xs mt-2 text-gray-400 text-center max-w-xs">
+                  Position your face clearly in front of your camera. Local image files cannot be uploaded for selfies to prevent identity fraud.
+                </p>
               </div>
             )}
 
@@ -569,40 +571,30 @@ export default function VerificationSection() {
                 <>
                   <button
                     onClick={capturePhoto}
-                    className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all"
+                    className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
                   >
                     <CheckCircle2 className="w-5 h-5" /> Take Snapshot
                   </button>
                   <button
                     onClick={stopCamera}
-                    className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all"
+                    className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
                   >
                     Cancel Scan
                   </button>
                 </>
               ) : (
-                <>
+                <div className="flex flex-col items-center gap-3">
                   <button
                     onClick={startCamera}
-                    className="px-6 py-3 bg-black hover:bg-gray-800 text-white rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all"
+                    className="px-8 py-4 bg-black hover:bg-gray-800 text-white rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer text-sm"
                   >
-                    <Camera className="w-5 h-5 text-[#d9ff00]" /> {selfieImage ? 'Scan Face Again' : 'Start Camera Scan'}
+                    <Camera className="w-5 h-5 text-[#d9ff00]" /> {selfieImage ? 'Rescan Face' : 'Start Camera Scan'}
                   </button>
-                  
-                  <div className="relative">
-                    <button
-                      className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all"
-                    >
-                      <Upload className="w-5 h-5 text-gray-500" /> Upload Selfie Image
-                    </button>
-                    <input 
-                      type="file" 
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(e, 'selfie')}
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                    />
-                  </div>
-                </>
+                  <p className="text-[10px] font-bold tracking-widest text-[#a3a3a3] uppercase flex items-center gap-1.5 mt-1 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    🔒 Enforced Live Verification Active (Zero Uploads)
+                  </p>
+                </div>
               )}
             </div>
           </div>

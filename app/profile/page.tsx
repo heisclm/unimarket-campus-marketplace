@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useAuth, UserRole } from '@/components/auth/AuthProvider';
 import { loginWithGoogle, logout, signInWithEmail, signUpWithEmail, resetPassword, db, resendVerification } from '@/lib/firebase';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { LogIn, LogOut, User as UserIcon, Store, GraduationCap, Mail, Lock, Eye, EyeOff, Wallet, ShieldCheck, History, Package, LayoutDashboard, ShoppingBag, Zap } from 'lucide-react';
 import dynamicImport from 'next/dynamic';
 const VerificationSection = dynamicImport(() => import('@/components/profile/VerificationSection'), { ssr: false });
@@ -24,6 +24,19 @@ export default function ProfilePage() {
   // Stats State
   const [stats, setStats] = useState({ purchases: 0, activeBids: 0 });
   const [statsLoading, setStatsLoading] = useState(false);
+
+  // Campus Selection states
+  const [signupSchool, setSignupSchool] = useState('UENR');
+  const [selectedSchool, setSelectedSchool] = useState('UENR');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const persistedSchool = localStorage.getItem('signup_school');
+      if (persistedSchool) {
+        setSelectedSchool(persistedSchool);
+      }
+    }
+  }, []);
 
   // Email Auth State
   const [fullName, setFullName] = useState('');
@@ -62,6 +75,9 @@ export default function ProfilePage() {
       if (isSignUp) {
         if (!fullName.trim()) {
           throw new Error("Full Name is required for sign up.");
+        }
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('signup_school', signupSchool);
         }
         await signUpWithEmail(email, password, fullName);
         toast.success('Account created successfully! A verification email has been sent. Please check your inbox and verify your email.', { duration: 6000 });
@@ -118,7 +134,10 @@ export default function ProfilePage() {
   const handleRoleSelection = async (selectedRole: UserRole) => {
     setIsSettingRole(true);
     try {
-      await setRole(selectedRole);
+      await setRole(selectedRole, selectedSchool);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('signup_school');
+      }
       toast.success(`Profile set as ${selectedRole}!`);
       window.location.assign('/');
     } catch (error) {
@@ -188,17 +207,37 @@ export default function ProfilePage() {
 
         <form onSubmit={handleEmailAuth} className="w-full flex flex-col gap-4 mb-6">
           {isSignUp && (
-            <div className="relative">
-              <UserIcon className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
-              <input 
-                type="text" 
-                placeholder="Full Name" 
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required={isSignUp}
-                className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all"
-              />
-            </div>
+            <>
+              <div className="relative">
+                <UserIcon className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                <input 
+                  type="text" 
+                  placeholder="Full Name" 
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required={isSignUp}
+                  className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all"
+                />
+              </div>
+              <div className="relative">
+                <GraduationCap className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <select
+                  value={signupSchool}
+                  onChange={(e) => {
+                    setSignupSchool(e.target.value);
+                    setSelectedSchool(e.target.value);
+                  }}
+                  className="w-full pl-12 pr-8 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all font-semibold text-gray-700 appearance-none cursor-pointer"
+                >
+                  <option value="UENR">🎓 UENR Campus</option>
+                  <option value="CUG">🏫 CUG Campus</option>
+                  <option value="STU">🏛️ STU Campus</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-xs text-center">
+                  ▼
+                </div>
+              </div>
+            </>
           )}
           <div className="relative">
             <Mail className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -293,6 +332,25 @@ export default function ProfilePage() {
         <p className="text-gray-500 mb-8 max-w-md">
           Are you joining as a student looking to buy/sell, or a vendor setting up a shop?
         </p>
+
+        <div className="w-full max-w-md mx-auto mb-8 bg-gray-50 p-6 rounded-[2rem] border border-gray-100">
+          <label className="block text-[10px] font-black uppercase text-gray-500 tracking-wider mb-2.5 text-center">Select Your Primary Campus</label>
+          <div className="relative">
+            <GraduationCap className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <select
+              value={selectedSchool}
+              onChange={(e) => setSelectedSchool(e.target.value)}
+              className="w-full pl-12 pr-8 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black font-bold text-gray-800 appearance-none cursor-pointer text-center"
+            >
+              <option value="UENR">🎓 University of Energy & Natural Resources (UENR)</option>
+              <option value="CUG">🏫 Catholic University of Ghana (CUG)</option>
+              <option value="STU">🏛️ Sunyani Technical University (STU)</option>
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-xs">
+              ▼
+            </div>
+          </div>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
           <button 
@@ -473,6 +531,41 @@ export default function ProfilePage() {
                   </div>
                   <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100">
                     <History className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100/50">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 block">Primary Campus</label>
+                  <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                    <div>
+                      <p className="font-bold text-lg text-gray-900 tracking-tight">
+                        {userData?.school === 'UENR' ? '🎓 University of Energy & Natural Resources (UENR)' :
+                         userData?.school === 'CUG' ? '🏫 Catholic University of Ghana (CUG)' :
+                         userData?.school === 'STU' ? '🏛️ Sunyani Technical University (STU)' :
+                         'Not selected'}
+                      </p>
+                    </div>
+                    <div>
+                      <select
+                        value={userData?.school || 'UENR'}
+                        onChange={async (e) => {
+                          const newSchool = e.target.value;
+                          try {
+                            const userRef = doc(db, 'users', user.uid);
+                            await updateDoc(userRef, { school: newSchool });
+                            toast.success('Primary campus updated successfully!');
+                            window.location.reload();
+                          } catch (err) {
+                            console.error('Failed to update school', err);
+                            toast.error('Failed to update primary campus');
+                          }
+                        }}
+                        className="px-4 py-2 bg-white border border-gray-200 rounded-xl font-bold text-sm focus:outline-none focus:ring-2 focus:ring-black cursor-pointer text-gray-800"
+                      >
+                        <option value="UENR">🎓 UENR</option>
+                        <option value="CUG">🏫 CUG</option>
+                        <option value="STU">🏛️ STU</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -12,7 +12,7 @@ interface AuthContextType {
   role: UserRole;
   userData: any | null;
   loading: boolean;
-  setRole: (role: UserRole) => Promise<void>;
+  setRole: (role: UserRole, school?: string) => Promise<void>;
   refreshUserData: () => Promise<void>;
 }
 
@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const setRole = async (newRole: UserRole) => {
+  const setRole = async (newRole: UserRole, school?: string) => {
     if (!user || !newRole) return;
     
     try {
@@ -109,6 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         role: newRole,
         walletBalance: 0,
         isVerified: false,
+        school: school || 'UENR',
         createdAt: serverTimestamp(),
       };
       await setDoc(userDocRef, initialData);
