@@ -318,7 +318,7 @@ export default function ProductDetailPage() {
                       {!v.name && v.color && <span className="text-sm text-gray-500">{v.color}</span>}
                       {v.quantity <= 0 && <span className="text-xs text-red-500 font-bold mt-1">Out of Stock</span>}
                       {v.price != null && (
-                         <span className="text-xs font-bold text-black mt-1">GH₵{v.price.toFixed(2)}</span>
+                         <span className="text-xs font-bold text-black mt-1">GH₵{Number(v.price).toFixed(2)}</span>
                       )}
                       
                       {selectedVariantIndex === idx && (

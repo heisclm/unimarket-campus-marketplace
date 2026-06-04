@@ -429,7 +429,7 @@ export default function Home() {
                 </div>
                 <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-1">{auction.title}</h3>
                 <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-50">
-                  <span className="text-gray-900 font-black text-xl tracking-tight">GH₵{auction.price.toFixed(2)}</span>
+                  <span className="text-gray-900 font-black text-xl tracking-tight">GH₵{Number(auction.price).toFixed(2)}</span>
                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Current Bid</span>
                 </div>
               </Link>

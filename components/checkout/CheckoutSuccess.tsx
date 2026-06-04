@@ -81,7 +81,7 @@ export default function CheckoutSuccess({ items }: { items: any[] }) {
                     </div>
                     <div>
                       <p className="font-bold text-gray-900 leading-tight">{item.title}</p>
-                      <p className="text-sm text-gray-500 font-bold">GH₵{item.price.toFixed(2)}</p>
+                      <p className="text-sm text-gray-500 font-bold">GH₵{Number(item.price).toFixed(2)}</p>
                     </div>
                   </div>
                 ))}

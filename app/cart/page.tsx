@@ -240,7 +240,7 @@ export default function CartPage() {
                 <div className={`flex-1 ${isUnavailable ? 'opacity-50' : ''}`}>
                   <h3 className="font-bold text-base sm:text-lg line-clamp-1 text-gray-900">{item.title}</h3>
                   <p className="text-gray-400 text-xs mb-1 sm:mb-2 font-medium uppercase tracking-wider line-clamp-1">Seller: {item.sellerId.slice(0, 8)}...</p>
-                  <div className="font-bold text-lg sm:text-xl text-black">GH₵{item.price.toFixed(2)}</div>
+                  <div className="font-bold text-lg sm:text-xl text-black">GH₵{Number(item.price).toFixed(2)}</div>
                 </div>
               </div>
               
