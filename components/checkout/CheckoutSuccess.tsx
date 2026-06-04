@@ -66,7 +66,7 @@ export default function CheckoutSuccess({ items }: { items: any[] }) {
                 </div>
                 
                 <Link 
-                  href={`/dashboard/messages?sellerId=${sellerId}&productId=${firstItem.id}&initMessage=${encodeURIComponent(`Hi! I just purchased ${firstItem.title} and funds are in escrow. When can we meet for delivery?`)}`}
+                  href={`/dashboard/messages?sellerId=${sellerId}&productId=${firstItem.id}&autoSend=true&initMessage=${encodeURIComponent(`Hi! I just purchased ${firstItem.title} and funds are in escrow. When can we meet for delivery?`)}`}
                   className="bg-[#d9ff00] text-black px-6 py-3 rounded-full font-bold hover:bg-[#c4e600] transition-all flex items-center justify-center gap-2 whitespace-nowrap shadow-sm hover:scale-105 active:scale-95"
                 >
                   <MessageSquare className="w-5 h-5" /> Message Seller

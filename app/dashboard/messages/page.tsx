@@ -58,17 +58,19 @@ function MessagesContent() {
 
   useEffect(() => {
     const initMessage = searchParams.get('initMessage');
-    if (initMessage) {
+    const autoSend = searchParams.get('autoSend');
+    if (initMessage && autoSend !== 'true') {
       setNewMessage(initMessage);
     }
   }, [searchParams]);
 
-  // Handle URL Params for new chat initiation
   useEffect(() => {
     if (!user || !userData) return;
     const sellerId = searchParams.get('sellerId');
     const productId = searchParams.get('productId');
     const directChatId = searchParams.get('chatId');
+    const initMessage = searchParams.get('initMessage');
+    const autoSend = searchParams.get('autoSend');
 
     if (directChatId && !initializingRef.current) {
       // If we directly pass a chatId (e.g. from an order), switch to it immediately
@@ -94,6 +96,22 @@ function MessagesContent() {
           if (chatSnap.exists()) {
             // Chat already exists, just switch to it
             setActiveChatId(deterministicChatId);
+            
+            // If autoSend is true and initMessage is provided, send it immediately
+            if (autoSend === 'true' && initMessage) {
+              await addDoc(collection(db, `chats/${deterministicChatId}/messages`), {
+                chatId: deterministicChatId,
+                senderId: user.uid,
+                text: initMessage,
+                status: 'sent',
+                createdAt: serverTimestamp()
+              });
+              await updateDoc(chatRef, {
+                lastMessage: initMessage,
+                lastMessageAt: serverTimestamp(),
+                [`unreadCount.${sellerId}`]: increment(1)
+              });
+            }
           } else {
             // Fetch product and seller info to build chat context
             const productSnap = await getDoc(doc(db, 'products', productId));
@@ -112,7 +130,7 @@ function MessagesContent() {
                   [sellerId]: { name: sellerData.displayName || 'Seller', photoURL: sellerData.photoURL || '', role: sellerData.role }
                 },
                 createdAt: serverTimestamp(),
-                lastMessage: 'Chat initiated',
+                lastMessage: autoSend === 'true' && initMessage ? initMessage : 'Chat initiated',
                 lastMessageAt: serverTimestamp(),
                 unreadCount: {
                   [user.uid]: 0,
@@ -131,6 +149,16 @@ function MessagesContent() {
                 status: 'sent',
                 createdAt: serverTimestamp()
               });
+              
+              if (autoSend === 'true' && initMessage) {
+                await addDoc(collection(db, `chats/${deterministicChatId}/messages`), {
+                  chatId: deterministicChatId,
+                  senderId: user.uid,
+                  text: initMessage,
+                  status: 'sent',
+                  createdAt: serverTimestamp()
+                });
+              }
             }
           }
         } finally {
