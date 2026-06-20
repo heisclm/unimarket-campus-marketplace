@@ -24,7 +24,15 @@ export async function GET(req: NextRequest) {
       
     // Filter out orders that already have a rider or belong to the current user
     const availableDeliveries = availableSnap.docs
-      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
+          updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt,
+        };
+      })
       .filter((order: any) => !order.riderId && order.buyerId !== uid && order.sellerId !== uid)
       .map((order: any) => {
         return order;
@@ -35,7 +43,15 @@ export async function GET(req: NextRequest) {
       .where('riderId', '==', uid)
       .get();
 
-    const myDeliveries = mySnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const myDeliveries = mySnap.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
+        updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt,
+      };
+    });
 
     return NextResponse.json({ available: availableDeliveries, myDeliveries });
   } catch (error: any) {
