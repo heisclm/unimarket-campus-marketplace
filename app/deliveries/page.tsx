@@ -24,30 +24,20 @@ export default function DeliveriesPage() {
     if (!user) return;
     setLoading(true);
     try {
-      // 1. Fetch available deliveries (rider requested, but not yet taken)
-      const qAvailable = query(
-        collection(db, 'orders'),
-        where('status', '==', 'escrow_held'),
-        where('deliveryPreference', '==', 'rider'),
-        where('riderId', '==', null)
-      );
-      
-      const snapAvailable = await getDocs(qAvailable);
-      const available = snapAvailable.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter((order: any) => order.buyerId !== user.uid && order.sellerId !== user.uid); // Don't let them deliver their own stuff
+      const token = await user.getIdToken();
+      const res = await fetch('/api/deliveries', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
-      // 2. Fetch my accepted deliveries
-      const qMy = query(
-        collection(db, 'orders'),
-        where('riderId', '==', user.uid)
-      );
-      
-      const snapMy = await getDocs(qMy);
-      const my = snapMy.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      if (!res.ok) {
+        throw new Error('Failed to fetch deliveries');
+      }
 
-      setAvailableDeliveries(available);
-      setMyDeliveries(my);
+      const data = await res.json();
+      setAvailableDeliveries(data.available || []);
+      setMyDeliveries(data.myDeliveries || []);
     } catch (e) {
       console.error("Error fetching deliveries:", e);
       toast.error("Failed to load deliveries");
@@ -122,25 +112,26 @@ export default function DeliveriesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8 pb-20">
       {/* Header */}
-      <div className="bg-black text-[#d9ff00] pt-12 pb-24 px-4 sm:px-8 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
-        <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tighter">Campus Rider Board</h1>
-            <p className="text-lg md:text-xl font-medium max-w-2xl opacity-90">
-              Verified students: earn extra cash by voluntarily delivering items for your peers on campus. Negotiate fees directly. No platform tax.
-            </p>
+      <div className="bg-gray-900 text-white rounded-[2.5rem] p-8 md:p-12 shadow-xl relative overflow-hidden border border-gray-800">
+        <div className="absolute top-[-20%] right-[-10%] w-96 h-96 bg-[#d9ff00] rounded-full blur-[150px] opacity-20 pointer-events-none"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-blue-500 rounded-full blur-[150px] opacity-20 pointer-events-none"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+          <div className="max-w-xl">
+            <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-3 leading-tight">Campus Rider Board</h1>
+            <p className="text-gray-400 font-medium text-lg">Verified students: earn extra cash by voluntarily delivering items for your peers on campus. Negotiate fees directly. No platform tax.</p>
           </div>
-          <div className="hidden md:flex w-32 h-32 bg-[#d9ff00] text-black rounded-[2rem] transform rotate-3 flex-col items-center justify-center shadow-2xl">
-            <Navigation className="w-12 h-12 mb-2" />
-            <span className="font-bold text-sm tracking-tighter">Earn Cash</span>
+          
+          <div className="hidden md:flex bg-[#d9ff00] text-black rounded-[2rem] px-8 py-6 transform rotate-3 flex-col items-center justify-center shadow-xl shadow-[#d9ff00]/20">
+            <Navigation className="w-8 h-8 mb-1" />
+            <span className="font-bold text-sm tracking-tighter whitespace-nowrap">Earn Cash</span>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 -mt-16 relative z-20 space-y-8">
+      <div className="relative z-20 space-y-8">
         
         {/* Active Route Focus */}
         {myDeliveries.length > 0 && (
