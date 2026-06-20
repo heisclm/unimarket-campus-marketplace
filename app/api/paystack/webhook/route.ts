@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 
         // 2. Process based on metadata type
         if (metadata.type === 'cart_checkout') {
-          const { buyerId, items } = metadata;
+          const { buyerId, items, deliveryPreference = 'pickup' } = metadata;
           const totalAmount = items.reduce((sum: number, item: any) => sum + item.price, 0);
 
           // FETCH USERS & PRODUCTS BEFORE WRITES (Transactions require reads before writes)
@@ -124,6 +124,9 @@ export async function POST(req: Request) {
               platformFee: itemPlatformFee,
               netAmount: (item.price * requestedQuantity) - itemPlatformFee,
               status: 'escrow_held',
+              deliveryPreference,
+              riderId: null,
+              deliveryStatus: 'pending',
               createdAt: FieldValue.serverTimestamp(),
               updatedAt: FieldValue.serverTimestamp(),
             });

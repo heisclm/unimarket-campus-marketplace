@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const buyerId = decodedToken.uid;
 
     // 2. Parse Request Body
-    const { items, useCoins } = await req.json();
+    const { items, useCoins, deliveryPreference = 'pickup' } = await req.json();
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
     }
@@ -166,6 +166,9 @@ export async function POST(req: NextRequest) {
           platformFee: itemPlatformFee, // What the platform takes
           netAmount: (item.price * item.quantity) - itemPlatformFee, // What the seller actually receives for the item
           status: 'escrow_held',
+          deliveryPreference,
+          riderId: null,
+          deliveryStatus: 'pending',
           createdAt: FieldValue.serverTimestamp(),
           updatedAt: FieldValue.serverTimestamp()
         });

@@ -65,7 +65,7 @@ export async function GET(req: Request) {
       }
 
       if (metadata.type === 'cart_checkout') {
-        const { buyerId, items } = metadata;
+        const { buyerId, items, deliveryPreference = 'pickup' } = metadata;
         const totalAmount = items.reduce((sum: number, item: any) => sum + item.price, 0);
 
         // FETCH USERS & PRODUCTS BEFORE WRITES
@@ -138,6 +138,9 @@ export async function GET(req: Request) {
             platformFee: itemPlatformFee,
             netAmount: (item.price * requestedQuantity) - itemPlatformFee,
             status: 'escrow_held',
+            deliveryPreference,
+            riderId: null,
+            deliveryStatus: 'pending',
             createdAt: FieldValue.serverTimestamp(),
             updatedAt: FieldValue.serverTimestamp(),
           });

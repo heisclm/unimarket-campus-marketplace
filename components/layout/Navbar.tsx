@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, ShoppingBag, Heart, User, LogIn, Bell, Users, Menu, X, LayoutDashboard, ShieldAlert, Store, MessageSquare, Home } from 'lucide-react';
+import { Search, ShoppingBag, Heart, User, LogIn, Bell, Users, Menu, X, LayoutDashboard, ShieldAlert, Store, MessageSquare, Home, Navigation } from 'lucide-react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { useCart } from '@/components/cart/CartProvider';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -146,6 +146,9 @@ export default function Navbar() {
                 <>
                   <Link href="/products" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors">
                     Marketplace
+                  </Link>
+                  <Link href="/deliveries" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors">
+                    Deliveries
                   </Link>
                   <Link href="/community" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors flex items-center gap-1.5">
                     Community
@@ -300,6 +303,10 @@ export default function Navbar() {
                       <Link href="/products" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 text-gray-700 font-medium transition-colors">
                         <Store className="w-5 h-5 text-gray-400" />
                         Marketplace
+                      </Link>
+                      <Link href="/deliveries" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 text-gray-700 font-medium transition-colors">
+                        <Navigation className="w-5 h-5 text-gray-400" />
+                        Deliveries
                       </Link>
                       <Link href="/community" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 text-gray-700 font-medium transition-colors">
                         <Users className="w-5 h-5 text-gray-400" />

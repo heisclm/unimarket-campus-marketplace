@@ -19,6 +19,7 @@ export default function CartPage() {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [success, setSuccess] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'wallet' | 'paystack'>('paystack');
+  const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'rider'>('pickup');
   const [useCoins, setUseCoins] = useState(false);
   const [unavailableItems, setUnavailableItems] = useState<string[]>([]);
   const [isValidatingCart, setIsValidatingCart] = useState(true);
@@ -113,7 +114,8 @@ export default function CartPage() {
           },
           body: JSON.stringify({
             items: items.map(item => ({ id: item.id, productId: item.productId || (item.id.includes('-') ? item.id.split('-')[0] : item.id), title: item.title, price: item.price, sellerId: item.sellerId, quantity: item.quantity || 1 })),
-            useCoins
+            useCoins,
+            deliveryPreference: deliveryMethod
           })
         });
 
@@ -147,6 +149,7 @@ export default function CartPage() {
               type: 'cart_checkout',
               buyerId: user.uid,
               useCoins,
+              deliveryPreference: deliveryMethod,
               items: items.map(item => ({
                 id: item.id,
                 productId: item.productId || (item.id.includes('-') ? item.id.split('-')[0] : item.id),
@@ -175,7 +178,7 @@ export default function CartPage() {
   if (success) {
     return (
       <div className="py-10">
-        <CheckoutSuccess items={purchasedItems} />
+        <CheckoutSuccess items={purchasedItems} deliveryMethod={deliveryMethod} />
       </div>
     );
   }
@@ -286,7 +289,39 @@ export default function CartPage() {
           );
         })}
 
-        {/* Payment Method Selection */}
+          {/* Delivery Method Selection */}
+          <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50 mt-8">
+            <h3 className="font-bold text-lg mb-4">Delivery Method</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button 
+                onClick={() => setDeliveryMethod('pickup')}
+                className={`p-4 rounded-2xl border-2 text-left transition-all flex flex-col gap-1 ${deliveryMethod === 'pickup' ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200'}`}
+              >
+                <div className="flex items-center gap-2">
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${deliveryMethod === 'pickup' ? 'border-black' : 'border-gray-300'}`}>
+                    {deliveryMethod === 'pickup' && <div className="w-2 h-2 rounded-full bg-black" />}
+                  </div>
+                  <span className="font-bold text-sm">Meetup / Self-Pickup</span>
+                </div>
+                <span className="text-xs text-gray-500 ml-6">You and seller arrange to meet on campus. Free.</span>
+              </button>
+              
+              <button 
+                onClick={() => setDeliveryMethod('rider')}
+                className={`p-4 rounded-2xl border-2 text-left transition-all flex flex-col gap-1 ${deliveryMethod === 'rider' ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200'}`}
+              >
+                <div className="flex items-center gap-2">
+                   <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${deliveryMethod === 'rider' ? 'border-black' : 'border-gray-300'}`}>
+                    {deliveryMethod === 'rider' && <div className="w-2 h-2 rounded-full bg-black" />}
+                  </div>
+                  <span className="font-bold text-sm">Request Campus Rider</span>
+                </div>
+                <span className="text-xs text-gray-500 ml-6">Independent student riders will bid to deliver. Pay them offline.</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Payment Method Selection */}
         <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-50 mt-8">
           <h3 className="font-bold text-lg mb-4">Payment Method</h3>
           <div className="grid grid-cols-2 gap-4">

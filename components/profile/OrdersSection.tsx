@@ -131,6 +131,12 @@ export default function OrdersSection() {
                     {getStatusIcon(order.status)}
                     {order.status.replace('_', ' ')}
                   </div>
+                  
+                  {order.deliveryPreference === 'rider' && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider border text-purple-600 bg-purple-50 border-purple-100">
+                      Rider {order.riderId ? 'Assigned' : 'Requested'}
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-2">
                     <button 
