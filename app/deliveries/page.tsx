@@ -59,51 +59,31 @@ export default function DeliveriesPage() {
     }
 
     try {
-      const orderRef = doc(db, 'orders', orderId);
-      
-      // Attempt to claim the delivery
-      await updateDoc(orderRef, {
-        riderId: user.uid,
-        deliveryStatus: 'accepted'
-      });
-
-      toast.success("Delivery accepted! You can now contact the buyer and seller.");
-      fetchDeliveries();
-
-      // Create a 3-way Group Chat (Or a chat with Buyer specifically about delivery)
-      // Let's create a specific chat with the buyer emphasizing delivery
-      const chatId = `delivery_${orderId}_${user.uid}`;
-      const chatRef = doc(db, 'chats', chatId);
-      
-      await setDoc(chatRef, {
-        participants: [user.uid, buyerId],
-        isGroup: false,
-        isDeliveryChat: true,
-        orderId: orderId,
-        createdAt: serverTimestamp(),
-        lastMessage: "I offered to deliver your item! Let's negotiate the fee and my ETA.",
-        lastMessageAt: serverTimestamp(),
-        participantDetails: {
-          [user.uid]: { name: userData?.displayName || 'Rider', role: userData?.role || 'student', photoURL: userData?.photoURL || '' },
-          [buyerId]: { name: 'Buyer', role: 'student', photoURL: '' } // Would ideally fetch buyer info, but this works for basic rendering
+      const token = await user.getIdToken();
+      const res = await fetch('/api/deliveries/accept', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        [`unreadCount.${buyerId}`]: increment(1)
-      }, { merge: true });
-
-      // Add actual first message
-      await setDoc(doc(db, `chats/${chatId}/messages`, 'init'), {
-        chatId: chatId,
-        senderId: user.uid,
-        text: "Hi! I saw your request for a Campus Rider. I can deliver this. What's your offer for the delivery fee?",
-        status: 'sent',
-        createdAt: serverTimestamp()
+        body: JSON.stringify({ orderId, buyerId })
       });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to accept delivery');
+      }
+
+      const { chatId } = await res.json();
+      
+      toast.success("Delivery accepted! You can now contact the buyer.");
+      fetchDeliveries();
 
       // Redirect to chat
       router.push(`/dashboard/messages?chatId=${chatId}`);
-    } catch (e) {
+    } catch (e: any) {
       console.error("Failed to accept delivery:", e);
-      toast.error("Could not accept delivery. Someone else may have taken it.");
+      toast.error(e.message || "Could not accept delivery. Someone else may have taken it.");
     }
   };
 
