@@ -26,6 +26,10 @@ export async function POST(req: NextRequest) {
     const userDoc = await adminDb.collection('users').doc(uid).get();
     const userData = userDoc.data() || {};
     
+    if (userData.role === 'vendor') {
+      return NextResponse.json({ error: 'Vendors cannot accept deliveries.' }, { status: 403 });
+    }
+
     if (!userData.isVerified) {
        return NextResponse.json({ error: 'Must be verified student to deliver' }, { status: 403 });
     }

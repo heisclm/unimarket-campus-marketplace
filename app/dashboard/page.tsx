@@ -432,9 +432,14 @@ export default function DashboardPage() {
                           }`}>
                             {order.status?.replace('_', ' ') || 'UNKNOWN'}
                           </span>
-                          {order.status === 'escrow_held' && (
+                          {order.status === 'escrow_held' && !order.riderId && (
                             <span className="text-[10px] text-gray-400 font-medium italic flex items-center gap-1">
                               <ShieldCheck className="w-3 h-3" /> Funds held securely
+                            </span>
+                          )}
+                          {order.riderId && (
+                            <span className="text-[10px] text-purple-600 font-bold flex items-center gap-1 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100">
+                              <ShieldCheck className="w-3 h-3" /> Rider Assigned
                             </span>
                           )}
                         </div>
@@ -448,6 +453,16 @@ export default function DashboardPage() {
                       >
                         <MessageSquare className="w-4 h-4" /> Message Seller
                       </Link>
+                      
+                      {order.riderId && (
+                        <Link
+                          href={`/dashboard/messages?chatId=delivery_${order.id}_${order.riderId}`}
+                          className="flex-1 md:flex-none bg-purple-50 text-purple-700 border border-purple-200 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-purple-100 transition-all flex items-center justify-center gap-2"
+                        >
+                          <MessageSquare className="w-4 h-4" /> Message Rider
+                        </Link>
+                      )}
+
                       {order.status === 'delivered' && (
                         <button 
                           onClick={() => setOrderToConfirm(order.id)}
@@ -502,6 +517,11 @@ export default function DashboardPage() {
                           }`}>
                             {order.status?.replace('_', ' ') || 'UNKNOWN'}
                           </span>
+                          {order.riderId && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-purple-100 text-purple-700 flex items-center gap-1">
+                              <ShieldCheck className="w-3 h-3" /> Campus Rider Assigned
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -513,7 +533,17 @@ export default function DashboardPage() {
                       >
                         <MessageSquare className="w-4 h-4" /> Message Buyer
                       </Link>
-                      {order.status === 'escrow_held' && (
+                      
+                      {order.riderId && (
+                        <Link
+                          href={`/dashboard/messages?chatId=delivery_${order.id}_${order.riderId}`}
+                          className="flex-1 md:flex-none bg-purple-50 text-purple-700 border border-purple-200 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-purple-100 transition-all flex items-center justify-center gap-2"
+                        >
+                          <MessageSquare className="w-4 h-4" /> Coord. Handoff (Rider)
+                        </Link>
+                      )}
+
+                      {order.status === 'escrow_held' && !order.riderId && (
                         <button 
                           onClick={() => handleMarkDelivered(order.id)}
                           className="flex-1 md:flex-none bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all flex items-center justify-center gap-2"

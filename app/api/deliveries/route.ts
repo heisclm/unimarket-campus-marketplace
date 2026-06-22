@@ -16,6 +16,13 @@ export async function GET(req: NextRequest) {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
+    const userDoc = await adminDb.collection('users').doc(uid).get();
+    const userData = userDoc.data() || {};
+
+    if (userData.role === 'vendor') {
+      return NextResponse.json({ error: 'Vendors cannot access delivery data.' }, { status: 403 });
+    }
+
     // 1. Fetch available deliveries (rider requested, but not yet taken)
     const availableSnap = await adminDb.collection('orders')
       .where('status', '==', 'escrow_held')

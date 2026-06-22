@@ -10,15 +10,24 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 export default function DeliveriesPage() {
-  const { user, userData } = useAuth();
+  const { user, userData, role, loading: authLoading } = useAuth();
   const [availableDeliveries, setAvailableDeliveries] = useState<any[]>([]);
   const [myDeliveries, setMyDeliveries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    fetchDeliveries();
-  }, [user]);
+    if (!authLoading && role === 'vendor') {
+      toast.error("Vendors are not authorized to view the delivery board.");
+      router.push('/dashboard');
+    }
+  }, [authLoading, role, router]);
+
+  useEffect(() => {
+    if (!authLoading && role !== 'vendor') {
+      fetchDeliveries();
+    }
+  }, [user, authLoading, role]);
 
   const fetchDeliveries = async () => {
     if (!user) return;
@@ -87,7 +96,7 @@ export default function DeliveriesPage() {
     }
   };
 
-  if (loading) {
+  if (loading || authLoading || role === 'vendor') {
     return <div className="min-h-screen bg-gray-50 flex items-center justify-center font-bold text-gray-500 tracking-widest uppercase text-sm animate-pulse">Loading Board...</div>;
   }
 

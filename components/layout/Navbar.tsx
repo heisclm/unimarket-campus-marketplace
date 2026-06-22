@@ -147,9 +147,11 @@ export default function Navbar() {
                   <Link href="/products" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors">
                     Marketplace
                   </Link>
-                  <Link href="/deliveries" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors">
-                    Deliveries
-                  </Link>
+                  {role !== 'vendor' && (
+                    <Link href="/deliveries" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors">
+                      Deliveries
+                    </Link>
+                  )}
                   <Link href="/community" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors flex items-center gap-1.5">
                     Community
                   </Link>
@@ -304,10 +306,12 @@ export default function Navbar() {
                         <Store className="w-5 h-5 text-gray-400" />
                         Marketplace
                       </Link>
-                      <Link href="/deliveries" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 text-gray-700 font-medium transition-colors">
-                        <Navigation className="w-5 h-5 text-gray-400" />
-                        Deliveries
-                      </Link>
+                      {role !== 'vendor' && (
+                        <Link href="/deliveries" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 text-gray-700 font-medium transition-colors">
+                          <Navigation className="w-5 h-5 text-gray-400" />
+                          Deliveries
+                        </Link>
+                      )}
                       <Link href="/community" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 text-gray-700 font-medium transition-colors">
                         <Users className="w-5 h-5 text-gray-400" />
                         Community
