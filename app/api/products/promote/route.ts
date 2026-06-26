@@ -26,9 +26,15 @@ export async function POST(req: NextRequest) {
 
     await adminDb.runTransaction(async (transaction) => {
       const userRef = adminDb.collection('users').doc(userId);
+      const productRef = adminDb.collection('products').doc(productId);
+
+      // READS MUST COME FIRST
       const userSnap = await transaction.get(userRef);
+      const productSnap = await transaction.get(productRef);
 
       if (!userSnap.exists) throw new Error('User not found');
+      if (!productSnap.exists) throw new Error('Product not found');
+      if (productSnap.data()?.sellerId !== userId) throw new Error('Not your product');
       
       const userData = userSnap.data()!;
       
@@ -45,7 +51,7 @@ export async function POST(req: NextRequest) {
         if ((userData.walletBalance || 0) < promotionCost) {
           throw new Error(`Insufficient wallet balance. Promotion costs GH₵${promotionCost.toFixed(2)}.`);
         }
-        // Deduct via ledger
+        // Deduct via ledger (Note: ledger does its own read first, which is safe here)
         await updateWalletWithLedger(transaction, {
           userId,
           amount: -promotionCost,
@@ -64,12 +70,6 @@ export async function POST(req: NextRequest) {
           createdAt: FieldValue.serverTimestamp(),
         });
       }
-
-      const productRef = adminDb.collection('products').doc(productId);
-      const productSnap = await transaction.get(productRef);
-
-      if (!productSnap.exists) throw new Error('Product not found');
-      if (productSnap.data()?.sellerId !== userId) throw new Error('Not your product');
 
       // Update product with isSponsored and duration
       const sponsoredUntil = new Date();
