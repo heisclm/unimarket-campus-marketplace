@@ -157,7 +157,7 @@ service cloud.firestore {
       allow create: if isAuthenticated() && !isAdmin() &&
                       request.resource.data.sellerId == request.auth.uid &&
                       request.resource.data.status in ['active', 'pending'] &&
-                      hasOnlyAllowedFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt', 'sellerIsVerified', 'offersDelivery', 'deliveryFee', 'auctionEndTime', 'sellerName', 'sellerPhotoURL', 'hasVariations', 'quantity', 'variants']) &&
+                      hasOnlyAllowedFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt', 'sellerIsVerified', 'offersDelivery', 'deliveryFee', 'auctionEndTime', 'sellerName', 'sellerPhotoURL', 'hasVariations', 'quantity', 'variants', 'campus']) &&
                       hasRequiredFields(['sellerId', 'title', 'description', 'price', 'category', 'type', 'status', 'images', 'previewImage', 'createdAt']);
       allow update: if isAuthenticated() && (
         isAdmin() || 
