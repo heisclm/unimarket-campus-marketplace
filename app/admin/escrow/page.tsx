@@ -29,6 +29,9 @@ export default function EscrowManagement() {
 
   const [orderToRelease, setOrderToRelease] = useState<string | null>(null);
   const [releaseNote, setReleaseNote] = useState('');
+  
+  const [orderToRefund, setOrderToRefund] = useState<string | null>(null);
+  const [refundNote, setRefundNote] = useState('');
 
   const handleManualRelease = async () => {
     if (!orderToRelease || !releaseNote.trim()) return;
@@ -42,6 +45,23 @@ export default function EscrowManagement() {
       toast.error(error.message || 'Release failed');
       setOrderToRelease(null);
       setReleaseNote('');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleManualRefund = async () => {
+    if (!orderToRefund || !refundNote.trim()) return;
+    setIsProcessing(true);
+    try {
+      await adminRefundEscrow(orderToRefund, refundNote);
+      toast.success('Funds refunded to buyer successfully');
+      setOrderToRefund(null);
+      setRefundNote('');
+    } catch (error: any) {
+      toast.error(error.message || 'Refund failed');
+      setOrderToRefund(null);
+      setRefundNote('');
     } finally {
       setIsProcessing(false);
     }
@@ -153,6 +173,12 @@ export default function EscrowManagement() {
                           >
                             Release
                           </button>
+                          <button 
+                            onClick={() => setOrderToRefund(order.id)}
+                            className="px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 transition-colors shadow-sm"
+                          >
+                            Refund
+                          </button>
                         </div>
                       )}
                     </td>
@@ -196,6 +222,44 @@ export default function EscrowManagement() {
               >
                 {isProcessing && <Loader2 className="w-4 h-4 animate-spin" />}
                 Release
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Refund Modal */}
+      {orderToRefund && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-xl">
+            <h3 className="text-2xl font-bold mb-4">Refund Escrow to Buyer</h3>
+            <p className="text-gray-600 mb-4">
+              Enter a reason for refunding the escrow to the buyer. This will reverse the transaction and return funds to the buyer's wallet.
+            </p>
+            <textarea
+              value={refundNote}
+              onChange={(e) => setRefundNote(e.target.value)}
+              placeholder="Reason for refund..."
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6 focus:outline-none focus:ring-2 focus:ring-black min-h-[120px]"
+            />
+            <div className="flex gap-4">
+              <button 
+                onClick={() => {
+                  setOrderToRefund(null);
+                  setRefundNote('');
+                }}
+                className="flex-1 bg-gray-100 text-black px-6 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                disabled={isProcessing}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleManualRefund}
+                disabled={!refundNote.trim() || isProcessing}
+                className="flex-1 bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isProcessing && <Loader2 className="w-4 h-4 animate-spin" />}
+                Refund
               </button>
             </div>
           </div>
