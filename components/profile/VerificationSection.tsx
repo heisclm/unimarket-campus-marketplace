@@ -296,7 +296,7 @@ export default function VerificationSection() {
           throw new Error(result.error || 'Verification failed');
         }
 
-        toast.success("Student verification details submitted successfully!", { id: 'verify' });
+        toast.success(result.message || "Student verification details submitted successfully!", { id: 'verify', duration: 6000 });
       } else if (userData?.role === 'vendor') {
         const response = await fetch('/api/verify/vendor', {
           method: 'POST',

@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
 
     // 5. Call Gemini to compare faces
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.5-flash',
       contents: [
         {
           parts: [

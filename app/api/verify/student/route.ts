@@ -114,6 +114,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Name does not match our records for this Student ID' }, { status: 400 });
     }
 
+    // Evaluate Face Biometric Match Requirements
+    // We require a high similarity score (e.g., > 75%) or `isMatch` from the previous API step
+    const faceMatchPassed = isMatch || (faceScore && faceScore > 75);
+    
+    // Auto-approval now requires both Name Match AND Face Match
+    const canAutoApprove = isMatchApproved && faceMatchPassed;
+
     // 2. Check if a request already exists
     const existingRequest = await adminDb.collection('verification_requests').doc(uid).get();
     if (existingRequest.exists && existingRequest.data()?.status === 'pending') {
@@ -121,6 +128,15 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Create Verification Record (Status depends on match approval result)
+    let adminNote = '';
+    if (canAutoApprove) {
+      adminNote = `Automatically verified on submission. Name matching: ${matchMethod === 'programmatic' ? 'Programmatic Rules' : 'AI semantic fallback'}. Face matched.`;
+    } else if (!faceMatchPassed && isMatchApproved) {
+      adminNote = `Name verified, but Face Biometric similarity score was too low (${faceScore}%). Requires manual admin review.`;
+    } else if (!isMatchApproved) {
+      adminNote = `Flagged Name Near-Miss (Programmatic Score: ${(matchResult.score * 100).toFixed(0)}%). Awaiting administrative handcraft verification.`;
+    }
+
     const requestData = {
       userId: uid,
       role: 'student',
@@ -131,22 +147,20 @@ export async function POST(req: NextRequest) {
       faceScore: faceScore || null,
       faceMatchScore: faceScore || null,
       isMatch: isMatch || null,
-      status: isMatchApproved ? 'approved' : 'pending',
-      autoMatch: isMatchApproved,
+      status: canAutoApprove ? 'approved' : 'pending',
+      autoMatch: canAutoApprove,
       matchMethod,
       matchReasons: matchResult.reasons,
       aiReason: aiReason || null,
       confidenceScore: confidenceScore,
       createdAt: new Date(),
       updatedAt: new Date(),
-      adminNote: isMatchApproved
-        ? `Automatically verified on submission using ${matchMethod === 'programmatic' ? 'Programmatic Rules' : 'AI semantic fallback'}.`
-        : `Flagged Name Near-Miss (Programmatic Score: ${(matchResult.score * 100).toFixed(0)}%). Awaiting administrative handcraft verification.`
+      adminNote
     };
 
     await adminDb.collection('verification_requests').doc(uid).set(requestData);
 
-    if (isMatchApproved) {
+    if (canAutoApprove) {
       // 4. Update core user verification document directly for Auto-Approval!
       await adminDb.collection('users').doc(uid).update({
         isVerified: true
@@ -185,7 +199,7 @@ export async function POST(req: NextRequest) {
         action: 'verification_approved_auto',
         targetUserId: uid,
         targetRequestId: uid,
-        adminNote: `Automatically verified with precision method: ${matchMethod}. Score: ${(confidenceScore * 100).toFixed(0)}%. ${aiReason}`,
+        adminNote: `Automatically verified with precision method: ${matchMethod}. Score: ${(confidenceScore * 100).toFixed(0)}%. Face Score: ${faceScore}%. ${aiReason}`,
         timestamp: new Date()
       });
 
@@ -193,6 +207,15 @@ export async function POST(req: NextRequest) {
         success: true,
         autoApproved: true,
         message: 'Verification request verified automatically!'
+      });
+    }
+
+    // Did face fail, but name passed?
+    if (!faceMatchPassed && isMatchApproved) {
+      return NextResponse.json({
+        success: true,
+        autoApproved: false,
+        message: `Face similarity too low (${faceScore || 0}%). Verification routed to admin for manual review.`
       });
     }
 

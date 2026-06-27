@@ -234,7 +234,7 @@ export default function EscrowManagement() {
           <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-xl">
             <h3 className="text-2xl font-bold mb-4">Refund Escrow to Buyer</h3>
             <p className="text-gray-600 mb-4">
-              Enter a reason for refunding the escrow to the buyer. This will reverse the transaction and return funds to the buyer's wallet.
+              Enter a reason for refunding the escrow to the buyer. This will reverse the transaction and return funds to the buyer&apos;s wallet.
             </p>
             <textarea
               value={refundNote}
